@@ -556,12 +556,16 @@ with tab_map:
         # Prepare PyDeck DataFrames with formatted HTML tooltips
         deck_demographics = filtered_df.copy()
         if not deck_demographics.empty:
+            deck_demographics['elevation_val'] = deck_demographics['Predicted Online Order Volume (Monthly)'].astype(float)
             deck_demographics['tooltip_html'] = (
-                "<b>📍 " + deck_demographics['Neighborhood'] + "</b><br/>"
+                "<b>📍 " + deck_demographics['Neighborhood'].astype(str) + "</b><br/>"
                 "Monthly Demand: <b>" + deck_demographics['Predicted Online Order Volume (Monthly)'].apply(lambda x: f"{x:,}") + " orders</b><br/>"
                 "Population Density: <b>" + deck_demographics['Population Density (per sq km)'].apply(lambda x: f"{x:,}") + " /km²</b><br/>"
                 "Shoppers: <b>" + deck_demographics['Estimated Online Shoppers'].apply(lambda x: f"{x:,}") + "</b>"
             )
+        else:
+            deck_demographics['elevation_val'] = 0.0
+            deck_demographics['tooltip_html'] = ""
 
         deck_stores = filtered_stores.copy()
         if not deck_stores.empty:
@@ -571,18 +575,21 @@ with tab_map:
             deck_stores['color_b'] = deck_stores['Status'].apply(lambda s: 129 if s == 'Active' else 11)
             deck_stores['fill_color'] = deck_stores.apply(lambda r: [r['color_r'], r['color_g'], r['color_b'], 210], axis=1)
             deck_stores['tooltip_html'] = (
-                "<b>🏪 " + deck_stores['Store Name'] + "</b><br/>"
-                "Status: <b>" + deck_stores['Status'] + "</b><br/>"
-                "Coverage: " + deck_stores['Coverage Area'] + "<br/>"
+                "<b>🏪 " + deck_stores['Store Name'].astype(str) + "</b><br/>"
+                "Status: <b>" + deck_stores['Status'].astype(str) + "</b><br/>"
+                "Coverage: " + deck_stores['Coverage Area'].astype(str) + "<br/>"
                 "Delivery Radius: <b>" + deck_stores['Delivery Radius (km)'].astype(str) + " km</b>"
             )
+        else:
+            deck_stores['fill_color'] = []
+            deck_stores['tooltip_html'] = ""
 
         # 3D Extruded Column Layer for Micro-Markets
         column_layer = pdk.Layer(
             "ColumnLayer",
             data=deck_demographics,
             get_position=["Longitude", "Latitude"],
-            get_elevation="Predicted Online Order Volume (Monthly)",
+            get_elevation="elevation_val",
             elevation_scale=0.06,
             radius=320,
             get_fill_color=[37, 99, 235, 175],
@@ -595,7 +602,7 @@ with tab_map:
             "ScatterplotLayer",
             data=deck_stores,
             get_position=["Longitude", "Latitude"],
-            get_radius=simulated_radius * 220,
+            get_radius=int(simulated_radius * 220),
             get_fill_color="fill_color",
             get_line_color=[255, 255, 255],
             line_width_min_pixels=2,
