@@ -68,7 +68,7 @@ git clone https://github.com/NeelBelsare/my-dark-store-app.git
 
 ### **🔹 Run the Streamlit App**  
 ```bash
-streamlit run MainScript.py
+streamlit run app.py
 ```
 ---
 
