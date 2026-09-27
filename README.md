@@ -1,5 +1,5 @@
-# **🛒 Dark Store Feasibility Analysis 📊**  
-**An Interactive AI-Powered Tool for Strategic Dark Store Placement**  
+# **🛒 Aurangabad (Chhatrapati Sambhajinagar) Dark Store Feasibility Analysis 📊**  
+**An Interactive AI-Powered Tool for Strategic Quick-Commerce Dark Store Placement**  
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Built%20With-Streamlit-orange?logo=streamlit)](https://streamlit.io/)
