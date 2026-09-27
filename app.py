@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import pydeck as pdk
 import folium
 from streamlit_folium import folium_static
 from sklearn.model_selection import train_test_split
@@ -31,6 +32,7 @@ st.markdown("""
     .stApp {
         background-color: #f8fafc;
         color: #0f172a;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     
     /* Sidebar Light Theme */
@@ -39,46 +41,83 @@ st.markdown("""
         border-right: 1px solid #e2e8f0;
     }
 
-    /* Metric Cards - Light Crisp Theme */
+    /* Metric Cards - Elevated Modern Light Theme */
     div[data-testid="stMetric"] {
         background: #ffffff !important;
-        padding: 16px 20px;
-        border-radius: 12px;
+        padding: 18px 22px;
+        border-radius: 14px;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
     div[data-testid="stMetric"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(10, 102, 194, 0.1) !important;
-        border-color: #cbd5e1 !important;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(10, 102, 194, 0.12) !important;
+        border-color: #3b82f6 !important;
     }
     div[data-testid="stMetric"] label {
         color: #64748b !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         font-size: 0.85rem !important;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
     }
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
         color: #0f172a !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
+        font-size: 1.85rem !important;
     }
 
-    /* Tabs Styling - Light Theme */
+    /* Tabs Styling - Modern Light Theme */
     button[data-baseweb="tab"] {
         font-size: 15px;
-        font-weight: 500;
+        font-weight: 600;
         color: #64748b;
+        padding: 10px 18px;
+        border-radius: 8px 8px 0 0;
+        transition: color 0.15s ease;
+    }
+    button[data-baseweb="tab"]:hover {
+        color: #0a66c2 !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
         color: #0a66c2 !important;
-        font-weight: 600 !important;
-        border-bottom-color: #0a66c2 !important;
+        font-weight: 700 !important;
+        border-bottom: 3px solid #0a66c2 !important;
+    }
+
+    /* Highlight Banner Cards */
+    .summary-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 18px 22px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        margin-bottom: 16px;
+    }
+    .badge-active {
+        background-color: #ecfdf5;
+        color: #059669;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .badge-proposed {
+        background-color: #fffbeb;
+        color: #d97706;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
     }
 
     /* Hide Default Streamlit Footer */
     footer { visibility: hidden; }
 
-    /* Custom Floating Footer - Light Mode */
+    /* Custom Floating Footer */
     .custom-footer {
         position: fixed;
         right: 20px;
@@ -87,9 +126,9 @@ st.markdown("""
         font-size: 13px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background: #ffffff;
-        padding: 6px 14px;
+        padding: 7px 16px;
         border-radius: 8px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
         border: 1px solid #e2e8f0;
         color: #334155;
     }
@@ -237,113 +276,146 @@ df_stores = load_dark_stores_data()
 df_climate = load_climate_impact_data()
 
 # ------------------------------------------------------------------------------
-# 4. Sidebar: Global Input Controls & Form Batching
+# 4. Sidebar: Dynamic Cross-Filtering & Session State Reactivity
 # ------------------------------------------------------------------------------
 with st.sidebar:
     st.title("📍 Chhatrapati Sambhajinagar")
-    st.caption("Aurangabad Quick-Commerce Planning")
+    st.caption("Quick-Commerce Strategy & Feasibility Engine")
     st.markdown("---")
 
-    # Batched Filter Form to optimize responsiveness
-    with st.form(key="global_filter_form"):
-        st.subheader("🎛️ Control & Filter Panel")
-        
-        # Neighborhood filter
-        all_neighborhoods = sorted(df_demographics['Neighborhood'].unique().tolist())
-        selected_neighborhoods = st.multiselect(
-            "Target Neighborhoods",
-            options=all_neighborhoods,
-            default=all_neighborhoods[:8],
-            help="Filter analytics to specific micro-markets in Aurangabad."
-        )
+    st.subheader("🎛️ Dynamic Cross-Filters")
 
-        # Minimum monthly orders threshold
-        min_order_volume = st.slider(
-            "Min. Monthly Orders Threshold",
-            min_value=10000,
-            max_value=150000,
-            value=25000,
-            step=5000,
-            help="Show localities generating at least this many monthly orders."
-        )
+    # Target Neighborhoods Multi-Select
+    all_neighborhoods = sorted(df_demographics['Neighborhood'].unique().tolist())
+    selected_neighborhoods = st.multiselect(
+        "Target Neighborhoods",
+        options=all_neighborhoods,
+        default=all_neighborhoods,
+        help="Select micro-markets to include in cross-analysis."
+    )
 
-        # Simulated Delivery Radius
-        simulated_radius = st.slider(
-            "Simulated Delivery Radius (km)",
-            min_value=1.5,
-            max_value=6.0,
-            value=3.0,
-            step=0.5,
-            help="Simulate buffer coverage circle for fulfillment centers."
-        )
+    # Double-Ended Slider: Population Density Range
+    min_density = int(df_demographics['Population Density (per sq km)'].min())
+    max_density = int(df_demographics['Population Density (per sq km)'].max())
+    density_range = st.slider(
+        "Population Density Range (/km²)",
+        min_value=min_density,
+        max_value=max_density,
+        value=(min_density, max_density),
+        step=500,
+        help="Filter micro-markets within specific population density boundaries."
+    )
 
-        # Store Status filter
-        status_options = ["All", "Active", "Proposed"]
-        selected_status = st.selectbox("Dark Store Status", options=status_options, index=0)
+    # Double-Ended Slider: Weather / Monsoon Friction Scale
+    weather_friction_range = st.slider(
+        "Monsoon / Weather Impact Scale",
+        min_value=1,
+        max_value=5,
+        value=(1, 5),
+        step=1,
+        help="Filter climate months by delivery friction scale (1=Favorable, 5=Severe Monsoon)."
+    )
 
-        # Forecast horizon
-        forecast_days = st.slider(
-            "Forecast Horizon (Days)",
-            min_value=3,
-            max_value=30,
-            value=7,
-            step=1
-        )
+    # Simulated Delivery Buffer Radius Slider
+    simulated_radius = st.slider(
+        "Simulated Delivery Radius (km)",
+        min_value=1.5,
+        max_value=6.0,
+        value=3.0,
+        step=0.5,
+        help="Simulate dark store fulfillment catchment radius for buffer & SLA calculations."
+    )
 
-        # Submit button to batch changes
-        submitted = st.form_submit_button("⚡ Apply Filters & Recalculate", use_container_width=True)
+    # Store Status Selector
+    status_options = ["All", "Active", "Proposed"]
+    selected_status = st.selectbox(
+        "Dark Store Status",
+        options=status_options,
+        index=0,
+        help="Filter fulfillment stores by operational readiness."
+    )
+
+    # Forecast Horizon
+    forecast_days = st.slider(
+        "Demand Forecast Horizon (Days)",
+        min_value=3,
+        max_value=30,
+        value=7,
+        step=1,
+        help="Number of forward projection days modeled by the ML engine."
+    )
 
     st.markdown("---")
     st.markdown("### 👨‍💻 Developer")
     st.markdown("**Neel Belsare**")
     st.markdown("[🔗 Connect on LinkedIn](https://www.linkedin.com/in/neel-belsare-719b9a314/)")
-    st.caption("Quick-Commerce Analytics v2.0 • Aurangabad")
+    st.caption("Quick-Commerce Analytics v3.0 • Aurangabad")
 
 # ------------------------------------------------------------------------------
-# 5. Filter Data Based on Inputs
+# 5. Cross-Filtering Execution & Toast Notification
 # ------------------------------------------------------------------------------
-# Apply Neighborhood & Order Volume Filters
-if selected_neighborhoods:
-    filtered_df = df_demographics[
-        (df_demographics['Neighborhood'].isin(selected_neighborhoods)) &
-        (df_demographics['Predicted Online Order Volume (Monthly)'] >= min_order_volume)
-    ]
-else:
-    filtered_df = df_demographics[df_demographics['Predicted Online Order Volume (Monthly)'] >= min_order_volume]
+# Filter Demographics by Neighborhood and Density bounds
+target_list = selected_neighborhoods if selected_neighborhoods else all_neighborhoods
+filtered_df = df_demographics[
+    (df_demographics['Neighborhood'].isin(target_list)) &
+    (df_demographics['Population Density (per sq km)'] >= density_range[0]) &
+    (df_demographics['Population Density (per sq km)'] <= density_range[1])
+].copy()
 
-# Apply Store Status Filter
+# Filter Stores by Operational Status
 if selected_status != "All":
-    filtered_stores = df_stores[df_stores['Status'] == selected_status]
+    filtered_stores = df_stores[df_stores['Status'] == selected_status].copy()
 else:
     filtered_stores = df_stores.copy()
+
+# Filter Climate Data by Friction scale
+filtered_climate = df_climate[
+    (df_climate['Delivery Impact Scale (1-5)'] >= weather_friction_range[0]) &
+    (df_climate['Delivery Impact Scale (1-5)'] <= weather_friction_range[1])
+].copy()
+
+# Live Session-State Toast Notifications for satisfying user feedback
+current_state_key = (
+    tuple(sorted(target_list)),
+    density_range,
+    weather_friction_range,
+    simulated_radius,
+    selected_status,
+    forecast_days
+)
+
+if "prev_filter_state" in st.session_state and st.session_state["prev_filter_state"] != current_state_key:
+    st.toast(f"⚡ Live updated: {len(filtered_df)} micro-markets & {len(filtered_stores)} store hubs", icon="🎯")
+st.session_state["prev_filter_state"] = current_state_key
 
 # ------------------------------------------------------------------------------
 # 6. Main Dashboard Header & KPI Metrics Cards
 # ------------------------------------------------------------------------------
 st.title("🛒 Aurangabad Quick-Commerce Dark Store Dashboard")
 st.markdown(
-    "Strategic feasibility analysis, demand forecasting, and geospatial coverage "
+    "Strategic feasibility analysis, 3D geospatial network coverage, and demand forecasting "
     "across **Chhatrapati Sambhajinagar (Aurangabad)** micro-markets."
 )
 
-# High-Level Metrics Strip using st.metric
+# High-Level Metrics Strip using elevated styled st.metric cards
 kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
 
-total_active_stores = len(df_stores[df_stores['Status'] == 'Active'])
-total_serviceable_pop = int(filtered_df['Estimated Population (2024)_x'].sum())
-total_monthly_orders = int(filtered_df['Predicted Online Order Volume (Monthly)'].sum())
+total_active_stores = len(filtered_stores[filtered_stores['Status'] == 'Active'])
+total_proposed_stores = len(filtered_stores[filtered_stores['Status'] == 'Proposed'])
+total_serviceable_pop = int(filtered_df['Estimated Population (2024)_x'].sum()) if not filtered_df.empty else 0
+total_monthly_orders = int(filtered_df['Predicted Online Order Volume (Monthly)'].sum()) if not filtered_df.empty else 0
 avg_density = int(filtered_df['Population Density (per sq km)'].mean()) if not filtered_df.empty else 0
-est_delivery_time = round(9.0 + (simulated_radius * 1.4), 1)
+est_delivery_sla = round(9.0 + (simulated_radius * 1.4), 1)
 
 kpi1.metric(
     label="Active Stores",
     value=f"{total_active_stores}",
-    delta=f"{len(df_stores[df_stores['Status'] == 'Proposed'])} Proposed"
+    delta=f"{total_proposed_stores} Proposed" if selected_status == "All" else f"{selected_status} View"
 )
 kpi2.metric(
     label="Serviceable Population",
     value=f"{total_serviceable_pop:,}",
-    delta="Selected Areas"
+    delta=f"{len(filtered_df)} Micro-Markets"
 )
 kpi3.metric(
     label="Est. Monthly Orders",
@@ -351,13 +423,13 @@ kpi3.metric(
     delta="Predicted Demand"
 )
 kpi4.metric(
-    label="Avg Delivery Radius",
+    label="Avg Delivery Buffer",
     value=f"{simulated_radius:.1f} km",
     delta=f"{avg_density:,}/km² Density"
 )
 kpi5.metric(
     label="Avg Delivery SLA",
-    value=f"{est_delivery_time:.0f} mins",
+    value=f"{est_delivery_sla:.0f} mins",
     delta="Ultra-Fast QC",
     delta_color="normal"
 )
@@ -365,26 +437,404 @@ kpi5.metric(
 st.markdown("---")
 
 # ------------------------------------------------------------------------------
-# 7. Dashboard Layout: Modern Tabs & Multi-Column Grids
+# 7. Dashboard Layout: Modern Structured Tabs
 # ------------------------------------------------------------------------------
-tab_feasibility, tab_map, tab_forecast, tab_climate = st.tabs([
-    "📊 Feasibility & Demographics",
-    "🗺️ Geospatial Coverage Map",
+tab_summary, tab_map, tab_demographics, tab_forecast, tab_climate = st.tabs([
+    "📊 Executive Summary",
+    "🗺️ Geospatial View (3D & 2D)",
+    "👥 Demographic Heatmaps",
     "📈 Demand Forecasting Engine",
     "🌦️ Climate & Monsoon Impact"
 ])
 
 # ------------------------------------------------------------------------------
-# TAB 1: Feasibility & Demographic Analysis
+# TAB 1: Executive Summary
 # ------------------------------------------------------------------------------
-with tab_feasibility:
-    st.subheader("Micro-Market Demographic Insights")
+with tab_summary:
+    st.subheader("Executive Market Overview & Strategic Expansion")
+    
+    col_summary_l, col_summary_r = st.columns([3, 2])
 
-    # Multi-column grid for Plotly visual analytics
-    col_chart1, col_chart2 = st.columns(2)
+    with col_summary_l:
+        st.markdown("### 🚨 High-Volume Micro-Markets Requiring 2+ Stores")
+        st.caption("Fulfillment clusters exceeding **80,000 monthly orders** require dual micro-hubs to satisfy the sub-12 minute delivery SLA.")
+        
+        high_demand = filtered_df[filtered_df['Predicted Online Order Volume (Monthly)'] > 80000].sort_values(
+            'Predicted Online Order Volume (Monthly)', ascending=False
+        )
+        if not high_demand.empty:
+            for _, row in high_demand.iterrows():
+                st.warning(
+                    f"**{row['Neighborhood']}**: Generating **{row['Predicted Online Order Volume (Monthly)']:,} orders/month** "
+                    f"with density **{row['Population Density (per sq km)']:,} people/km²**. Secondary micro-hub recommended."
+                )
+        else:
+            st.success("No micro-markets in the current selection exceed the single-store capacity threshold (80k orders/mo).")
 
-    with col_chart1:
+        st.markdown("---")
+        st.markdown("### 🏆 Top 5 Priority Expansion Zones")
+        st.caption("Ranked by estimated monthly online orders and shopper density.")
         if not filtered_df.empty:
+            top_expansion = filtered_df.nlargest(5, 'Predicted Online Order Volume (Monthly)')[
+                ['Neighborhood', 'Estimated Online Shoppers', 'Predicted Online Order Volume (Monthly)', 'Population Density (per sq km)']
+            ]
+            st.dataframe(
+                top_expansion.style.format({
+                    'Estimated Online Shoppers': '{:,}',
+                    'Predicted Online Order Volume (Monthly)': '{:,}',
+                    'Population Density (per sq km)': '{:,}'
+                }),
+                use_container_width=True
+            )
+        else:
+            st.info("Adjust filter criteria to view expansion priorities.")
+
+    with col_summary_r:
+        st.markdown("### 🏬 Dark Store Network Composition")
+        status_counts = df_stores['Status'].value_counts()
+        fig_donut = go.Figure(data=[go.Pie(
+            labels=status_counts.index,
+            values=status_counts.values,
+            hole=0.62,
+            marker_colors=['#0a66c2', '#f59e0b'],
+            textinfo='label+value',
+            hoverinfo='label+percent'
+        )])
+        fig_donut.update_layout(
+            title="Active vs. Proposed Store Hubs",
+            template="plotly_white",
+            height=280,
+            margin=dict(l=10, r=10, t=40, b=10),
+            plot_bgcolor="#ffffff",
+            paper_bgcolor="#ffffff",
+            font=dict(color="#1e293b")
+        )
+        st.plotly_chart(fig_donut, use_container_width=True)
+
+        st.markdown("### ⏱️ Estimated SLA vs Delivery Radius")
+        radius_steps = np.arange(1.5, 6.5, 0.5)
+        sla_steps = [round(9.0 + (r * 1.4), 1) for r in radius_steps]
+        fig_sla = go.Figure(data=[go.Scatter(
+            x=radius_steps,
+            y=sla_steps,
+            mode='lines+markers',
+            line=dict(color='#2563eb', width=3),
+            marker=dict(size=7, color='#1d4ed8')
+        )])
+        fig_sla.add_vline(x=simulated_radius, line_dash="dash", line_color="#ef4444", annotation_text=f"Selected: {simulated_radius}km")
+        fig_sla.update_layout(
+            title="Delivery Time SLA vs Buffer Radius",
+            xaxis_title="Catchment Radius (km)",
+            yaxis_title="Estimated SLA (Minutes)",
+            template="plotly_white",
+            height=230,
+            margin=dict(l=10, r=10, t=35, b=20),
+            plot_bgcolor="#ffffff",
+            paper_bgcolor="#ffffff",
+            font=dict(color="#1e293b")
+        )
+        st.plotly_chart(fig_sla, use_container_width=True)
+
+# ------------------------------------------------------------------------------
+# TAB 2: Geospatial View (3D & 2D)
+# ------------------------------------------------------------------------------
+with tab_map:
+    st.subheader("🗺️ Geospatial Coverage & Network Topology")
+
+    map_view_mode = st.radio(
+        "Select Geospatial Engine:",
+        options=["✨ 3D Spatial Deck (PyDeck)", "🌐 2D Service Polygons & Delivery Buffers (Leaflet / Folium)"],
+        horizontal=True
+    )
+
+    if map_view_mode == "✨ 3D Spatial Deck (PyDeck)":
+        st.markdown(
+            "Interactive **3D Column & Scatter Deck** for Chhatrapati Sambhajinagar. "
+            "Column height represents **Monthly Order Demand** per micro-market, while circular points represent **Dark Store Fulfillment Hubs**."
+        )
+
+        # Prepare PyDeck DataFrames with formatted HTML tooltips
+        deck_demographics = filtered_df.copy()
+        if not deck_demographics.empty:
+            deck_demographics['tooltip_html'] = (
+                "<b>📍 " + deck_demographics['Neighborhood'] + "</b><br/>"
+                "Monthly Demand: <b>" + deck_demographics['Predicted Online Order Volume (Monthly)'].apply(lambda x: f"{x:,}") + " orders</b><br/>"
+                "Population Density: <b>" + deck_demographics['Population Density (per sq km)'].apply(lambda x: f"{x:,}") + " /km²</b><br/>"
+                "Shoppers: <b>" + deck_demographics['Estimated Online Shoppers'].apply(lambda x: f"{x:,}") + "</b>"
+            )
+
+        deck_stores = filtered_stores.copy()
+        if not deck_stores.empty:
+            # Color code: Emerald green for Active, Amber for Proposed
+            deck_stores['color_r'] = deck_stores['Status'].apply(lambda s: 16 if s == 'Active' else 245)
+            deck_stores['color_g'] = deck_stores['Status'].apply(lambda s: 185 if s == 'Active' else 158)
+            deck_stores['color_b'] = deck_stores['Status'].apply(lambda s: 129 if s == 'Active' else 11)
+            deck_stores['fill_color'] = deck_stores.apply(lambda r: [r['color_r'], r['color_g'], r['color_b'], 210], axis=1)
+            deck_stores['tooltip_html'] = (
+                "<b>🏪 " + deck_stores['Store Name'] + "</b><br/>"
+                "Status: <b>" + deck_stores['Status'] + "</b><br/>"
+                "Coverage: " + deck_stores['Coverage Area'] + "<br/>"
+                "Delivery Radius: <b>" + deck_stores['Delivery Radius (km)'].astype(str) + " km</b>"
+            )
+
+        # 3D Extruded Column Layer for Micro-Markets
+        column_layer = pdk.Layer(
+            "ColumnLayer",
+            data=deck_demographics,
+            get_position=["Longitude", "Latitude"],
+            get_elevation="Predicted Online Order Volume (Monthly)",
+            elevation_scale=0.06,
+            radius=320,
+            get_fill_color=[37, 99, 235, 175],
+            pickable=True,
+            auto_highlight=True
+        )
+
+        # 3D Scatterplot Layer for Dark Store Hubs
+        store_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=deck_stores,
+            get_position=["Longitude", "Latitude"],
+            get_radius=simulated_radius * 220,
+            get_fill_color="fill_color",
+            get_line_color=[255, 255, 255],
+            line_width_min_pixels=2,
+            pickable=True,
+            auto_highlight=True
+        )
+
+        view_state = pdk.ViewState(
+            latitude=19.8762,
+            longitude=75.3433,
+            zoom=11.6,
+            pitch=45,
+            bearing=15
+        )
+
+        deck = pdk.Deck(
+            layers=[column_layer, store_layer],
+            initial_view_state=view_state,
+            map_style=pdk.map_styles.CARTO_LIGHT,
+            tooltip={
+                "html": "{tooltip_html}",
+                "style": {
+                    "backgroundColor": "#0f172a",
+                    "color": "#f8fafc",
+                    "fontSize": "13px",
+                    "borderRadius": "8px",
+                    "padding": "10px 14px",
+                    "boxShadow": "0 4px 14px rgba(0, 0, 0, 0.2)"
+                }
+            }
+        )
+
+        st.pydeck_chart(deck, use_container_width=True)
+
+        st.caption("💡 **Tip**: Hold **Right Click + Drag** to rotate in 3D, and **Scroll** to zoom. Hover over any column or marker for detailed micro-market metrics.")
+
+    else:
+        st.markdown(
+            f"Interactive **Leaflet Map** with real-world **Blinkit & Zepto GeoJSON polygons** "
+            f"and simulated fulfillment buffer circles (**{simulated_radius} km radius**)."
+        )
+
+        # Initialize Folium Map centered on Aurangabad with clean OpenStreetMap tiles
+        aurangabad_map = folium.Map(
+            location=[19.8762, 75.3433],
+            zoom_start=12,
+            tiles="OpenStreetMap"
+        )
+
+        # FeatureGroups for interactive layer toggling
+        fg_stores = folium.FeatureGroup(name="🏪 Dark Store Hubs & Buffers", show=True)
+        fg_blinkit = folium.FeatureGroup(name="🟡 Blinkit Service Zones", show=True)
+        fg_zepto = folium.FeatureGroup(name="🟣 Zepto Service Zones", show=True)
+        fg_custom = folium.FeatureGroup(name="🔵 Custom Boundary Zones", show=True)
+
+        # Add Dark Store Markers & Delivery Radius Circles to Store FeatureGroup
+        for _, store in filtered_stores.iterrows():
+            is_active = (store['Status'] == 'Active')
+            marker_color = "blue" if is_active else "orange"
+            icon_type = "shopping-cart" if is_active else "clock"
+
+            popup_html = f"""
+            <div style='font-family: sans-serif; font-size: 13px; width: 220px;'>
+                <h4 style='margin: 0 0 6px 0; color: #0a66c2;'>{store['Store Name']}</h4>
+                <p style='margin: 2px 0;'><b>Coverage:</b> {store['Coverage Area']}</p>
+                <p style='margin: 2px 0;'><b>Status:</b> <span style='color: {"#059669" if is_active else "#d97706"}; font-weight: bold;'>{store['Status']}</span></p>
+                <p style='margin: 2px 0;'><b>Delivery Radius:</b> {simulated_radius} km</p>
+            </div>
+            """
+
+            folium.Marker(
+                location=[store['Latitude'], store['Longitude']],
+                popup=folium.Popup(popup_html, max_width=250),
+                tooltip=f"{store['Store Name']} ({store['Status']})",
+                icon=folium.Icon(color=marker_color, icon=icon_type, prefix="fa")
+            ).add_to(fg_stores)
+
+            folium.Circle(
+                location=[store['Latitude'], store['Longitude']],
+                radius=simulated_radius * 1000,
+                color="#0a66c2" if is_active else "#f39c12",
+                weight=1.5,
+                fill=True,
+                fill_color="#0a66c2" if is_active else "#f39c12",
+                fill_opacity=0.12,
+                tooltip=f"{store['Store Name']} - {simulated_radius}km Coverage Zone"
+            ).add_to(fg_stores)
+
+        # Load and Render GeoJSON files from data/geojson/
+        geojson_dir = os.path.join(BASE_DIR, "data", "geojson")
+        loaded_polygons = []
+
+        def sanitize_geojson_keys(obj):
+            """Sanitize property keys with hyphens (e.g. stroke-width -> stroke_width) to prevent Leaflet JS errors."""
+            if isinstance(obj, dict):
+                if 'features' in obj and isinstance(obj['features'], list):
+                    for feat in obj['features']:
+                        if isinstance(feat, dict) and 'properties' in feat and isinstance(feat['properties'], dict):
+                            feat['properties'] = {
+                                str(k).replace('-', '_'): v
+                                for k, v in feat['properties'].items()
+                            }
+                elif 'properties' in obj and isinstance(obj['properties'], dict):
+                    obj['properties'] = {
+                        str(k).replace('-', '_'): v
+                        for k, v in obj['properties'].items()
+                    }
+            return obj
+
+        if os.path.exists(geojson_dir):
+            geo_files = sorted(
+                glob.glob(os.path.join(geojson_dir, "*.json")) +
+                glob.glob(os.path.join(geojson_dir, "*.geojson"))
+            )
+            for g_path in geo_files:
+                if os.path.getsize(g_path) > 0:
+                    try:
+                        with open(g_path, "r", encoding="utf-8") as f:
+                            geo_json_data = json.load(f)
+
+                        geo_json_data = sanitize_geojson_keys(geo_json_data)
+                        fname = os.path.basename(g_path).lower()
+                        zone_label = (
+                            os.path.basename(g_path)
+                            .replace("_geo", "")
+                            .replace(".geojson", "")
+                            .replace(".json", "")
+                            .replace("_", " ")
+                            .title()
+                        )
+
+                        if "blinkit" in fname:
+                            stroke_color = "#b7950b"
+                            fill_color = "#f4d03f"
+                            target_fg = fg_blinkit
+                            brand = "Blinkit"
+                        elif "zepto" in fname:
+                            stroke_color = "#512e5f"
+                            fill_color = "#8e44ad"
+                            target_fg = fg_zepto
+                            brand = "Zepto"
+                        else:
+                            stroke_color = "#1f618d"
+                            fill_color = "#3498db"
+                            target_fg = fg_custom
+                            brand = "Custom"
+
+                        folium.GeoJson(
+                            geo_json_data,
+                            name=f"{brand}: {zone_label}",
+                            style_function=lambda feature, sc=stroke_color, fc=fill_color: {
+                                'color': sc,
+                                'fillColor': fc,
+                                'weight': 3,
+                                'opacity': 0.9,
+                                'fillOpacity': 0.30,
+                            },
+                            tooltip=f"<b>{brand} Delivery Polygon:</b> {zone_label}",
+                            popup=folium.Popup(
+                                f"<div style='font-family: sans-serif; font-size: 13px;'>"
+                                f"<b style='color: {stroke_color};'>{brand} Real-World Service Zone</b><br>"
+                                f"<b>Zone:</b> {zone_label}<br>"
+                                f"<b>Source:</b> {os.path.basename(g_path)}</div>",
+                                max_width=260
+                            )
+                        ).add_to(target_fg)
+                        loaded_polygons.append({
+                            "Brand": brand,
+                            "Zone Name": zone_label,
+                            "Filename": os.path.basename(g_path),
+                            "Size (bytes)": os.path.getsize(g_path)
+                        })
+                    except Exception:
+                        pass
+
+        fg_stores.add_to(aurangabad_map)
+        fg_blinkit.add_to(aurangabad_map)
+        fg_zepto.add_to(aurangabad_map)
+        if fg_custom._children:
+            fg_custom.add_to(aurangabad_map)
+
+        folium.LayerControl(position="topright", collapsed=False).add_to(aurangabad_map)
+        folium_static(aurangabad_map, width=1050, height=520)
+
+        if loaded_polygons:
+            st.success(f"🗺️ **{len(loaded_polygons)} Real-World Delivery Polygons Loaded**: Rendering live boundaries from `data/geojson/`.")
+            with st.expander("📋 Inspect Loaded GeoJSON Zones"):
+                st.dataframe(pd.DataFrame(loaded_polygons), use_container_width=True)
+        else:
+            st.info("💡 Place GeoJSON boundary files in `data/geojson/` to overlay real-world service boundaries.")
+
+    # Store Directory Table
+    st.markdown("### 🏢 Dark Store Fulfillment Hubs Directory")
+    st.dataframe(
+        filtered_stores[['Store Name', 'Status', 'Coverage Area', 'Delivery Radius (km)', 'Latitude', 'Longitude']],
+        use_container_width=True
+    )
+
+# ------------------------------------------------------------------------------
+# TAB 3: Demographic Heatmaps & Visualizations
+# ------------------------------------------------------------------------------
+with tab_demographics:
+    st.subheader("👥 Micro-Market Demographic Analysis & Interactive Heatmaps")
+
+    if not filtered_df.empty:
+        # Dynamic Bubble Chart: Density vs Monthly Orders vs Shoppers
+        fig_bubble = px.scatter(
+            filtered_df,
+            x='Population Density (per sq km)',
+            y='Predicted Online Order Volume (Monthly)',
+            size='Estimated Online Shoppers',
+            color='E-Commerce Activity Index (1-10)',
+            hover_name='Neighborhood',
+            hover_data={
+                'Projected Population (2025)': ':,',
+                'Internet Penetration Rate (%)': ':.1f',
+                'Growth Rate (%)': ':.1f'
+            },
+            title="Micro-Market Shopper Density vs. Predicted Monthly Demand",
+            labels={
+                'Population Density (per sq km)': 'Population Density (people/km²)',
+                'Predicted Online Order Volume (Monthly)': 'Predicted Monthly Orders'
+            },
+            color_continuous_scale='Tealgrn',
+            template="plotly_white"
+        )
+        fig_bubble.update_layout(
+            height=420,
+            margin=dict(l=20, r=20, t=40, b=40),
+            plot_bgcolor="#ffffff",
+            paper_bgcolor="#ffffff",
+            font=dict(color="#1e293b")
+        )
+        st.plotly_chart(fig_bubble, use_container_width=True)
+
+        # Multi-column grid for sorted comparison bar charts
+        col_c1, col_c2 = st.columns(2)
+
+        with col_c1:
             fig_pop = px.bar(
                 filtered_df.sort_values('Projected Population (2025)', ascending=False),
                 x='Neighborhood',
@@ -403,11 +853,8 @@ with tab_feasibility:
                 font=dict(color="#1e293b")
             )
             st.plotly_chart(fig_pop, use_container_width=True)
-        else:
-            st.info("No data meets current filter criteria.")
 
-    with col_chart2:
-        if not filtered_df.empty:
+        with col_c2:
             fig_orders = px.bar(
                 filtered_df.sort_values('Predicted Online Order Volume (Monthly)', ascending=False),
                 x='Neighborhood',
@@ -426,47 +873,39 @@ with tab_feasibility:
                 font=dict(color="#1e293b")
             )
             st.plotly_chart(fig_orders, use_container_width=True)
-        else:
-            st.info("No data meets current filter criteria.")
 
-    st.markdown("---")
+        # Correlation Heatmap for demographic variables
+        st.markdown("### 📊 Demographic Feature Correlation Matrix")
+        numeric_cols = [
+            'Population Density (per sq km)',
+            'Growth Rate (%)',
+            'Projected Population (2025)',
+            'Internet Penetration Rate (%)',
+            'Estimated Online Shoppers',
+            'Predicted Online Order Volume (Monthly)'
+        ]
+        corr_matrix = filtered_df[numeric_cols].corr()
+        fig_corr = px.imshow(
+            corr_matrix,
+            text_auto=".2f",
+            color_continuous_scale="Blues",
+            template="plotly_white",
+            title="Correlation Matrix across Micro-Market Variables"
+        )
+        fig_corr.update_layout(
+            height=390,
+            margin=dict(l=20, r=20, t=40, b=40),
+            plot_bgcolor="#ffffff",
+            paper_bgcolor="#ffffff",
+            font=dict(color="#1e293b")
+        )
+        st.plotly_chart(fig_corr, use_container_width=True)
 
-    # Expansion Recommendations & High-Demand Multi-Store Alerts
-    col_rec, col_alert = st.columns(2)
+    else:
+        st.warning("No micro-markets match current density and neighborhood filters.")
 
-    with col_rec:
-        st.markdown("### 🏆 Top Recommended Expansion Zones")
-        st.caption("Ranked by monthly online order volume and shopper density.")
-        if not filtered_df.empty:
-            top_areas = filtered_df.nlargest(5, 'Predicted Online Order Volume (Monthly)')[
-                ['Neighborhood', 'Estimated Online Shoppers', 'Predicted Online Order Volume (Monthly)', 'Population Density (per sq km)']
-            ]
-            st.dataframe(
-                top_areas.style.format({
-                    'Estimated Online Shoppers': '{:,}',
-                    'Predicted Online Order Volume (Monthly)': '{:,}',
-                    'Population Density (per sq km)': '{:,}'
-                }),
-                use_container_width=True
-            )
-        else:
-            st.warning("Adjust filter thresholds to view recommendations.")
-
-    with col_alert:
-        st.markdown("### 🚨 High-Volume Areas Requiring 2+ Stores")
-        st.caption("Micro-markets exceeding 80,000 monthly orders require multiple fulfillment hubs to meet the <12 min delivery SLA.")
-        high_demand = filtered_df[filtered_df['Predicted Online Order Volume (Monthly)'] > 80000]
-        if not high_demand.empty:
-            for _, row in high_demand.iterrows():
-                st.warning(
-                    f"**{row['Neighborhood']}**: Generating **{row['Predicted Online Order Volume (Monthly)']:,} orders/mo** "
-                    f"({row['Population Density (per sq km)']:,} people/km²). Recommend deploying secondary micro-hub."
-                )
-        else:
-            st.success("No areas in current selection exceed the single-store capacity threshold (80k orders/mo).")
-
-    # Detailed Dataset Inspector
-    with st.expander("🔍 Inspect Full Aurangabad Market Dataset"):
+    # Detailed Dataset Inspector & Download
+    with st.expander("🔍 Inspect Full Market Dataset & Export"):
         st.dataframe(filtered_df, use_container_width=True)
         csv_data = filtered_df.to_csv(index=False).encode('utf-8')
         st.download_button(
@@ -477,190 +916,7 @@ with tab_feasibility:
         )
 
 # ------------------------------------------------------------------------------
-# TAB 2: Geospatial Network Map
-# ------------------------------------------------------------------------------
-with tab_map:
-    st.subheader("🗺️ Chhatrapati Sambhajinagar Dark Store Network")
-    st.markdown(
-        f"Geographic fulfillment coverage with interactive simulated delivery circles "
-        f"(**{simulated_radius} km radius**). Center: `[19.8762, 75.3433]`."
-    )
-
-    # Initialize Folium Map centered on Aurangabad with clean OpenStreetMap tiles
-    aurangabad_map = folium.Map(
-        location=[19.8762, 75.3433],
-        zoom_start=12,
-        tiles="OpenStreetMap"
-    )
-
-    # FeatureGroups for interactive layer toggling
-    fg_stores = folium.FeatureGroup(name="🏪 Dark Store Hubs & Buffers", show=True)
-    fg_blinkit = folium.FeatureGroup(name="🟡 Blinkit Service Zones", show=True)
-    fg_zepto = folium.FeatureGroup(name="🟣 Zepto Service Zones", show=True)
-    fg_custom = folium.FeatureGroup(name="🔵 Custom Boundary Zones", show=True)
-
-    # Add Dark Store Markers & Delivery Radius Circles to Store FeatureGroup
-    for _, store in filtered_stores.iterrows():
-        is_active = (store['Status'] == 'Active')
-        marker_color = "blue" if is_active else "orange"
-        icon_type = "shopping-cart" if is_active else "clock"
-
-        # Pop-up card with store specifications
-        popup_html = f"""
-        <div style='font-family: sans-serif; font-size: 13px; width: 220px;'>
-            <h4 style='margin: 0 0 6px 0; color: #0a66c2;'>{store['Store Name']}</h4>
-            <p style='margin: 2px 0;'><b>Coverage:</b> {store['Coverage Area']}</p>
-            <p style='margin: 2px 0;'><b>Status:</b> <span style='color: {"green" if is_active else "orange"}; font-weight: bold;'>{store['Status']}</span></p>
-            <p style='margin: 2px 0;'><b>Delivery Radius:</b> {simulated_radius} km</p>
-        </div>
-        """
-
-        # Point Marker
-        folium.Marker(
-            location=[store['Latitude'], store['Longitude']],
-            popup=folium.Popup(popup_html, max_width=250),
-            tooltip=f"{store['Store Name']} ({store['Status']})",
-            icon=folium.Icon(color=marker_color, icon=icon_type, prefix="fa")
-        ).add_to(fg_stores)
-
-        # Coverage Circle (Simulated Buffer)
-        folium.Circle(
-            location=[store['Latitude'], store['Longitude']],
-            radius=simulated_radius * 1000,  # meters
-            color="#0a66c2" if is_active else "#f39c12",
-            weight=1.5,
-            fill=True,
-            fill_color="#0a66c2" if is_active else "#f39c12",
-            fill_opacity=0.12,
-            tooltip=f"{store['Store Name']} - {simulated_radius}km Coverage Zone"
-        ).add_to(fg_stores)
-
-    # Load and Render GeoJSON files from data/geojson/
-    geojson_dir = os.path.join(BASE_DIR, "data", "geojson")
-    loaded_polygons = []
-
-    def sanitize_geojson_keys(obj):
-        """Sanitize property keys with hyphens (e.g. stroke-width -> stroke_width) to prevent Leaflet JS ReferenceErrors."""
-        if isinstance(obj, dict):
-            if 'features' in obj and isinstance(obj['features'], list):
-                for feat in obj['features']:
-                    if isinstance(feat, dict) and 'properties' in feat and isinstance(feat['properties'], dict):
-                        feat['properties'] = {
-                            str(k).replace('-', '_'): v
-                            for k, v in feat['properties'].items()
-                        }
-            elif 'properties' in obj and isinstance(obj['properties'], dict):
-                obj['properties'] = {
-                    str(k).replace('-', '_'): v
-                    for k, v in obj['properties'].items()
-                }
-        return obj
-
-    if os.path.exists(geojson_dir):
-        geo_files = sorted(
-            glob.glob(os.path.join(geojson_dir, "*.json")) +
-            glob.glob(os.path.join(geojson_dir, "*.geojson"))
-        )
-        for g_path in geo_files:
-            # Check if file has been populated with data
-            if os.path.getsize(g_path) > 0:
-                try:
-                    with open(g_path, "r", encoding="utf-8") as f:
-                        geo_json_data = json.load(f)
-
-                    # Sanitize to prevent Leaflet switch(feature.properties.stroke-width) JS error
-                    geo_json_data = sanitize_geojson_keys(geo_json_data)
-
-                    fname = os.path.basename(g_path).lower()
-                    zone_label = (
-                        os.path.basename(g_path)
-                        .replace("_geo", "")
-                        .replace(".geojson", "")
-                        .replace(".json", "")
-                        .replace("_", " ")
-                        .title()
-                    )
-
-                    # Determine brand styling
-                    if "blinkit" in fname:
-                        stroke_color = "#b7950b"
-                        fill_color = "#f4d03f"
-                        target_fg = fg_blinkit
-                        brand = "Blinkit"
-                    elif "zepto" in fname:
-                        stroke_color = "#512e5f"
-                        fill_color = "#8e44ad"
-                        target_fg = fg_zepto
-                        brand = "Zepto"
-                    else:
-                        stroke_color = "#1f618d"
-                        fill_color = "#3498db"
-                        target_fg = fg_custom
-                        brand = "Custom"
-
-                    folium.GeoJson(
-                        geo_json_data,
-                        name=f"{brand}: {zone_label}",
-                        style_function=lambda feature, sc=stroke_color, fc=fill_color: {
-                            'color': sc,
-                            'fillColor': fc,
-                            'weight': 3,
-                            'opacity': 0.9,
-                            'fillOpacity': 0.30,
-                        },
-                        tooltip=f"<b>{brand} Delivery Polygon:</b> {zone_label}",
-                        popup=folium.Popup(
-                            f"<div style='font-family: sans-serif; font-size: 13px;'>"
-                            f"<b style='color: {stroke_color};'>{brand} Real-World Service Zone</b><br>"
-                            f"<b>Zone:</b> {zone_label}<br>"
-                            f"<b>Source:</b> {os.path.basename(g_path)}</div>",
-                            max_width=260
-                        )
-                    ).add_to(target_fg)
-                    loaded_polygons.append({
-                        "Brand": brand,
-                        "Zone Name": zone_label,
-                        "Filename": os.path.basename(g_path),
-                        "Size (bytes)": os.path.getsize(g_path)
-                    })
-                except Exception as e:
-                    # Ignore invalid/incomplete json gracefully while user is editing
-                    pass
-
-    # Add all feature groups to map
-    fg_stores.add_to(aurangabad_map)
-    fg_blinkit.add_to(aurangabad_map)
-    fg_zepto.add_to(aurangabad_map)
-    if fg_custom._children:
-        fg_custom.add_to(aurangabad_map)
-
-    # Layer toggle control for user interaction
-    folium.LayerControl(position="topright", collapsed=False).add_to(aurangabad_map)
-
-    # Render Map inside Streamlit
-    folium_static(aurangabad_map, width=1050, height=520)
-
-    # Informational banner about GeoJSON status
-    if loaded_polygons:
-        st.success(f"🗺️ **{len(loaded_polygons)} GeoJSON Delivery Boundaries Loaded**: Displaying exact service polygons for Blinkit & Zepto.")
-        with st.expander("📋 View Loaded GeoJSON Boundaries"):
-            st.dataframe(pd.DataFrame(loaded_polygons), use_container_width=True)
-    else:
-        st.info(
-            "💡 **GeoJSON Integration Active**: The map is connected to `data/geojson/`. "
-            "As soon as you paste your GeoJSON code into any of the files "
-            "(`usmanpura_blinkit_geo.json`, `cidco_zepto_geo.geojson`, etc.), their real delivery polygons will automatically display on the map."
-        )
-
-    # Store Directory Table
-    st.markdown("### 🏢 Dark Store Directory & Coverage Zones")
-    st.dataframe(
-        filtered_stores[['Store Name', 'Status', 'Coverage Area', 'Latitude', 'Longitude']],
-        use_container_width=True
-    )
-
-# ------------------------------------------------------------------------------
-# TAB 3: Demand Forecasting Engine (Machine Learning)
+# TAB 4: Demand Forecasting Engine (Machine Learning)
 # ------------------------------------------------------------------------------
 with tab_forecast:
     st.subheader("📈 Machine Learning Demand Forecasting Engine")
@@ -753,8 +1009,29 @@ with tab_forecast:
         )
         st.plotly_chart(fig_future, use_container_width=True)
 
+    # Interactive Rider Fleet Sizing Calculator
+    st.markdown("### 🛵 Delivery Fleet Sizing Calculator")
+    calc_col1, calc_col2 = st.columns(2)
+    with calc_col1:
+        target_orders_per_rider = st.slider(
+            "Target Orders per Rider / Shift",
+            min_value=15,
+            max_value=40,
+            value=24,
+            step=1,
+            help="Average fulfillment deliveries completed per rider per work shift."
+        )
+    with calc_col2:
+        avg_forecast = float(np.mean(future_pred))
+        riders_req = int(np.ceil(avg_forecast / target_orders_per_rider))
+        surge_buffer = int(np.ceil(riders_req * 1.25))
+        st.info(
+            f"• **Base Fleet Needed**: **{riders_req} active riders** per hub.\n\n"
+            f"• **Weekend Peak / Surge Buffer**: **{surge_buffer} riders** (includes 25% contingency buffer)."
+        )
+
 # ------------------------------------------------------------------------------
-# TAB 4: Climate & Monsoon Delivery Impact
+# TAB 5: Climate & Monsoon Delivery Impact
 # ------------------------------------------------------------------------------
 with tab_climate:
     st.subheader("🌦️ Marathwada Climate & Monsoon Delivery Impact")
@@ -766,47 +1043,54 @@ with tab_climate:
     c_col1, c_col2 = st.columns([2, 1])
 
     with c_col1:
-        fig_climate = go.Figure()
-        fig_climate.add_trace(go.Bar(
-            x=df_climate['Month'],
-            y=df_climate['Avg Rainfall (mm)'],
-            name='Avg Rainfall (mm)',
-            marker_color='#3498db'
-        ))
-        fig_climate.add_trace(go.Scatter(
-            x=df_climate['Month'],
-            y=df_climate['Delivery Impact Scale (1-5)'],
-            name='Delivery Impact Scale (1-5)',
-            yaxis='y2',
-            mode='lines+markers',
-            line=dict(color='#e67e22', width=3),
-            marker=dict(size=8)
-        ))
-        fig_climate.update_layout(
-            title="Rainfall vs Delivery Friction Scale in Aurangabad",
-            xaxis_title="Month",
-            yaxis=dict(title="Precipitation (mm)"),
-            yaxis2=dict(title="Impact Scale (1-5)", overlaying='y', side='right', range=[0, 6]),
-            legend=dict(x=0.01, y=0.99),
-            template="plotly_white",
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#1e293b"),
-            height=380,
-            margin=dict(l=20, r=20, t=40, b=40)
-        )
-        st.plotly_chart(fig_climate, use_container_width=True)
+        if not filtered_climate.empty:
+            fig_climate = go.Figure()
+            fig_climate.add_trace(go.Bar(
+                x=filtered_climate['Month'],
+                y=filtered_climate['Avg Rainfall (mm)'],
+                name='Avg Rainfall (mm)',
+                marker_color='#38bdf8'
+            ))
+            fig_climate.add_trace(go.Scatter(
+                x=filtered_climate['Month'],
+                y=filtered_climate['Delivery Impact Scale (1-5)'],
+                name='Delivery Impact Scale (1-5)',
+                yaxis='y2',
+                mode='lines+markers',
+                line=dict(color='#ea580c', width=3),
+                marker=dict(size=8, color='#c2410c')
+            ))
+            fig_climate.update_layout(
+                title="Rainfall vs Delivery Friction Scale in Aurangabad",
+                xaxis_title="Month",
+                yaxis=dict(title="Precipitation (mm)"),
+                yaxis2=dict(title="Impact Scale (1-5)", overlaying='y', side='right', range=[0, 6]),
+                legend=dict(x=0.01, y=0.99),
+                template="plotly_white",
+                plot_bgcolor="#ffffff",
+                paper_bgcolor="#ffffff",
+                font=dict(color="#1e293b"),
+                height=380,
+                margin=dict(l=20, r=20, t=40, b=40)
+            )
+            st.plotly_chart(fig_climate, use_container_width=True)
+        else:
+            st.warning("No months match current weather delivery friction filter range.")
 
     with c_col2:
-        st.markdown("### 💡 Operational Takeaways")
+        st.markdown("### 💡 Operational Strategic Insights")
         st.info(
-            "• **Monsoon Buffer**: In July-August (~185mm rainfall), average delivery time in low-lying zones "
-            "increases by +4.5 mins. Increase wet-weather rider incentives."
+            "• **Monsoon Flooding Buffer**: In July-August (~185mm rainfall), low-lying corridors (e.g. Chikalthana, Beed Bypass) "
+            "experience +4.5 min SLA delays. Deploy wet-weather surge incentives."
         )
         st.warning(
-            "• **Summer Heatwave Surge**: In April-May (temperatures ~40°C), afternoon dark store orders increase "
-            "by 32% as consumers avoid retail outings. Stock ice cream & chilled beverages."
+            "• **Summer Heatwave Surge**: In April-May (temperatures ~40.5°C), afternoon dark store volume increases "
+            "by 32% as consumers avoid retail outings. Boost cold-storage beverage inventory."
         )
         st.success(
-            "• **Winter Peak**: November-January provides optimal delivery logistics with zero weather bottlenecks."
+            "• **Winter Optimal Window**: November-January provides peak delivery efficiency with zero weather bottlenecks."
         )
+
+    # Filtered climate dataset viewer
+    with st.expander("📋 View Monthly Climate & Impact Table"):
+        st.dataframe(filtered_climate, use_container_width=True)
