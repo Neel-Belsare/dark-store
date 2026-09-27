@@ -488,11 +488,11 @@ with tab_map:
         f"(**{simulated_radius} km radius**). Center: `[19.8762, 75.3433]`."
     )
 
-    # Initialize Folium Map centered on Aurangabad
+    # Initialize Folium Map centered on Aurangabad with clean OpenStreetMap tiles
     aurangabad_map = folium.Map(
         location=[19.8762, 75.3433],
         zoom_start=12,
-        tiles="CartoDB positron"
+        tiles="OpenStreetMap"
     )
 
     # FeatureGroups for interactive layer toggling
@@ -541,6 +541,23 @@ with tab_map:
     geojson_dir = os.path.join(BASE_DIR, "data", "geojson")
     loaded_polygons = []
 
+    def sanitize_geojson_keys(obj):
+        """Sanitize property keys with hyphens (e.g. stroke-width -> stroke_width) to prevent Leaflet JS ReferenceErrors."""
+        if isinstance(obj, dict):
+            if 'features' in obj and isinstance(obj['features'], list):
+                for feat in obj['features']:
+                    if isinstance(feat, dict) and 'properties' in feat and isinstance(feat['properties'], dict):
+                        feat['properties'] = {
+                            str(k).replace('-', '_'): v
+                            for k, v in feat['properties'].items()
+                        }
+            elif 'properties' in obj and isinstance(obj['properties'], dict):
+                obj['properties'] = {
+                    str(k).replace('-', '_'): v
+                    for k, v in obj['properties'].items()
+                }
+        return obj
+
     if os.path.exists(geojson_dir):
         geo_files = sorted(
             glob.glob(os.path.join(geojson_dir, "*.json")) +
@@ -552,6 +569,9 @@ with tab_map:
                 try:
                     with open(g_path, "r", encoding="utf-8") as f:
                         geo_json_data = json.load(f)
+
+                    # Sanitize to prevent Leaflet switch(feature.properties.stroke-width) JS error
+                    geo_json_data = sanitize_geojson_keys(geo_json_data)
 
                     fname = os.path.basename(g_path).lower()
                     zone_label = (
@@ -586,15 +606,16 @@ with tab_map:
                         style_function=lambda feature, sc=stroke_color, fc=fill_color: {
                             'color': sc,
                             'fillColor': fc,
-                            'weight': 2.5,
-                            'fillOpacity': 0.35,
+                            'weight': 3,
+                            'opacity': 0.9,
+                            'fillOpacity': 0.30,
                         },
                         tooltip=f"<b>{brand} Delivery Polygon:</b> {zone_label}",
                         popup=folium.Popup(
                             f"<div style='font-family: sans-serif; font-size: 13px;'>"
                             f"<b style='color: {stroke_color};'>{brand} Real-World Service Zone</b><br>"
                             f"<b>Zone:</b> {zone_label}<br>"
-                            f"<b>File:</b> {os.path.basename(g_path)}</div>",
+                            f"<b>Source:</b> {os.path.basename(g_path)}</div>",
                             max_width=260
                         )
                     ).add_to(target_fg)
