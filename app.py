@@ -1,4 +1,6 @@
 import os
+import json
+import glob
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -493,7 +495,13 @@ with tab_map:
         tiles="CartoDB positron"
     )
 
-    # Add Dark Store Markers & Delivery Radius Circles
+    # FeatureGroups for interactive layer toggling
+    fg_stores = folium.FeatureGroup(name="🏪 Dark Store Hubs & Buffers", show=True)
+    fg_blinkit = folium.FeatureGroup(name="🟡 Blinkit Service Zones", show=True)
+    fg_zepto = folium.FeatureGroup(name="🟣 Zepto Service Zones", show=True)
+    fg_custom = folium.FeatureGroup(name="🔵 Custom Boundary Zones", show=True)
+
+    # Add Dark Store Markers & Delivery Radius Circles to Store FeatureGroup
     for _, store in filtered_stores.iterrows():
         is_active = (store['Status'] == 'Active')
         marker_color = "blue" if is_active else "orange"
@@ -515,7 +523,7 @@ with tab_map:
             popup=folium.Popup(popup_html, max_width=250),
             tooltip=f"{store['Store Name']} ({store['Status']})",
             icon=folium.Icon(color=marker_color, icon=icon_type, prefix="fa")
-        ).add_to(aurangabad_map)
+        ).add_to(fg_stores)
 
         # Coverage Circle (Simulated Buffer)
         folium.Circle(
@@ -527,10 +535,103 @@ with tab_map:
             fill_color="#0a66c2" if is_active else "#f39c12",
             fill_opacity=0.12,
             tooltip=f"{store['Store Name']} - {simulated_radius}km Coverage Zone"
-        ).add_to(aurangabad_map)
+        ).add_to(fg_stores)
+
+    # Load and Render GeoJSON files from data/geojson/
+    geojson_dir = os.path.join(BASE_DIR, "data", "geojson")
+    loaded_polygons = []
+
+    if os.path.exists(geojson_dir):
+        geo_files = sorted(
+            glob.glob(os.path.join(geojson_dir, "*.json")) +
+            glob.glob(os.path.join(geojson_dir, "*.geojson"))
+        )
+        for g_path in geo_files:
+            # Check if file has been populated with data
+            if os.path.getsize(g_path) > 0:
+                try:
+                    with open(g_path, "r", encoding="utf-8") as f:
+                        geo_json_data = json.load(f)
+
+                    fname = os.path.basename(g_path).lower()
+                    zone_label = (
+                        os.path.basename(g_path)
+                        .replace("_geo", "")
+                        .replace(".geojson", "")
+                        .replace(".json", "")
+                        .replace("_", " ")
+                        .title()
+                    )
+
+                    # Determine brand styling
+                    if "blinkit" in fname:
+                        stroke_color = "#b7950b"
+                        fill_color = "#f4d03f"
+                        target_fg = fg_blinkit
+                        brand = "Blinkit"
+                    elif "zepto" in fname:
+                        stroke_color = "#512e5f"
+                        fill_color = "#8e44ad"
+                        target_fg = fg_zepto
+                        brand = "Zepto"
+                    else:
+                        stroke_color = "#1f618d"
+                        fill_color = "#3498db"
+                        target_fg = fg_custom
+                        brand = "Custom"
+
+                    folium.GeoJson(
+                        geo_json_data,
+                        name=f"{brand}: {zone_label}",
+                        style_function=lambda feature, sc=stroke_color, fc=fill_color: {
+                            'color': sc,
+                            'fillColor': fc,
+                            'weight': 2.5,
+                            'fillOpacity': 0.35,
+                        },
+                        tooltip=f"<b>{brand} Delivery Polygon:</b> {zone_label}",
+                        popup=folium.Popup(
+                            f"<div style='font-family: sans-serif; font-size: 13px;'>"
+                            f"<b style='color: {stroke_color};'>{brand} Real-World Service Zone</b><br>"
+                            f"<b>Zone:</b> {zone_label}<br>"
+                            f"<b>File:</b> {os.path.basename(g_path)}</div>",
+                            max_width=260
+                        )
+                    ).add_to(target_fg)
+                    loaded_polygons.append({
+                        "Brand": brand,
+                        "Zone Name": zone_label,
+                        "Filename": os.path.basename(g_path),
+                        "Size (bytes)": os.path.getsize(g_path)
+                    })
+                except Exception as e:
+                    # Ignore invalid/incomplete json gracefully while user is editing
+                    pass
+
+    # Add all feature groups to map
+    fg_stores.add_to(aurangabad_map)
+    fg_blinkit.add_to(aurangabad_map)
+    fg_zepto.add_to(aurangabad_map)
+    if fg_custom._children:
+        fg_custom.add_to(aurangabad_map)
+
+    # Layer toggle control for user interaction
+    folium.LayerControl(position="topright", collapsed=False).add_to(aurangabad_map)
 
     # Render Map inside Streamlit
     folium_static(aurangabad_map, width=1050, height=520)
+
+    # Informational banner about GeoJSON status
+    if loaded_polygons:
+        st.success(f"🗺️ **{len(loaded_polygons)} GeoJSON Delivery Boundaries Loaded**: Displaying exact service polygons for Blinkit & Zepto.")
+        with st.expander("📋 View Loaded GeoJSON Boundaries"):
+            st.dataframe(pd.DataFrame(loaded_polygons), use_container_width=True)
+    else:
+        st.info(
+            "💡 **GeoJSON Integration Active**: The map is connected to `data/geojson/`. "
+            "As soon as you paste your GeoJSON code into any of the files "
+            "(`usmanpura_blinkit_geo.json`, `cidco_zepto_geo.geojson`, etc.), their real delivery polygons will automatically display on the map."
+        )
 
     # Store Directory Table
     st.markdown("### 🏢 Dark Store Directory & Coverage Zones")
