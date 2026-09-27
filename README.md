@@ -3,9 +3,15 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Built%20With-Streamlit-orange?logo=streamlit)](https://streamlit.io/)
+[![Deployed with Streamlit](https://img.shields.io/badge/Deployed-Streamlit%20Cloud-ff4b4b?logo=streamlit)](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Neel%20Belsare-0A66C2?logo=linkedin)](https://www.linkedin.com/in/neel-belsare-719b9a314/)
 [![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare/my-dark-store-app)
+
+---
+
+## 🚀 **Live Demo**  
+🔗 **Try the interactive application live**: [**my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
 
 ---
 
