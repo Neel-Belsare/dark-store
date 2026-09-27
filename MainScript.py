@@ -10,7 +10,53 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 # Streamlit page config
-st.set_page_config(page_title="Dark Store Analysis")
+st.set_page_config(page_title="Dark Store Analysis", layout="wide")
+
+# Custom footer with developer credit in bottom right corner
+custom_footer = """
+<style>
+footer {visibility: hidden;}
+.custom-footer {
+    position: fixed;
+    right: 20px;
+    bottom: 12px;
+    z-index: 999999;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+    .custom-footer {
+        background: rgba(28, 31, 38, 0.9);
+        color: #f0f0f0;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+}
+.custom-footer a {
+    color: #0a66c2;
+    text-decoration: none;
+    font-weight: 600;
+}
+.custom-footer a:hover {
+    text-decoration: underline;
+}
+</style>
+<div class="custom-footer">
+    Made with ❤️ by <a href="https://www.linkedin.com/in/neel-belsare-719b9a314/" target="_blank">Neel Belsare</a>
+</div>
+"""
+st.markdown(custom_footer, unsafe_allow_html=True)
+
+# Sidebar with Developer info
+with st.sidebar:
+    st.markdown("### 👨‍💻 Developer")
+    st.markdown("**Neel Belsare**")
+    st.markdown("[🔗 LinkedIn Profile](https://www.linkedin.com/in/neel-belsare-719b9a314/)")
+    st.markdown("---")
 
 # Load data
 def load_data():

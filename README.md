@@ -4,19 +4,13 @@
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Built%20With-Streamlit-orange?logo=streamlit)](https://streamlit.io/)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Open Source](https://img.shields.io/badge/Open--Source-Contributions%20Welcome-brightgreen.svg)](https://github.com/atharvbyadav/Dark-Store-Feasibility-Analysis)
-[![Project Status](https://img.shields.io/badge/Status-Hackathon%20Prototype-blueviolet)](https://github.com/atharvbyadav)
-
-[![Made with Love](https://img.shields.io/badge/Made%20with-%F0%9F%96%A4-red)](https://github.com/atharvbyadav)
-[![Deployed with Streamlit](https://img.shields.io/badge/Deployed-Streamlit%20Cloud-ff4b4b?logo=streamlit)](https://dark-store.streamlit.app/)
-[![Last Commit](https://img.shields.io/github/last-commit/atharvbyadav/Dark-Store-Feasibility-Analysis?color=blue)](https://github.com/atharvbyadav/Dark-Store-Feasibility-Analysis/commits/main)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Neel%20Belsare-0A66C2?logo=linkedin)](https://www.linkedin.com/in/neel-belsare-719b9a314/)
+[![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare/my-dark-store-app)
 
 ---
 
-## 🚀 Live Demo  
-🔗 **Try it out now**: [dark-store.streamlit.app](https://dark-store.streamlit.app/)
-
-🔗 **GitHub Repository**: [Dark Store Feasibility Analysis](https://github.com/atharvbyadav/Dark-Store-Feasibility-Analysis)
+## 🔗 **GitHub Repository**: [NeelBelsare/my-dark-store-app](https://github.com/NeelBelsare/my-dark-store-app)
+👨‍💻 **Developer**: [Neel Belsare](https://www.linkedin.com/in/neel-belsare-719b9a314/)
 
 ---
 
@@ -69,7 +63,7 @@ This project provides a **data-driven solution** to **analyze, predict and recom
 
 ### **🔹 Clone the Repository**  
 ```bash
-git clone https://github.com/atharvbyadav/Dark-Store-Feasibility-Analysis.git
+git clone https://github.com/NeelBelsare/my-dark-store-app.git
 ```
 
 ### **🔹 Run the Streamlit App**  
