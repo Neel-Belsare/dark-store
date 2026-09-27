@@ -8,8 +8,6 @@ venv/
 env/
 ENV/
 
-# Streamlit
-.streamlit/
 
 # macOS
 .DS_Store

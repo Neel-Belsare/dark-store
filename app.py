@@ -25,31 +25,58 @@ st.set_page_config(
 # ------------------------------------------------------------------------------
 st.markdown("""
 <style>
-    /* Metric Card Styling */
+    /* Global Light Theme Colors */
+    .stApp {
+        background-color: #f8fafc;
+        color: #0f172a;
+    }
+    
+    /* Sidebar Light Theme */
+    section[data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    /* Metric Cards - Light Crisp Theme */
     div[data-testid="stMetric"] {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 244, 250, 0.9));
+        background: #ffffff !important;
         padding: 16px 20px;
         border-radius: 12px;
-        border: 1px solid rgba(0, 102, 204, 0.15);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     div[data-testid="stMetric"]:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 102, 204, 0.12);
+        box-shadow: 0 6px 16px rgba(10, 102, 194, 0.1) !important;
+        border-color: #cbd5e1 !important;
     }
-    @media (prefers-color-scheme: dark) {
-        div[data-testid="stMetric"] {
-            background: linear-gradient(135deg, rgba(28, 33, 44, 0.95), rgba(20, 24, 33, 0.9));
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
+    div[data-testid="stMetric"] label {
+        color: #64748b !important;
+        font-weight: 500 !important;
+        font-size: 0.85rem !important;
     }
-    
+    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+    }
+
+    /* Tabs Styling - Light Theme */
+    button[data-baseweb="tab"] {
+        font-size: 15px;
+        font-weight: 500;
+        color: #64748b;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #0a66c2 !important;
+        font-weight: 600 !important;
+        border-bottom-color: #0a66c2 !important;
+    }
+
     /* Hide Default Streamlit Footer */
     footer { visibility: hidden; }
 
-    /* Custom Floating Footer */
+    /* Custom Floating Footer - Light Mode */
     .custom-footer {
         position: fixed;
         right: 20px;
@@ -57,19 +84,12 @@ st.markdown("""
         z-index: 999999;
         font-size: 13px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: rgba(255, 255, 255, 0.92);
+        background: #ffffff;
         padding: 6px 14px;
         border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        backdrop-filter: blur(4px);
-    }
-    @media (prefers-color-scheme: dark) {
-        .custom-footer {
-            background: rgba(28, 31, 38, 0.92);
-            color: #f0f0f0;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+        color: #334155;
     }
     .custom-footer a {
         color: #0a66c2;
@@ -370,9 +390,17 @@ with tab_feasibility:
                 title="Projected Population (2025) by Area",
                 labels={'Projected Population (2025)': 'Population'},
                 color='Projected Population (2025)',
-                color_continuous_scale='Blues'
+                color_continuous_scale='Blues',
+                template="plotly_white"
             )
-            fig_pop.update_layout(xaxis_tickangle=-40, height=380, margin=dict(l=20, r=20, t=40, b=80))
+            fig_pop.update_layout(
+                xaxis_tickangle=-40,
+                height=380,
+                margin=dict(l=20, r=20, t=40, b=80),
+                plot_bgcolor="#ffffff",
+                paper_bgcolor="#ffffff",
+                font=dict(color="#1e293b")
+            )
             st.plotly_chart(fig_pop, use_container_width=True)
         else:
             st.info("No data meets current filter criteria.")
@@ -386,9 +414,17 @@ with tab_feasibility:
                 title="Predicted Monthly Orders by Area",
                 labels={'Predicted Online Order Volume (Monthly)': 'Monthly Orders'},
                 color='Predicted Online Order Volume (Monthly)',
-                color_continuous_scale='Tealgrn'
+                color_continuous_scale='Tealgrn',
+                template="plotly_white"
             )
-            fig_orders.update_layout(xaxis_tickangle=-40, height=380, margin=dict(l=20, r=20, t=40, b=80))
+            fig_orders.update_layout(
+                xaxis_tickangle=-40,
+                height=380,
+                margin=dict(l=20, r=20, t=40, b=80),
+                plot_bgcolor="#ffffff",
+                paper_bgcolor="#ffffff",
+                font=dict(color="#1e293b")
+            )
             st.plotly_chart(fig_orders, use_container_width=True)
         else:
             st.info("No data meets current filter criteria.")
@@ -539,6 +575,10 @@ with tab_forecast:
         xaxis_title="Date",
         yaxis_title="Daily Orders per Hub",
         hovermode="x unified",
+        template="plotly_white",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
+        font=dict(color="#1e293b"),
         height=380,
         margin=dict(l=20, r=20, t=40, b=40)
     )
@@ -584,6 +624,10 @@ with tab_forecast:
             title=f"{forecast_days}-Day Forward Demand Projection",
             xaxis_title="Timeline",
             yaxis_title="Orders / Hub",
+            template="plotly_white",
+            plot_bgcolor="#ffffff",
+            paper_bgcolor="#ffffff",
+            font=dict(color="#1e293b"),
             height=320,
             margin=dict(l=20, r=20, t=40, b=40)
         )
@@ -624,6 +668,10 @@ with tab_climate:
             yaxis=dict(title="Precipitation (mm)"),
             yaxis2=dict(title="Impact Scale (1-5)", overlaying='y', side='right', range=[0, 6]),
             legend=dict(x=0.01, y=0.99),
+            template="plotly_white",
+            plot_bgcolor="#ffffff",
+            paper_bgcolor="#ffffff",
+            font=dict(color="#1e293b"),
             height=380,
             margin=dict(l=20, r=20, t=40, b=40)
         )
