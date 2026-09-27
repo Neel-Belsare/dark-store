@@ -391,8 +391,7 @@ with tab_feasibility:
                 y='Projected Population (2025)',
                 title="Projected Population (2025) by Area",
                 labels={'Projected Population (2025)': 'Population'},
-                color='Projected Population (2025)',
-                color_continuous_scale='Blues',
+                color_discrete_sequence=['#2563eb'],
                 template="plotly_white"
             )
             fig_pop.update_layout(
@@ -415,8 +414,7 @@ with tab_feasibility:
                 y='Predicted Online Order Volume (Monthly)',
                 title="Predicted Monthly Orders by Area",
                 labels={'Predicted Online Order Volume (Monthly)': 'Monthly Orders'},
-                color='Predicted Online Order Volume (Monthly)',
-                color_continuous_scale='Tealgrn',
+                color_discrete_sequence=['#0d9488'],
                 template="plotly_white"
             )
             fig_orders.update_layout(
