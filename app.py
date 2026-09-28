@@ -59,8 +59,22 @@ st.markdown("""
         background-color: var(--card) !important;
         border-right: 1px solid var(--line) !important;
     }
-    section[data-testid="stSidebar"] * {
-        font-family: 'Inter', sans-serif !important;
+
+    /* Preserve Material Symbols Ligatures for Streamlit Collapse Arrow & Icons */
+    [data-testid="stIconMaterial"],
+    [data-testid="stSidebarCollapseButton"] span,
+    [data-testid="stSidebarCollapseButton"] button,
+    button[data-testid="baseButton-headerNoPadding"] span,
+    .material-symbols-rounded,
+    .material-symbols-outlined,
+    .material-icons {
+        font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
+        font-style: normal;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
     }
 
     /* Header & Live Network Indicator */
