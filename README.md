@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-ff4b4b?logo=streamlit)](https://streamlit.io/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Realtime-3ECF8E?logo=supabase)](https://supabase.com)
 [![React Native](https://img.shields.io/badge/React%20Native-Expo%2051-61DAFB?logo=react)](https://reactnative.dev/)
 [![PyDeck](https://img.shields.io/badge/PyDeck-Deck.gl%203D-blueviolet)](https://deckgl.readthedocs.io/)
 [![Deployed on Streamlit](https://img.shields.io/badge/Live%20Dashboard-Streamlit%20Cloud-00c853?logo=streamlit)](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
@@ -28,39 +29,43 @@
 
 This project provides an end-to-end **Quick-Commerce Dark Store Management & Consumer Ecosystem** designed for **Chhatrapati Sambhajinagar (Aurangabad)**. 
 
-It connects three core tiers:
-1. **Frontend Mobile App (`mobile-app/`)**: A high-performance **React Native (Expo)** mobile application (Blinkit clone) featuring device GPS location locking, cart management, free delivery tier, celebratory micro-animations, and instant checkout.
-2. **Real-Time Dispatch Bridge (`api.py`)**: A **FastAPI** backend that receives live GPS coordinates from the mobile app, runs Haversine nearest-hub routing against 12 Aurangabad dark stores, assigns delivery riders, computes SLAs, and syncs order payloads.
-3. **Analytics & Command Center (`app.py`)**: A modern **Streamlit** dashboard featuring 3D PyDeck telemetry (flight arcs, concentric pulse rings, moving riders), Leaflet vector GeoJSON delivery zones, ML demand forecasting, climate friction simulations, and unit economics.
+It connects four synchronized tiers:
+1. **Frontend Mobile App (`mobile-app/`)**: A high-performance **React Native (Expo)** mobile application (Blinkit clone) featuring device GPS location locking, cart management, free delivery tier, celebratory micro-animations, instant checkout, and direct Supabase synchronization.
+2. **Autonomous Dispatch Bridge (`api.py`)**: A **FastAPI** backend that receives live GPS coordinates from the mobile app, enforces GeoJSON serviceability catchments, runs Haversine nearest-hub routing against 12 Aurangabad dark stores, assigns delivery riders, computes predictive weather/traffic SLAs, and syncs order payloads.
+3. **Cloud Database & Realtime Layer (Supabase PostgreSQL)**: A cloud database providing persistent storage for `stores`, `riders`, `users`, `orders`, and `order_items` with native PostGIS geospatial support, Row Level Security, and Realtime WebSocket event broadcasting.
+4. **Analytics & Command Center (`app.py`)**: A modern **Streamlit** dashboard featuring 3D PyDeck telemetry (flight arcs, concentric pulse rings, moving riders), Leaflet vector GeoJSON delivery zones, ML demand forecasting, climate friction simulations, and unit economics.
 
 ```
-                                      ┌──────────────────────────────────────────────┐
-                                      │   📱 Mobile App (React Native Expo)          │
-                                      │   - useCurrentLocation (GPS Lock via expo)   │
-                                      │   - CheckoutScreen (Blinkit UI, Cart, Bill)  │
-                                      │   - CelebrationModal (Confetti & Animation)  │
-                                      └──────────────────────┬───────────────────────┘
-                                                             │
-                                                  POST /api/order (GPS Coords)
-                                                             │
-                                                             ▼
-                                      ┌──────────────────────────────────────────────┐
-                                      │   ⚡ FastAPI Dispatch Bridge (api.py)        │
-                                      │   - Haversine Nearest Dark Store Routing     │
-                                      │   - ETA, SLA & Rider Assignment Engine       │
-                                      │   - Atomic State Sync (latest_order.json)    │
-                                      └──────────────────────┬───────────────────────┘
-                                                             │
-                                                   Live Telemetry Sync
-                                                             │
-                                                             ▼
-                                      ┌──────────────────────────────────────────────┐
-                                      │   🖥️ Streamlit Command Center (app.py)       │
-                                      │   - 3D PyDeck ArcLayer Vector Flight Path    │
-                                      │   - Real-World GeoJSON Service Polygons      │
-                                      │   - In-Transit Rider Marker & Telemetry      │
-                                      │   - Sidebar Real-Time st.status Pipeline     │
-                                      └──────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐       ┌──────────────────────────────────────────────┐
+│   📱 Mobile App (React Native Expo)          │       │   🖥️ Streamlit Command Center (app.py)       │
+│   - useCurrentLocation (GPS Lock via expo)   │       │   - 3D PyDeck ArcLayer Vector Flight Path    │
+│   - CheckoutScreen (Blinkit UI, Cart, Bill)  │       │   - Real-World GeoJSON Service Polygons      │
+│   - CelebrationModal (Confetti & Animation)  │       │   - In-Transit Rider Marker & Telemetry      │
+│   - Direct Supabase REST Cloud Sync          │       │   - Real-Time Supabase Order Stream & Reset  │
+└──────────────────────┬───────────────────────┘       └──────────────────────┬───────────────────────┘
+                       │                                                      │
+             Order Dispatch / Sync                                  Active Order Fetch / Reset
+                       │                                                      │
+                       ▼                                                      ▼
+       ┌──────────────────────────────────────────────────────────────────────────────┐
+       │                 ⚡ Supabase Cloud Database (PostgreSQL + Realtime)           │
+       │   - stores: 12 Pre-seeded Aurangabad fulfillment hubs & coordinates          │
+       │   - riders: 12 Couriers with live GPS telemetry, vehicles & ratings          │
+       │   - users: Registered consumers, addresses & loyalty tiers                   │
+       │   - orders & order_items: Single-active dispatch pipeline & line items       │
+       │   - supabase_realtime: Instant WebSocket event broadcast                     │
+       └──────────────────────────────────────▲───────────────────────────────────────┘
+                                              │
+                                    Telemetry & State Sync
+                                              │
+                       ┌──────────────────────┴───────────────────────┐
+                       │   ⚡ FastAPI Dispatch Bridge (api.py)        │
+                       │   - Haversine Nearest Dark Store Routing     │
+                       │   - ETA, SLA & Rider Assignment Engine       │
+                       │   - Serpentine S-Shape Warehouse Pick Path   │
+                       │   - Multi-Order Courier Route Batching       │
+                       │   - Atomic Cloud Sync + Local Fallback       │
+                       └──────────────────────────────────────────────┘
 ```
 
 ---
@@ -73,8 +78,14 @@ Below is the complete file and folder breakdown of the repository:
 📦 Dark-Store-Feasibility-Analysis
 ├── 📄 app.py                             # Main Streamlit Command Center web application (UI, 3D maps, ML, KPIs)
 ├── 📄 api.py                             # FastAPI REST bridge connecting mobile orders to the Streamlit visualizer
+├── 📄 supabase_client.py                 # Supabase Python client (orders, riders, stores with zero-downtime fallback)
+├── 📄 supabase_schema.sql                # Complete SQL migration script (stores, riders, users, orders, RLS, realtime)
 ├── 📄 MainScript.py                      # Core Python data modeling and analytics pipeline
-├── 📄 requirements.txt                   # Python dependencies (Streamlit, FastAPI, PyDeck, Folium, Plotly, etc.)
+├── 📄 requirements.txt                   # Python dependencies (Streamlit, FastAPI, Supabase, PyDeck, Folium, Plotly, etc.)
+├── 📄 Dockerfile                         # Production containerization configuration
+├── 📄 docker-compose.yml                 # Multi-container orchestration for local dev & testing
+├── 📄 DEPLOYMENT.md                      # Cloud & container deployment documentation
+├── 📄 .env.example                       # Environment variables template for Supabase & API keys
 ├── 📄 index.html                         # GitHub Pages static redirect
 ├── 📄 LICENSE                            # MIT License
 ├── 📄 README.md                          # Full system documentation, folder structure, and usage guide
@@ -84,6 +95,7 @@ Below is the complete file and folder breakdown of the repository:
 │   ├── 📄 app.json                       # Expo configuration (app metadata, GPS permissions for iOS/Android)
 │   ├── 📄 package.json                   # React Native & Expo dependencies (expo-location, etc.)
 │   ├── 📄 tsconfig.json                  # TypeScript compiler settings
+│   ├── 📄 .env.example                   # Mobile app public Supabase environment template
 │   ├── 📄 README.md                      # Dedicated mobile app setup and run guide
 │   └── 📂 src/
 │       ├── 📄 types.ts                   # TypeScript interfaces (GPSLocation, CartItem, OrderPayload, etc.)
@@ -92,7 +104,8 @@ Below is the complete file and folder breakdown of the repository:
 │       ├── 📂 hooks/
 │       │   └── 📄 useCurrentLocation.ts  # Expo GPS location hook, reverse geocoding, and micro-market switcher
 │       ├── 📂 services/
-│       │   └── 📄 api.ts                 # HTTP client calling FastAPI bridge with offline fallback simulation
+│       │   ├── 📄 api.ts                 # HTTP client calling FastAPI bridge with offline fallback simulation
+│       │   └── 📄 supabase.ts            # Lightweight Supabase REST client for order sync & reset
 │       ├── 📂 components/
 │       │   ├── 📄 LocationBar.tsx        # Top GPS delivery bar with live indicator & Aurangabad hub switcher
 │       │   ├── 📄 CartItemRow.tsx        # Grocery items with dynamic +/- quantity steppers
@@ -183,15 +196,54 @@ python3 api.py
 #### Available Endpoints:
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| **`POST`** | `/api/order` | Receives GPS coordinates, routes to nearest dark store via Haversine geometry, and notifies Streamlit |
-| **`GET`** | `/api/latest-order` | Returns the most recently dispatched order payload |
-| **`GET`** | `/api/orders` | Retrieves recent order history |
-| **`GET`** | `/api/stores` | Returns the list of all 12 dark store hubs with coordinates and coverage details |
-| **`GET`** | `/api/health` | Health check endpoint |
+| **`POST`** | `/api/order` | Receives GPS coordinates, routes to nearest dark store, computes buffered ETA, and syncs to Supabase |
+| **`POST`** | `/api/order/reset` | Resets active order pipeline in Supabase and local cache when "Done" is triggered |
+| **`GET`** | `/api/latest-order` | Returns the single active order payload for real-time mobile and dashboard synchronization |
+| **`GET`** | `/api/orders` | Retrieves recent order history from Supabase (or local cache) |
+| **`GET`** | `/api/stores` | Returns the list of all 12 dark store hubs with coordinates, radii, and operational status |
+| **`GET`** | `/api/riders` | Returns delivery couriers, vehicle types, speed, ratings, and live availability |
+| **`GET`** | `/api/users` | Returns registered consumers, addresses, and quick-commerce loyalty tiers |
+| **`GET`** | `/api/serviceability/check` | Evaluates if GPS coordinates are inside GeoJSON catchment zones or dark store radii |
+| **`POST`** | `/api/warehouse/optimize-pick-path` | Calculates optimal serpentine (S-shape) picking sequences for warehouse workers |
+| **`GET`** | `/api/dispatch/batched-routes` | Calculates multi-order spatial route batching to reduce courier transit distance |
+| **`WS`** | `/ws/tracking/{order_id}` | Live WebSocket streaming rider GPS coordinates and 4 fulfillment milestones |
+| **`GET`** | `/api/health` | System health check and catchment summary |
 
 ---
 
-### 4. Running the Consumer Client Locally (`mobile-app/` ➔ [blinkit-aurangabad.netlify.app](https://blinkit-aurangabad.netlify.app))
+### 4. Supabase Cloud Database & Realtime Setup
+
+The project uses **Supabase (PostgreSQL + Realtime)** as the unified persistence and synchronization tier.
+
+#### Database Tables & Schemas:
+- **`public.stores`**: All 12 Aurangabad dark store fulfillment hubs (CIDCO, Garkheda, Nirala Bazar, Waluj, Chikalthana, Beed Bypass, Osmanpura, Seven Hills, HUDCO, Railway Station, Shahgunj, Shendra AURIC).
+- **`public.riders`**: Delivery couriers with live GPS coordinates, vehicle types (EV Scooter, ICE Motorcycle, E-Bike), ratings, speeds, and status (`available`, `delivering`, `idle`).
+- **`public.users`**: Registered consumers with delivery addresses, phone numbers, and loyalty tiers (`Gold`, `Silver`, `Bronze`).
+- **`public.orders`**: Single-active order pipeline with customer coordinates, assigned store, routing distances, predictive buffered ETAs, weather/traffic conditions, and courier telemetry.
+- **`public.order_items`**: Line items linked via foreign keys to parent orders.
+
+#### Activating Your Database Tables:
+1. Open the [**Supabase SQL Editor**](https://supabase.com/dashboard/project/wovfqutzuppauwretoiw/sql/new).
+2. Copy and paste the contents of [`supabase_schema.sql`](supabase_schema.sql).
+3. Click **"Run"** — this creates the tables, pre-seeds the dark stores and sample data, enables Realtime publications, and configures Row Level Security (RLS).
+
+#### Environment Variables Configuration:
+Copy `.env.example` to `.env` in the project root:
+```env
+SUPABASE_URL="https://wovfqutzuppauwretoiw.supabase.co"
+SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+```
+
+In `mobile-app/`, copy `.env.example` to `.env`:
+```env
+EXPO_PUBLIC_SUPABASE_URL="https://wovfqutzuppauwretoiw.supabase.co"
+EXPO_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+```
+
+> 🛡️ **Zero-Downtime Fallback**: If Supabase credentials are not provided or if the database is offline, both the Python backend and React Native client automatically fall back to local JSON and CSV datasets without errors.
+
+### 5. Running the Consumer Client Locally (`mobile-app/` ➔ [blinkit-aurangabad.netlify.app](https://blinkit-aurangabad.netlify.app))
 
 The customer client is built with React Native and Expo, and is deployed live on Netlify at [**https://blinkit-aurangabad.netlify.app**](https://blinkit-aurangabad.netlify.app).
 
@@ -240,7 +292,7 @@ npm expo start
 
 ---
 
-### 5. Experiencing the End-to-End Live Workflow
+### 6. Experiencing the End-to-End Live Workflow
 
 1. Keep **FastAPI** (`python3 api.py`) and **Streamlit** (`streamlit run app.py`) running.
 2. Open the **Mobile App** (Web or Phone).

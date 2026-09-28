@@ -2,6 +2,7 @@
 
 [![Deployed on Netlify](https://img.shields.io/badge/Live%20Web%20App-Netlify-00C7B7?logo=netlify)](https://blinkit-aurangabad.netlify.app)
 [![React Native](https://img.shields.io/badge/React%20Native-Expo%2051-61DAFB?logo=react)](https://reactnative.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Cloud%20Sync-3ECF8E?logo=supabase)](https://supabase.com)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Neel%20Belsare-0A66C2?logo=linkedin)](https://www.linkedin.com/in/neel-belsare-719b9a314/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Mansi%20Gaike-0A66C2?logo=linkedin)](https://www.linkedin.com/in/mansi-gaike-821260316)
 [![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare)
@@ -73,7 +74,8 @@ mobile-app/
     ├── hooks/
     │   └── useCurrentLocation.ts# GPS location & reverse geocoding
     ├── services/
-    │   └── api.ts               # FastAPI bridge client with offline fallback
+    │   ├── api.ts               # FastAPI bridge client with offline fallback
+    │   └── supabase.ts          # Lightweight REST client for direct cloud order sync & reset
     ├── components/
     │   ├── LocationBar.tsx      # GPS status & micro-market switcher modal
     │   ├── CartItemRow.tsx      # Basket item with +/- steppers
