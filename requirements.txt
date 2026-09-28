@@ -6,4 +6,6 @@ pydeck
 scikit-learn
 folium
 streamlit-folium
-
+fastapi
+uvicorn
+pydantic
