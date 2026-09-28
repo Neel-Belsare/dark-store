@@ -16,7 +16,7 @@
 ## 🌐 Live Deployments & Links
 - 🚀 **Streamlit Command Center (Live Web App)**: [**my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
 - 🔗 **GitHub Repository**: [**NeelBelsare/my-dark-store-app**](https://github.com/NeelBelsare/my-dark-store-app)
-- 👨‍💻 **Developer**: [**Neel Belsare**](https://www.linkedin.com/in/neel-belsare-719b9a314/)
+- 👨‍💻 **Developers**: [**Neel Belsare**](https://www.linkedin.com/in/neel-belsare-719b9a314/) & [**Mansi Gaike**](www.linkedin.com/in/mansi-gaike-821260316) 
 
 ---
 
@@ -244,10 +244,11 @@ $$\text{ETA (mins)} = \mathrm{round}\left(3.5 + d \times 2.8\right)$$
 **Neel Belsare**  
 - **LinkedIn**: [linkedin.com/in/neel-belsare-719b9a314](https://www.linkedin.com/in/neel-belsare-719b9a314/)  
 - **GitHub**: [github.com/NeelBelsare](https://github.com/NeelBelsare)
+  
 **Mansi gaike**  
 - **LinkedIn**: [linkedin.com/in/mansi-gaike-821260316](https://www.linkedin.com/in/mansi-gaike-821260316)  
 - **GitHub**: [github.com/gaikemansi03-sketch](https://github.com/gaikemansi03-sketch)
-- 
+
 - **Live Application**: [my-dark-store-app.streamlit.app](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
 
 ---
