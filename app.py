@@ -375,7 +375,7 @@ st.markdown("""
     }
 </style>
 <div class="custom-footer">
-    Made with ❤️ by <a href="https://www.linkedin.com/in/neel-belsare-719b9a314/" target="_blank">Neel Belsare</a>
+    Made by <a href="https://www.linkedin.com/in/neel-belsare-719b9a314/" target="_blank">Neel Belsare & <a href="https://www.linkedin.com/in/mansi-gaike-821260316" target="_blank">Mansi Gaike </a>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1127,8 +1127,9 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("### 👨‍💻 Developer")
-    st.markdown("**Neel Belsare**")
-    st.markdown("[🔗 Connect on LinkedIn](https://www.linkedin.com/in/neel-belsare-719b9a314/)")
+    st.markdown("**Neel Belsare** & **Mansi Gaike**")
+    st.markdown("[🔗 Connect with Neel on LinkedIn](https://www.linkedin.com/in/neel-belsare-719b9a314/)")
+    st.markdown("[🔗 Connect with Mansi on LinkedIn](https://www.linkedin.com/in/mansi-gaike-821260316)")
     st.caption("Quick-Commerce Analytics v3.0 • Command Center")
 
     st.markdown("---")
