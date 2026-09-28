@@ -1,6 +1,7 @@
 import os
 import json
 import glob
+import time
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -505,6 +506,88 @@ df_stores = load_dark_stores_data()
 df_climate = load_climate_impact_data()
 
 # ------------------------------------------------------------------------------
+# Geospatial Routing & Order Simulation Engine (Haversine Logic)
+# ------------------------------------------------------------------------------
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """Calculate great circle distance between two coordinates in kilometers."""
+    R = 6371.0
+    dlat = np.radians(lat2 - lat1)
+    dlon = np.radians(lon2 - lon1)
+    a = np.sin(dlat / 2.0)**2 + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2)) * np.sin(dlon / 2.0)**2
+    return 2 * R * np.arcsin(np.sqrt(a))
+
+def generate_mock_customer_order(df_stores):
+    """Generate a random customer coordinate within the delivery catchment radius of an active store."""
+    active_stores = df_stores[df_stores['Status'] == 'Active'].copy()
+    if active_stores.empty:
+        active_stores = df_stores.copy()
+    
+    seed_store = active_stores.sample(1).iloc[0]
+    max_r = max(1.2, float(seed_store['Delivery Radius (km)']) * 0.85)
+    r = float(np.random.uniform(0.35, max_r))
+    theta = float(np.random.uniform(0, 2 * np.pi))
+    dlat = (r * np.cos(theta)) / 111.32
+    dlon = (r * np.sin(theta)) / (111.32 * np.cos(np.radians(seed_store['Latitude'])))
+    
+    cust_lat = float(seed_store['Latitude'] + dlat)
+    cust_lon = float(seed_store['Longitude'] + dlon)
+    
+    active_stores['Dist_to_Customer'] = active_stores.apply(
+        lambda s: haversine_distance(cust_lat, cust_lon, s['Latitude'], s['Longitude']),
+        axis=1
+    )
+    assigned_store = active_stores.sort_values('Dist_to_Customer').iloc[0]
+    distance_km = float(assigned_store['Dist_to_Customer'])
+    eta_mins = int(round(3.5 + distance_km * 2.8))
+    
+    mock_items = [
+        "Amul Taaza Homogenised Toned Milk 500ml (x2)",
+        "Aashirvaad Shudh Chakki Atta 5kg",
+        "Fortune Sunlite Refined Sunflower Oil 1L",
+        "Amul Pasteurized Salted Butter 100g",
+        "Lay's India's Magic Masala Potato Chips 50g",
+        "Coca-Cola Zero Sugar 750ml",
+        "Britannia 100% Whole Wheat Bread 400g",
+        "Tata Salt Vacuum Evaporated Iodized 1kg",
+        "Cadbury Dairy Milk Silk Chocolate 150g",
+        "Epigamia Greek Yogurt Natural 90g"
+    ]
+    num_items = int(np.random.randint(2, 5))
+    selected_items = np.random.choice(mock_items, size=num_items, replace=False).tolist()
+    order_val = int(np.random.randint(180, 850))
+    order_id = f"CSN-{np.random.randint(1000, 9999)}"
+    rider_names = [
+        "Rahul S. (Rider #18)",
+        "Vikram M. (Rider #07)",
+        "Amit P. (Rider #23)",
+        "Sachin K. (Rider #12)",
+        "Gaurav D. (Rider #31)"
+    ]
+    assigned_rider = str(np.random.choice(rider_names))
+    
+    return {
+        "order_id": order_id,
+        "cust_lat": cust_lat,
+        "cust_lon": cust_lon,
+        "assigned_store": assigned_store['Store Name'],
+        "store_lat": float(assigned_store['Latitude']),
+        "store_lon": float(assigned_store['Longitude']),
+        "coverage_area": assigned_store['Coverage Area'],
+        "distance_km": distance_km,
+        "eta_mins": eta_mins,
+        "items": selected_items,
+        "order_val": order_val,
+        "rider": assigned_rider,
+        "timestamp": pd.Timestamp.now().strftime("%H:%M:%S")
+    }
+
+# Session state initialization for live order simulation
+if "active_order" not in st.session_state or st.session_state["active_order"] is None:
+    st.session_state["active_order"] = generate_mock_customer_order(df_stores)
+if "just_simulated" not in st.session_state:
+    st.session_state["just_simulated"] = False
+
+# ------------------------------------------------------------------------------
 # 4. Sidebar: Dynamic Cross-Filtering & Session State Reactivity
 # ------------------------------------------------------------------------------
 with st.sidebar:
@@ -573,6 +656,41 @@ with st.sidebar:
     st.markdown("**Neel Belsare**")
     st.markdown("[🔗 Connect on LinkedIn](https://www.linkedin.com/in/neel-belsare-719b9a314/)")
     st.caption("Quick-Commerce Analytics v3.0 • Command Center")
+
+    st.markdown("---")
+    st.markdown("### ⚡ Live Dispatch Telemetry")
+    active_ord = st.session_state.get("active_order")
+    if active_ord:
+        if st.session_state.get("just_simulated", False):
+            with st.status("🚀 Routing Quick-Commerce Order...", expanded=True) as status_box:
+                st.write(f"🛒 Order **#{active_ord['order_id']}** placed ({len(active_ord['items'])} items)")
+                time.sleep(0.2)
+                st.write(f"📍 Customer GPS locked (`{active_ord['cust_lat']:.4f}, {active_ord['cust_lon']:.4f}`)")
+                time.sleep(0.2)
+                st.write(f"🧠 Assigned: **{active_ord['assigned_store']}** ({active_ord['distance_km']:.2f} km)")
+                time.sleep(0.2)
+                st.write("📦 Order picked & packed at hub")
+                time.sleep(0.2)
+                st.write(f"🛵 Dispatched with **{active_ord['rider']}**")
+                status_box.update(label=f"✅ Out for Delivery (ETA: {active_ord['eta_mins']} mins)", state="complete", expanded=False)
+            st.session_state["just_simulated"] = False
+
+        st.markdown(f"""
+        <div class="card" style="padding: 14px; border-left: 3px solid var(--ok); margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 11px; text-transform: uppercase; color: var(--mut); font-weight: 700;">Active Delivery</span>
+                <span class="live" style="padding: 3px 8px; font-size: 11px;"><i></i>In Transit</span>
+            </div>
+            <div style="font-size: 16px; font-weight: 800; color: var(--tx); margin: 6px 0 2px;">Order #{active_ord['order_id']}</div>
+            <div style="font-size: 12px; color: var(--mut); margin-bottom: 6px;">Placed at {active_ord['timestamp']} · ₹{active_ord['order_val']}</div>
+            <div style="font-size: 12.5px; color: var(--tx); margin-bottom: 3px;"><b>Hub:</b> {active_ord['assigned_store']}</div>
+            <div style="font-size: 12.5px; color: var(--tx); margin-bottom: 8px;"><b>Rider:</b> {active_ord['rider']}</div>
+            <div style="display: flex; justify-content: space-between; padding-top: 6px; border-top: 1px solid var(--line); font-size: 12px;">
+                <span>Distance: <b style="color: var(--acc);">{active_ord['distance_km']:.2f} km</b></span>
+                <span>ETA: <b style="color: var(--ok);">{active_ord['eta_mins']} mins</b></span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
 # 5. Cross-Filtering Execution & Toast Notification
@@ -644,8 +762,9 @@ st.markdown(kpis_html, unsafe_allow_html=True)
 # ------------------------------------------------------------------------------
 # 7. Dashboard Layout: Modern Structured Tabs
 # ------------------------------------------------------------------------------
-tab_summary, tab_map, tab_demographics, tab_forecast, tab_climate = st.tabs([
+tab_summary, tab_sim, tab_map, tab_demographics, tab_forecast, tab_climate = st.tabs([
     "📊 Executive Summary",
+    "⚡ Live Order Simulation",
     "🗺️ Geospatial View",
     "👥 Demographic Heatmaps",
     "📈 Demand Forecasting",
@@ -809,7 +928,303 @@ with tab_summary:
         st.markdown("<tr><td colspan='4'>No micro-markets meet current filter criteria.</td></tr></tbody></table></div></div>", unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
-# TAB 2: Geospatial View
+# TAB 2: Live Order Simulation & Geospatial Dispatch
+# ------------------------------------------------------------------------------
+with tab_sim:
+    st.markdown("""
+    <div class="card" style="margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 class="card-title">⚡ Live Quick-Commerce Order Simulation & Dispatch</h2>
+          <p class="hint" style="margin: 4px 0 0 0;">Simulate real-time customer orders in Aurangabad, assign to the nearest dark store via Haversine routing, and monitor live delivery telemetry.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span class="live"><i></i>Telemetry Active</span>
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_action1, col_action2, col_spacer = st.columns([1.5, 1, 2.5])
+    with col_action1:
+        if st.button("🚀 Simulate New Customer Order", type="primary", use_container_width=True):
+            st.session_state["active_order"] = generate_mock_customer_order(df_stores)
+            st.session_state["just_simulated"] = True
+            st.rerun()
+
+    with col_action2:
+        if st.button("🔄 Reset / Clear Order", use_container_width=True):
+            st.session_state["active_order"] = generate_mock_customer_order(df_stores)
+            st.session_state["just_simulated"] = False
+            st.rerun()
+
+    cur_ord = st.session_state.get("active_order")
+    if cur_ord:
+        # Order KPIs
+        st.markdown(f"""
+        <div class="kpis" style="margin: 10px 0 20px 0;">
+          <div class="card kpi"><small>Assigned Dark Store</small><b style="font-size: 19px; line-height: 1.2;">{cur_ord['assigned_store']}</b><em>Nearest hub match</em></div>
+          <div class="card kpi"><small>Road Distance</small><b>{cur_ord['distance_km']:.2f} km</b><em>Haversine direct</em></div>
+          <div class="card kpi"><small>Estimated SLA</small><b>{cur_ord['eta_mins']} mins</b><em>Sub-15m promise</em></div>
+          <div class="card kpi"><small>Assigned Fleet</small><b style="font-size: 19px; line-height: 1.2;">{cur_ord['rider'].split(' ')[0]}</b><em>{cur_ord['rider'].split(' ')[-1]}</em></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # PyDeck Animated Visualizer
+        st.markdown("### 🗺️ Live Dispatch Telemetry Visualizer")
+        
+        # 1. Assigned Dark Store Highlight Layer (Outer glow ring + center pin)
+        store_glow = pd.DataFrame([{
+            "Latitude": cur_ord['store_lat'],
+            "Longitude": cur_ord['store_lon'],
+            "tooltip_html": f"<b>Assigned Hub:</b> {cur_ord['assigned_store']}<br/><b>Coverage:</b> {cur_ord['coverage_area']}"
+        }])
+        assigned_glow_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=store_glow,
+            get_position=["Longitude", "Latitude"],
+            get_radius=580,
+            get_fill_color=[16, 185, 129, 60],
+            get_line_color=[16, 185, 129, 255],
+            stroked=True,
+            filled=True,
+            line_width_min_pixels=3,
+            pickable=True
+        )
+        assigned_pin_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=store_glow,
+            get_position=["Longitude", "Latitude"],
+            get_radius=200,
+            get_fill_color=[16, 185, 129, 255],
+            get_line_color=[255, 255, 255, 255],
+            stroked=True,
+            filled=True,
+            line_width_min_pixels=2.5,
+            pickable=True
+        )
+
+        # 2. Other Dark Stores (Muted grey to keep visual focus on active order)
+        other_stores = df_stores[df_stores['Store Name'] != cur_ord['assigned_store']].copy()
+        other_stores['tooltip_html'] = "<b>Hub:</b> " + other_stores['Store Name'].astype(str) + "<br/><b>Status:</b> " + other_stores['Status'].astype(str)
+        other_stores_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=other_stores,
+            get_position=["Longitude", "Latitude"],
+            get_radius=170,
+            get_fill_color=[148, 163, 184, 160],
+            get_line_color=[255, 255, 255, 200],
+            stroked=True,
+            filled=True,
+            line_width_min_pixels=1.5,
+            pickable=True
+        )
+
+        # 3. Customer Location Ping (Concentric pulse rings + Cyan center)
+        cust_df = pd.DataFrame([{
+            "Latitude": cur_ord['cust_lat'],
+            "Longitude": cur_ord['cust_lon'],
+            "tooltip_html": f"<b>📍 Customer Location</b><br/>Order #{cur_ord['order_id']}<br/>ETA: {cur_ord['eta_mins']} mins"
+        }])
+        cust_pulse_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=cust_df,
+            get_position=["Longitude", "Latitude"],
+            get_radius=380,
+            get_fill_color=[6, 182, 212, 50],
+            get_line_color=[6, 182, 212, 255],
+            stroked=True,
+            filled=True,
+            line_width_min_pixels=2.5,
+            pickable=True
+        )
+        cust_pin_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=cust_df,
+            get_position=["Longitude", "Latitude"],
+            get_radius=110,
+            get_fill_color=[6, 182, 212, 255],
+            get_line_color=[255, 255, 255, 255],
+            stroked=True,
+            filled=True,
+            line_width_min_pixels=2,
+            pickable=True
+        )
+
+        # 4. Animated 3D Curved Arc Layer (Assigned Store -> Customer)
+        arc_df = pd.DataFrame([{
+            "from_lon": cur_ord['store_lon'],
+            "from_lat": cur_ord['store_lat'],
+            "to_lon": cur_ord['cust_lon'],
+            "to_lat": cur_ord['cust_lat'],
+            "tooltip_html": f"<b>Delivery Flight Vector</b><br/>Distance: {cur_ord['distance_km']:.2f} km<br/>ETA: {cur_ord['eta_mins']} mins"
+        }])
+        arc_layer = pdk.Layer(
+            "ArcLayer",
+            data=arc_df,
+            get_source_position=["from_lon", "from_lat"],
+            get_target_position=["to_lon", "to_lat"],
+            get_source_color=[16, 185, 129, 255],
+            get_target_color=[6, 182, 212, 255],
+            get_width=5,
+            pickable=True
+        )
+
+        # 5. Delivery Line Layer (Ground Route Vector)
+        line_layer = pdk.Layer(
+            "LineLayer",
+            data=arc_df,
+            get_source_position=["from_lon", "from_lat"],
+            get_target_position=["to_lon", "to_lat"],
+            get_color=[99, 102, 241, 180],
+            get_width=3,
+            pickable=True
+        )
+
+        # 6. Moving Rider Marker
+        rider_progress = 0.65
+        rider_lat = (1 - rider_progress) * cur_ord['store_lat'] + rider_progress * cur_ord['cust_lat']
+        rider_lon = (1 - rider_progress) * cur_ord['store_lon'] + rider_progress * cur_ord['cust_lon']
+        rider_df = pd.DataFrame([{
+            "Latitude": rider_lat,
+            "Longitude": rider_lon,
+            "tooltip_html": f"<b>🛵 {cur_ord['rider']}</b><br/>Status: In Transit (65% completed)<br/>Speed: ~28 km/h"
+        }])
+        rider_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=rider_df,
+            get_position=["Longitude", "Latitude"],
+            get_radius=160,
+            get_fill_color=[245, 158, 11, 255],
+            get_line_color=[255, 255, 255, 255],
+            stroked=True,
+            filled=True,
+            line_width_min_pixels=2.5,
+            pickable=True
+        )
+
+        sim_layers = [
+            other_stores_layer,
+            assigned_glow_layer,
+            assigned_pin_layer,
+            cust_pulse_layer,
+            cust_pin_layer,
+            line_layer,
+            arc_layer,
+            rider_layer
+        ]
+
+        mid_lat = (cur_ord['store_lat'] + cur_ord['cust_lat']) / 2.0
+        mid_lon = (cur_ord['store_lon'] + cur_ord['cust_lon']) / 2.0
+
+        sim_view_state = pdk.ViewState(
+            latitude=mid_lat,
+            longitude=mid_lon,
+            zoom=13.2,
+            pitch=35,
+            bearing=15
+        )
+
+        sim_deck = pdk.Deck(
+            layers=sim_layers,
+            initial_view_state=sim_view_state,
+            map_style=pdk.map_styles.CARTO_LIGHT,
+            tooltip={
+                "html": "{tooltip_html}",
+                "style": {
+                    "backgroundColor": "#0f1629",
+                    "color": "#e8edf9",
+                    "fontFamily": "Inter, sans-serif",
+                    "fontSize": "13px",
+                    "borderRadius": "10px",
+                    "padding": "10px 14px",
+                    "boxShadow": "0 8px 24px rgba(0, 0, 0, 0.25)",
+                    "border": "1px solid #1e2a47"
+                }
+            }
+        )
+
+        st.pydeck_chart(sim_deck, use_container_width=True)
+        st.caption("🟢 **Assigned Hub** (Store) ── 3D Arc Vector ── 🟡 **Rider** In Transit ── 🔵 **Customer** GPS Target")
+
+        col_man1, col_man2 = st.columns([1.1, 1.3])
+
+        with col_man1:
+            st.markdown("""
+            <div class="card">
+              <h2 class="card-title">📦 Customer Order Manifest</h2>
+              <p class="hint">Items picked & packed at dark store fulfillment staging</p>
+            """, unsafe_allow_html=True)
+
+            items_pills = "".join([
+                f'<div style="padding: 7px 12px; background: rgba(99, 102, 241, 0.08); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--tx);">🛒 {it}</div>'
+                for it in cur_ord['items']
+            ])
+
+            manifest_html = f"""
+              <div style="margin-bottom: 12px;">{items_pills}</div>
+              <div style="display: flex; justify-content: space-between; padding: 10px 0 4px; border-top: 1px solid var(--line); font-size: 13px;">
+                <span style="color: var(--mut);">Estimated Basket Value</span>
+                <span style="font-weight: 700; color: var(--tx);">₹{cur_ord['order_val']}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--mut);">
+                <span>Payment Mode</span>
+                <span style="font-weight: 600; color: var(--ok);">UPI / Online Paid</span>
+              </div>
+            </div>
+            """
+            st.markdown(manifest_html, unsafe_allow_html=True)
+
+        with col_man2:
+            st.markdown("""
+            <div class="card">
+              <h2 class="card-title">🧠 Geospatial Proximity Matrix (Haversine)</h2>
+              <p class="hint">Real-time distance ranking of all operational dark store hubs to customer coordinates</p>
+            """, unsafe_allow_html=True)
+
+            prox_df = df_stores[df_stores['Status'] == 'Active'].copy()
+            prox_df['Distance_km'] = prox_df.apply(
+                lambda row: haversine_distance(cur_ord['cust_lat'], cur_ord['cust_lon'], row['Latitude'], row['Longitude']),
+                axis=1
+            )
+            prox_sorted = prox_df.sort_values('Distance_km').head(6)
+
+            matrix_rows = ""
+            for i, (_, s_row) in enumerate(prox_sorted.iterrows()):
+                is_winner = (s_row['Store Name'] == cur_ord['assigned_store'])
+                badge = '<span class="live" style="padding: 2px 8px; font-size: 11px;">🏆 Assigned</span>' if is_winner else '<span style="color: var(--mut); font-size: 11px;">Alternate</span>'
+                dist_str = f"<b>{s_row['Distance_km']:.2f} km</b>" if is_winner else f"{s_row['Distance_km']:.2f} km"
+                matrix_rows += f"""
+                <tr>
+                  <td>{s_row['Store Name']}</td>
+                  <td class="r">{dist_str}</td>
+                  <td class="r">{s_row['Delivery Radius (km)']} km</td>
+                  <td class="r">{badge}</td>
+                </tr>
+                """
+
+            matrix_table = f"""
+            <div class="tbl">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Store Hub</th>
+                    <th class="r">Distance</th>
+                    <th class="r">Radius</th>
+                    <th class="r">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matrix_rows}
+                </tbody>
+              </table>
+            </div>
+            </div>
+            """
+            st.markdown(matrix_table, unsafe_allow_html=True)
+
+# ------------------------------------------------------------------------------
+# TAB 3: Geospatial View
 # ------------------------------------------------------------------------------
 with tab_map:
     st.markdown("""
