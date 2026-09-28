@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LiveDeliveryTrackingMap } from './LiveDeliveryTrackingMap';
 
 // ============================================================================
 // Types & Interfaces
@@ -27,6 +28,7 @@ export interface LiveOrderSimulationModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderData?: Partial<OrderSimulationData>;
+  onSimulationComplete?: (order: OrderSimulationData) => void;
 }
 
 // Default mock order if none provided
@@ -49,6 +51,7 @@ export const LiveOrderSimulationModal: React.FC<LiveOrderSimulationModalProps> =
   isOpen,
   onClose,
   orderData,
+  onSimulationComplete,
 }) => {
   const [currentStep, setCurrentStep] = useState<SimulationStep>('idle');
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -99,6 +102,9 @@ export const LiveOrderSimulationModal: React.FC<LiveOrderSimulationModalProps> =
       // Auto-close 2 seconds after the final step (at 9s)
       const t4 = setTimeout(() => {
         clearAllTimers();
+        if (onSimulationComplete) {
+          onSimulationComplete(data);
+        }
         onClose();
         setCurrentStep('idle');
       }, 9000);
@@ -460,6 +466,7 @@ export const LiveOrderSimulationModal: React.FC<LiveOrderSimulationModalProps> =
 
 export const LiveOrderSimulationDashboard: React.FC = () => {
   const [isSimOpen, setIsSimOpen] = useState<boolean>(false);
+  const [isDelivering, setIsDelivering] = useState<boolean>(false);
   const [activeOrder, setActiveOrder] = useState<OrderSimulationData>(DEFAULT_ORDER);
 
   /**
@@ -475,71 +482,134 @@ export const LiveOrderSimulationDashboard: React.FC = () => {
       totalAmount: Math.floor(200 + Math.random() * 600),
       ...customPayload,
     });
+    setIsDelivering(false);
     setIsSimOpen(true);
   };
 
+  const handleSimulationComplete = (completedOrder: OrderSimulationData) => {
+    setIsSimOpen(false);
+    setIsDelivering(true);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 p-6 text-slate-100 flex flex-col items-center justify-center font-sans antialiased selection:bg-emerald-500 selection:text-black">
-      {/* Dashboard Card Container */}
-      <div className="w-full max-w-2xl rounded-3xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-md relative overflow-hidden">
-        
-        {/* Top Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="h-3.5 w-3.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
+    <div className="min-h-screen bg-slate-950 p-4 sm:p-6 text-slate-100 flex flex-col items-center justify-center font-sans antialiased selection:bg-emerald-500 selection:text-black">
+      {/* If delivering, render the Live Delivery Tracking Map View */}
+      {isDelivering ? (
+        <div className="w-full max-w-4xl space-y-4">
+          <div className="flex items-center justify-between px-2">
             <div>
-              <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                Quick-Commerce Dark Store Command Center
-              </h1>
-              <p className="text-xs text-slate-400">Real-time Haversine Dispatch Engine</p>
+              <div className="flex items-center space-x-2">
+                <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                  Live Dispatch Stream
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white mt-0.5">
+                Active Order Tracking #{activeOrder.orderId}
+              </h2>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => triggerSimulation()}
+                className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-emerald-500/20 transition active:scale-95"
+              >
+                ⚡ New Simulation
+              </button>
+              <button
+                onClick={() => setIsDelivering(false)}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 hover:bg-slate-800 text-xs font-bold text-slate-300 transition active:scale-95"
+              >
+                ← Command Center
+              </button>
             </div>
           </div>
-          <span className="rounded-full border border-emerald-800/80 bg-emerald-950/80 px-3 py-1 text-xs font-semibold text-emerald-400">
-            System Online
-          </span>
-        </div>
 
-        {/* Live Network Metrics */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Stores</div>
-            <div className="mt-1 text-xl sm:text-2xl font-black text-emerald-400">11 Hubs</div>
+          <LiveDeliveryTrackingMap
+            isDelivering={isDelivering}
+            orderInfo={{
+              orderId: activeOrder.orderId,
+              darkStoreName: activeOrder.matchedStore,
+              riderName: activeOrder.riderName.replace(/\s*\(.*\)/, ''),
+              totalDistanceKm: activeOrder.distanceKm > 0 ? activeOrder.distanceKm : 1.8,
+              estimatedMinutesInitial: activeOrder.estimatedMinutes || 8,
+            }}
+            animationDurationSeconds={12}
+            onReset={() => setIsDelivering(false)}
+          />
+        </div>
+      ) : (
+        /* Dashboard Card Container */
+        <div className="w-full max-w-2xl rounded-3xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-md relative overflow-hidden">
+          
+          {/* Top Header */}
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="h-3.5 w-3.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
+              <div>
+                <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  Quick-Commerce Dark Store Command Center
+                </h1>
+                <p className="text-xs text-slate-400">Real-time Haversine Dispatch Engine</p>
+              </div>
+            </div>
+            <span className="rounded-full border border-emerald-800/80 bg-emerald-950/80 px-3 py-1 text-xs font-semibold text-emerald-400">
+              System Online
+            </span>
           </div>
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Average SLA</div>
-            <div className="mt-1 text-xl sm:text-2xl font-black text-cyan-400">8.2 Mins</div>
+
+          {/* Live Network Metrics */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 text-center">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Stores</div>
+              <div className="mt-1 text-xl sm:text-2xl font-black text-emerald-400">11 Hubs</div>
+            </div>
+            <div className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 text-center">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Average SLA</div>
+              <div className="mt-1 text-xl sm:text-2xl font-black text-cyan-400">8.2 Mins</div>
+            </div>
+            <div className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 text-center">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Router Latency</div>
+              <div className="mt-1 text-xl sm:text-2xl font-black text-indigo-400">4.1 ms</div>
+            </div>
           </div>
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 text-center">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Router Latency</div>
-            <div className="mt-1 text-xl sm:text-2xl font-black text-indigo-400">4.1 ms</div>
+
+          {/* Trigger Simulation Action Box */}
+          <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/60 p-6 text-center">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-2xl text-emerald-400 shadow-inner">
+              ⚡
+            </div>
+            <h2 className="text-base font-bold text-white mb-1">Simulate Incoming Mobile Order</h2>
+            <p className="mx-auto max-w-md text-xs text-slate-400 mb-5 leading-relaxed">
+              Click the button below to simulate an order placed from the React Native Blinkit clone app. 
+              This will launch the animated glassmorphism routing overlay across all 3 progression states,
+              then transition directly into the <strong>Live Delivery Tracking Map</strong>.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => triggerSimulation()}
+                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-6 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-emerald-500/25 transition-all hover:brightness-110 active:scale-95"
+              >
+                <span>🚀</span>
+                <span>triggerSimulation()</span>
+              </button>
+              <button
+                onClick={() => setIsDelivering(true)}
+                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 px-5 py-3.5 text-sm font-bold text-slate-300 hover:text-white transition active:scale-95"
+              >
+                <span>🗺️</span>
+                <span>Open Map Directly (mock)</span>
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Trigger Simulation Action Box */}
-        <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/60 p-6 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-2xl text-emerald-400 shadow-inner">
-            ⚡
-          </div>
-          <h2 className="text-base font-bold text-white mb-1">Simulate Incoming Mobile Order</h2>
-          <p className="mx-auto max-w-md text-xs text-slate-400 mb-5 leading-relaxed">
-            Click the button below to simulate an order placed from the React Native Blinkit clone app. 
-            This will launch the animated glassmorphism routing overlay across all 3 progression states.
-          </p>
-
-          <button
-            onClick={() => triggerSimulation()}
-            className="inline-flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-6 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-emerald-500/25 transition-all hover:brightness-110 active:scale-95"
-          >
-            <span>🚀</span>
-            <span>triggerSimulation()</span>
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Live Order Simulation Modal Overlay */}
       <LiveOrderSimulationModal
         isOpen={isSimOpen}
         onClose={() => setIsSimOpen(false)}
+        onSimulationComplete={handleSimulationComplete}
         orderData={activeOrder}
       />
     </div>
