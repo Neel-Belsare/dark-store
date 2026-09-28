@@ -249,7 +249,7 @@ $$\text{ETA (mins)} = \mathrm{round}\left(3.5 + d \times 2.8\right)$$
 - **LinkedIn**: [linkedin.com/in/mansi-gaike-821260316](https://www.linkedin.com/in/mansi-gaike-821260316)  
 - **GitHub**: [github.com/gaikemansi03-sketch](https://github.com/gaikemansi03-sketch)
 
-- **Live Application**: [my-dark-store-app.streamlit.app](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
+ **Live Application**: [my-dark-store-app.streamlit.app](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
 
 ---
 
