@@ -219,7 +219,7 @@ To verify the exact static build before deploying to Netlify:
 npm run build
 
 # 2. Serve and preview the production dist folder locally
-npx serve dist
+npm serve dist
 ```
 
 ---
@@ -228,7 +228,7 @@ npx serve dist
 To test on a physical smartphone or simulator:
 ```bash
 cd mobile-app
-npx expo start
+npm expo start
 ```
 - **Physical Phone**: Open the free **Expo Go** app (iOS/Android) and scan the terminal QR code.
 - **iOS Simulator**: Press **`i`** (macOS with Xcode).
