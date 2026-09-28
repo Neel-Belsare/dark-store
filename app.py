@@ -15,6 +15,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
+# Supabase Cloud Database Client
+try:
+    import supabase_client
+except ImportError:
+    supabase_client = None
+
 # ------------------------------------------------------------------------------
 # 1. Page Configuration
 # ------------------------------------------------------------------------------
@@ -597,7 +603,17 @@ def generate_mock_customer_order(df_stores):
     }
 
 def check_for_external_order():
-    """Check if an incoming mobile order was submitted via the FastAPI bridge."""
+    """Check if an incoming mobile order was submitted via Supabase Cloud or FastAPI bridge."""
+    # 1. Try Supabase cloud database first
+    if supabase_client and supabase_client.is_supabase_enabled():
+        try:
+            active_cloud_order = supabase_client.get_active_order()
+            if active_cloud_order:
+                return active_cloud_order
+        except Exception:
+            pass
+
+    # 2. Local file fallback
     order_file = os.path.join(BASE_DIR, "latest_order.json")
     if os.path.exists(order_file):
         try:
@@ -1719,6 +1735,14 @@ with tab_sim:
 
     with col_action3:
         if st.button("🔄 Done / Reset", use_container_width=True):
+            # 1. Reset in Supabase cloud database
+            if supabase_client and supabase_client.is_supabase_enabled():
+                try:
+                    supabase_client.reset_active_orders()
+                except Exception:
+                    pass
+
+            # 2. Reset in local file fallback
             order_file = os.path.join(BASE_DIR, "latest_order.json")
             try:
                 with open(order_file, "w") as f:

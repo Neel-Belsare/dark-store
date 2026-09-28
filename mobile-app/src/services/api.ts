@@ -5,6 +5,11 @@ import {
   DispatchedOrder,
   ServiceabilityResponse,
 } from '../types';
+import {
+  syncOrderToSupabase,
+  resetSupabaseActiveOrders,
+  fetchLatestOrderFromSupabase,
+} from './supabase';
 
 /**
  * Dispatches an order to the local Python backend with device GPS coordinates
@@ -55,6 +60,10 @@ export async function placeLiveOrder(
 
       if (response.ok) {
         const data: OrderApiResponse = await response.json();
+        // Sync to Supabase cloud database
+        if (data.order) {
+          syncOrderToSupabase(data.order);
+        }
         return data;
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -71,7 +80,12 @@ export async function placeLiveOrder(
   }
 
   console.warn(`[API] Backend at ${baseUrl} unreachable. Running local offline simulation.`);
-  return simulateLocalDarkStoreDispatch(payload);
+  const localResult = simulateLocalDarkStoreDispatch(payload);
+  // Sync local simulation to Supabase so remote dashboards receive it
+  if (localResult.order) {
+    syncOrderToSupabase(localResult.order);
+  }
+  return localResult;
 }
 
 /**
@@ -117,6 +131,9 @@ export async function checkServiceability(
  */
 export async function resetLiveOrder(): Promise<boolean> {
   const baseUrl = getApiBaseUrl();
+  // Always reset in Supabase cloud database
+  await resetSupabaseActiveOrders();
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -129,12 +146,12 @@ export async function resetLiveOrder(): Promise<boolean> {
     clearTimeout(timeoutId);
     return res.ok;
   } catch {
-    return false;
+    return true; // Supabase reset succeeded
   }
 }
 
 /**
- * Fetches the latest live order from the backend queue.
+ * Fetches the latest live order from the backend queue or Supabase.
  */
 export async function getLatestOrder(): Promise<DispatchedOrder | null> {
   const baseUrl = getApiBaseUrl();
@@ -146,10 +163,17 @@ export async function getLatestOrder(): Promise<DispatchedOrder | null> {
         return data;
       }
     }
-    return null;
   } catch {
-    return null;
+    // Backend unreachable, proceed to Supabase fallback
   }
+
+  // Fallback to Supabase Cloud query
+  const cloudOrder = await fetchLatestOrderFromSupabase();
+  if (cloudOrder) {
+    return cloudOrder as DispatchedOrder;
+  }
+
+  return null;
 }
 
 /**

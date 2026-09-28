@@ -33,6 +33,12 @@ ORDER_HISTORY_FILE = os.path.join(BASE_DIR, "order_history.json")
 STORES_CSV = os.path.join(BASE_DIR, "data", "processed", "aurangabad_dark_stores.csv")
 GEOJSON_DIR = os.path.join(BASE_DIR, "data", "geojson")
 
+# Supabase Cloud Database Client
+try:
+    import supabase_client
+except ImportError:
+    supabase_client = None
+
 app = FastAPI(
     title="Aurangabad Quick-Commerce Autonomous Dispatch API",
     description="Full-stack logistics bridge connecting Expo mobile client and Streamlit Command Center",
@@ -533,6 +539,13 @@ def get_latest_order():
     Returns the active single-order payload for real-time synchronization
     between mobile client and Streamlit Command Center.
     """
+    # 1. Try Supabase cloud database first
+    if supabase_client and supabase_client.is_supabase_enabled():
+        active_cloud_order = supabase_client.get_active_order()
+        if active_cloud_order:
+            return active_cloud_order
+
+    # 2. Seamless local fallback
     if os.path.exists(LATEST_ORDER_FILE):
         try:
             with open(LATEST_ORDER_FILE, "r") as f:
@@ -551,6 +564,14 @@ def reset_active_order():
     Clears the active order pipeline when 'Done' / 'Continue Shopping' is pressed
     on either the mobile phone or the Streamlit dashboard.
     """
+    # 1. Reset in Supabase cloud database
+    if supabase_client and supabase_client.is_supabase_enabled():
+        try:
+            supabase_client.reset_active_orders()
+        except Exception as sb_err:
+            print(f"[Supabase Warning] Could not reset orders: {sb_err}")
+
+    # 2. Reset in local file fallback
     reset_payload = {
         "active": False,
         "status": "completed",
@@ -572,6 +593,11 @@ def reset_active_order():
 @app.get("/api/orders")
 def get_order_history(limit: int = 15):
     """Retrieve recent order history."""
+    if supabase_client and supabase_client.is_supabase_enabled():
+        cloud_history = supabase_client.get_order_history(limit)
+        if cloud_history:
+            return cloud_history
+
     if os.path.exists(ORDER_HISTORY_FILE):
         try:
             with open(ORDER_HISTORY_FILE, "r") as f:
@@ -669,14 +695,21 @@ def place_order(order: OrderCreateRequest):
         "warehouse_pick_plan": pick_path_data
     }
 
-    # 4. Atomically persist active order for Streamlit pickup
+    # 4. Persist to Supabase cloud database
+    if supabase_client and supabase_client.is_supabase_enabled():
+        try:
+            supabase_client.create_order(order_payload)
+        except Exception as sb_err:
+            print(f"[Supabase Warning] Could not persist order to Supabase: {sb_err}")
+
+    # 5. Atomically persist active order for local fallback / Streamlit pickup
     try:
         with open(LATEST_ORDER_FILE, "w") as f:
             json.dump(order_payload, f, indent=2)
     except Exception as e:
         print(f"Error saving latest order: {e}")
 
-    # 5. Append to persistent order history
+    # 6. Append to persistent local order history
     try:
         history = []
         if os.path.exists(ORDER_HISTORY_FILE):
