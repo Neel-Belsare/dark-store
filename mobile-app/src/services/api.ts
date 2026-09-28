@@ -1,40 +1,16 @@
-import { Platform } from 'react-native';
+import { getApiBaseUrl, API_ENDPOINTS } from '../config/apiConfig';
 import { OrderApiResponse, OrderPayload, DispatchedOrder } from '../types';
 
 /**
- * FASTAPI SERVER CONFIGURATION
- * ----------------------------
- * Replace `YOUR_LOCAL_IP` with your machine's local Wi-Fi IP address (e.g., '192.168.1.15')
- * when running on a physical iPhone or Android device via Expo Go.
- *
- * For Emulators/Simulators:
- * - Android Emulator uses '10.0.2.2' to refer to your host PC localhost.
- * - iOS Simulator / Web uses 'localhost'.
- */
-const LOCAL_IP_PLACEHOLDER = 'YOUR_LOCAL_IP'; // <-- Replace with your machine's LAN IP e.g. '192.168.1.5'
-
-const SERVER_HOST = Platform.select({
-  android: LOCAL_IP_PLACEHOLDER !== 'YOUR_LOCAL_IP' ? `http://${LOCAL_IP_PLACEHOLDER}:8000` : 'http://10.0.2.2:8000',
-  ios: LOCAL_IP_PLACEHOLDER !== 'YOUR_LOCAL_IP' ? `http://${LOCAL_IP_PLACEHOLDER}:8000` : 'http://localhost:8000',
-  default: LOCAL_IP_PLACEHOLDER !== 'YOUR_LOCAL_IP' ? `http://${LOCAL_IP_PLACEHOLDER}:8000` : 'http://localhost:8000',
-});
-
-export const API_BASE_URL = SERVER_HOST;
-
-/**
- * Sends customer GPS coordinates to the local FastAPI router for nearest dark-store assignment.
- *
- * @param lat Customer GPS Latitude (e.g. 19.8760)
- * @param lon Customer GPS Longitude (e.g. 75.3640)
- * @param customPayload Optional additional order details (items, cart value, address)
+ * Dispatches an order to the local Python backend with device GPS coordinates
+ * to determine and assign the strictly nearest dark store.
  */
 export async function placeLiveOrder(
   lat: number,
   lon: number,
   customPayload?: Partial<OrderPayload>
 ): Promise<OrderApiResponse> {
-  const url = `${API_BASE_URL}/api/order`;
-
+  const baseUrl = getApiBaseUrl();
   const payload: OrderPayload = {
     latitude: lat,
     longitude: lon,
@@ -42,48 +18,55 @@ export async function placeLiveOrder(
     customer_phone: customPayload?.customer_phone || '+91 98765 43210',
     delivery_address: customPayload?.delivery_address || 'Chhatrapati Sambhajinagar',
     items: customPayload?.items || [
-      { name: 'Amul Taaza Toned Milk 500ml', quantity: 2, price: 27.0 },
-      { name: 'Britannia 100% Whole Wheat Bread 400g', quantity: 1, price: 45.0 },
-      { name: "Lay's India's Magic Masala 50g", quantity: 2, price: 20.0 },
+      { name: 'Amul Taaza Toned Fresh Milk', quantity: 2, price: 27.0 },
+      { name: 'Britannia 100% Whole Wheat Bread', quantity: 1, price: 45.0 },
     ],
-    order_value: customPayload?.order_value || 139.0,
+    order_value: customPayload?.order_value || 99.0,
   };
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6500);
+  // Try configured /place_order and fallback to /api/order
+  const endpointsToTry = [
+    `${baseUrl}${API_ENDPOINTS.PLACE_ORDER}`,
+    `${baseUrl}${API_ENDPOINTS.API_ORDER}`,
+  ];
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+  for (const url of endpointsToTry) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    clearTimeout(timeoutId);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      throw new Error(`Server returned HTTP ${response.status}`);
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data: OrderApiResponse = await response.json();
+        return data;
+      }
+    } catch (err: any) {
+      // Continue to next endpoint or local fallback
     }
-
-    const data: OrderApiResponse = await response.json();
-    return data;
-  } catch (error: any) {
-    console.warn(`[API] Could not reach ${url} (${error.message}). Executing local dark-store assignment...`);
-    
-    // Offline / Local fallback simulation matching the Python Haversine algorithm
-    return simulateLocalDarkStoreDispatch(payload);
   }
+
+  console.warn(`[API] Could not connect to backend at ${baseUrl}. Executing local dark store assignment.`);
+  return simulateLocalDarkStoreDispatch(payload);
 }
 
 /**
- * Fetches the active live order from the FastAPI server queue
+ * Fetches the latest live order from the backend queue
  */
 export async function getLatestOrder(): Promise<DispatchedOrder | null> {
+  const baseUrl = getApiBaseUrl();
   try {
-    const res = await fetch(`${API_BASE_URL}/api/latest-order`);
+    const res = await fetch(`${baseUrl}${API_ENDPOINTS.LATEST_ORDER}`);
     if (res.ok) {
       return await res.json();
     }
@@ -109,7 +92,6 @@ function simulateLocalDarkStoreDispatch(payload: OrderPayload): OrderApiResponse
   let minDistanceKm = 999;
 
   for (const s of stores) {
-    // Great circle calculation approximation
     const dlat = (payload.latitude - s.lat) * 111.32;
     const dlon = (payload.longitude - s.lon) * 111.32 * Math.cos((s.lat * Math.PI) / 180);
     const dist = Math.sqrt(dlat * dlat + dlon * dlon);
@@ -139,12 +121,12 @@ function simulateLocalDarkStoreDispatch(payload: OrderPayload): OrderApiResponse
     order_val: Math.round(payload.order_value),
     rider: 'Rahul S. (Rider #18)',
     timestamp: new Date().toLocaleTimeString(),
-    source: 'Mobile App (GPS Local Fallback)',
+    source: 'Mobile App (Offline Simulation)',
   };
 
   return {
     success: true,
-    message: `Order assigned to ${closest.name} (${distanceKm} km away)`,
+    message: `Assigned to ${closest.name} (${distanceKm} km away)`,
     order,
   };
 }

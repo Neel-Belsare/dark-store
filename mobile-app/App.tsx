@@ -1,13 +1,16 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { CheckoutScreen } from './src/screens/CheckoutScreen';
+import { CartProvider } from './src/context/CartContext';
+import { TabNavigator } from './src/navigation/TabNavigator';
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" backgroundColor="#F7D435" />
-      <CheckoutScreen />
+      <CartProvider>
+        <StatusBar style="dark" backgroundColor="#F7D435" />
+        <TabNavigator />
+      </CartProvider>
     </SafeAreaProvider>
   );
 }

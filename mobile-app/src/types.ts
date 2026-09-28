@@ -1,17 +1,38 @@
+export type TabName = 'Home' | 'Cart' | 'Profile';
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  unit: string;
+  emoji: string;
+  category: string;
+  mrp?: number;
+  deliveryMins?: number;
+}
+
+export interface Category {
+  id: string;
+  title: string;
+  icon: string;
+  itemCount: number;
+}
+
+export interface CartItem extends Product {
+  quantity: number;
+}
+
 export interface GPSLocation {
   latitude: number;
   longitude: number;
   accuracy?: number | null;
 }
 
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  unit: string;
-  quantity: number;
-  emoji: string;
-  category: string;
+export interface MockLocationOption {
+  label: string;
+  sublabel: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface OrderItemPayload {
@@ -53,11 +74,4 @@ export interface OrderApiResponse {
   success: boolean;
   message: string;
   order: DispatchedOrder;
-}
-
-export interface MockLocationOption {
-  label: string;
-  sublabel: string;
-  latitude: number;
-  longitude: number;
 }
