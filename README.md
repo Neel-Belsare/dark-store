@@ -6,7 +6,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React Native](https://img.shields.io/badge/React%20Native-Expo%2051-61DAFB?logo=react)](https://reactnative.dev/)
 [![PyDeck](https://img.shields.io/badge/PyDeck-Deck.gl%203D-blueviolet)](https://deckgl.readthedocs.io/)
-[![Deployed on Streamlit](https://img.shields.io/badge/Live%20App-Streamlit%20Cloud-00c853?logo=streamlit)](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
+[![Deployed on Streamlit](https://img.shields.io/badge/Live%20Dashboard-Streamlit%20Cloud-00c853?logo=streamlit)](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
+[![Deployed on Netlify](https://img.shields.io/badge/Live%20Consumer%20Client-Netlify-00C7B7?logo=netlify)](https://blinkit-aurangabad.netlify.app)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Neel%20Belsare-0A66C2?logo=linkedin)](https://www.linkedin.com/in/neel-belsare-719b9a314/)
 [![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare/my-dark-store-app)
@@ -14,9 +15,10 @@
 ---
 
 ## 🌐 Live Deployments & Links
-- 🚀 **Streamlit Command Center (Live Web App)**: [**my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
+- 📱 **Blinkit Consumer Client (Live Web App)**: [**blinkit-aurangabad.netlify.app**](https://blinkit-aurangabad.netlify.app)
+- 🚀 **Streamlit Command Center (Live Dashboard)**: [**my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
 - 🔗 **GitHub Repository**: [**NeelBelsare/my-dark-store-app**](https://github.com/NeelBelsare/my-dark-store-app)
-- 👨‍💻 **Developers**: [**Neel Belsare**](https://www.linkedin.com/in/neel-belsare-719b9a314/) & [**Mansi Gaike**](www.linkedin.com/in/mansi-gaike-821260316) 
+- 👨‍💻 **Developers**: [**Neel Belsare**](https://www.linkedin.com/in/neel-belsare-719b9a314/) & [**Mansi Gaike**](https://www.linkedin.com/in/mansi-gaike-821260316) 
 
 ---
 
@@ -187,24 +189,52 @@ python3 api.py
 
 ---
 
-### 4. Running the React Native Mobile App (`mobile-app/`)
+### 4. Running the Consumer Client Locally (`mobile-app/` ➔ [blinkit-aurangabad.netlify.app](https://blinkit-aurangabad.netlify.app))
 
-The mobile app provides a Blinkit clone consumer checkout experience.
+The customer client is built with React Native and Expo, and is deployed live on Netlify at [**https://blinkit-aurangabad.netlify.app**](https://blinkit-aurangabad.netlify.app).
 
-In another terminal:
+To run and test this application locally:
+
+#### A. Run the Local Web Client (Exact App Hosted on Netlify)
+In a new terminal:
 ```bash
+# 1. Navigate to the mobile app directory
 cd mobile-app
+
+# 2. Install dependencies
 npm install
-npx expo start
+
+# 3. Start local development web server
+npm run web
+# (Alternatively: npx expo start --web)
+```
+*Your browser will automatically open [**http://localhost:8081**](http://localhost:8081) with the full interactive Blinkit ordering interface.*
+
+---
+
+#### B. Build & Preview the Production Netlify Bundle Locally
+To verify the exact static build before deploying to Netlify:
+```bash
+# 1. Export the production static web bundle (outputs to mobile-app/dist/)
+npm run build
+
+# 2. Serve and preview the production dist folder locally
+npx serve dist
 ```
 
-#### Choose Your Testing Environment:
-- **Web Browser (Fastest)**: Press **`w`** in the terminal to open the mobile view right in Google Chrome / Safari.
-- **iOS Simulator**: Press **`i`** (requires macOS with Xcode).
-- **Android Emulator**: Press **`a`** (requires Android Studio).
-- **Physical Phone**: Install the free **Expo Go** app from the App Store or Google Play, and scan the QR code displayed in your terminal.
+---
 
-> 💡 **Tip for Physical Devices**: Ensure your phone is connected to the same local Wi-Fi as your computer. In `mobile-app/src/services/api.ts`, update `DEV_API_HOST` with your machine's local IP (e.g. `http://192.168.1.15:8000`).
+#### C. Run on Physical Phone (Expo Go) or Emulators
+To test on a physical smartphone or simulator:
+```bash
+cd mobile-app
+npx expo start
+```
+- **Physical Phone**: Open the free **Expo Go** app (iOS/Android) and scan the terminal QR code.
+- **iOS Simulator**: Press **`i`** (macOS with Xcode).
+- **Android Emulator**: Press **`a`** (requires Android Studio).
+
+> 💡 **Connecting Physical Device to Local Backend**: Ensure your phone is connected to the same Wi-Fi network as your computer. In `mobile-app/src/services/api.ts`, update `DEV_API_HOST` with your machine's LAN IP (e.g., `http://192.168.1.15:8000`).
 
 ---
 

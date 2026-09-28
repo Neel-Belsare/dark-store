@@ -1,67 +1,56 @@
-# 📱 Blinkit Quick-Commerce Mobile App (React Native Expo)
+# 📱 Blinkit Quick-Commerce Client (React Native Expo)
 
-A high-performance, modern React Native (Expo) mobile frontend replicating the **Blinkit** quick-commerce checkout experience for **Chhatrapati Sambhajinagar (Aurangabad)**. 
+[![Deployed on Netlify](https://img.shields.io/badge/Live%20Web%20App-Netlify-00C7B7?logo=netlify)](https://blinkit-aurangabad.netlify.app)
+[![React Native](https://img.shields.io/badge/React%20Native-Expo%2051-61DAFB?logo=react)](https://reactnative.dev/)
 
-Directly integrated with the **Aurangabad Dark Store Command Center** (`app.py`) via a real-time **FastAPI Bridge** (`api.py`).
+A high-performance, modern React Native (Expo) web and mobile application replicating the **Blinkit** quick-commerce customer experience for **Chhatrapati Sambhajinagar (Aurangabad)**.
 
----
-
-## 🌟 Key Features
-
-1. **⚡ Instant GPS Catchment Matching (`useCurrentLocation.ts`)**:
-   - Uses `expo-location` with high-accuracy GPS lock (`Accuracy.Balanced`).
-   - Reverse geocoding to resolve street & micro-market addresses.
-   - Built-in one-tap selector for Chhatrapati Sambhajinagar hubs (CIDCO N-4, Osmanpura, Nirala Bazar, Seven Hills, Garkheda, Chikalthana MIDC).
-
-2. **🛍️ Blinkit Checkout Experience (`CheckoutScreen.tsx`)**:
-   - Signature Blinkit yellow (`#F7D435`) and quick-commerce green (`#0C831F`) design tokens.
-   - Dynamic grocery basket with quantity steppers (`Amul Taaza Milk`, `Whole Wheat Bread`, `Lay's Chips`, `Sunflower Oil`, `Tata Salt`).
-   - Delivery instructions selector (Leave at door, Don't ring bell).
-   - Itemized bill breakdown with Free Delivery tier and savings banner.
-
-3. **🎉 Celebratory Micro-Animations (`CelebrationModal.tsx`)**:
-   - Dynamic multi-particle confetti explosion built with React Native's `Animated` engine.
-   - Spring-bouncing checkmark badge.
-   - Order telemetry summary: **Assigned Hub**, **Road Distance**, **Estimated SLA**, and **Assigned Fleet Rider**.
-
-4. **📡 Real-Time Bridge to Streamlit (`api.py`)**:
-   - When "Place Order" is tapped, payload is dispatched to `POST /api/order`.
-   - The FastAPI backend calculates Haversine nearest-store dispatch.
-   - Updates `latest_order.json`, instantly triggering 3D Arc & telemetry animation inside the Streamlit Command Center dashboard!
+- 🌐 **Live Web Application (Netlify)**: [**https://blinkit-aurangabad.netlify.app**](https://blinkit-aurangabad.netlify.app)
+- 🚀 **Streamlit Command Center**: [**https://my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
 
 ---
 
-## 🚀 Quick Start Guide
+## 💻 Local Run Commands (Web & Mobile)
 
-### 1. Launch the FastAPI Bridge
-In the root directory of the project:
+### 1. Run the Local Web Client (Exact App Deployed on Netlify)
+To run the web application on your local machine:
 ```bash
-python3 api.py
-```
-*API will start listening at `http://0.0.0.0:8000` (Docs at `http://localhost:8000/docs`).*
+# Navigate to the mobile app folder
+cd mobile-app
 
-### 2. Launch the Streamlit Command Center
-In a separate terminal:
+# Install dependencies
+npm install
+
+# Start local web development server
+npm run web
+# (or: npx expo start --web)
+```
+*Your browser will open automatically at [**http://localhost:8081**](http://localhost:8081).*
+
+---
+
+### 2. Build & Preview the Production Netlify Bundle Locally
+To export and test the production web build:
 ```bash
-streamlit run app.py
-```
-*Open `http://localhost:8501` and navigate to the **⚡ Live Order Simulation** tab.*
+# Export the production static bundle to dist/
+npm run build
 
-### 3. Launch the Mobile App
-In another terminal, navigate to `mobile-app`:
+# Preview the static build locally using any web server
+npx serve dist
+```
+
+---
+
+### 3. Run on Physical Smartphone (Expo Go) / Emulators
 ```bash
 cd mobile-app
-npm install
 npx expo start
 ```
+- **Physical Phone**: Open the free **Expo Go** app (iOS/Android) and scan the QR code in your terminal.
+- **iOS Simulator**: Press **`i`** (requires macOS with Xcode).
+- **Android Emulator**: Press **`a`** (requires Android Studio).
 
-Press:
-- **`w`** to open in Web browser (instant testing without phone/emulator).
-- **`i`** to open in iOS Simulator (macOS with Xcode).
-- **`a`** to open in Android Emulator.
-- **Scan QR Code** with the **Expo Go** app on your physical iPhone or Android device!
-
-> 💡 **Testing on a Physical Device**: Ensure your phone is connected to the same Wi-Fi network as your computer. In `mobile-app/src/services/api.ts`, update `DEV_API_HOST` to your computer's local IP (e.g. `http://192.168.1.15:8000`).
+> 💡 **Testing with Local Backend**: To connect your physical phone to your local FastAPI backend, update `DEV_API_HOST` in `src/services/api.ts` with your computer's local Wi-Fi IP (e.g. `http://192.168.1.15:8000`).
 
 ---
 
