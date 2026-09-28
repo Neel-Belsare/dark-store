@@ -9,7 +9,7 @@ import {
   Easing,
   Dimensions,
 } from 'react-native';
-import { COLORS } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { DispatchedOrder } from '../types';
 
 const { width } = Dimensions.get('window');
@@ -20,13 +20,13 @@ interface CelebrationModalProps {
   onClose: () => void;
 }
 
-// Generate deterministic confetti particle positions
+// Generate animated confetti particles
 const CONFETTI_COLORS = ['#F7D435', '#0C831F', '#6366F1', '#EC4899', '#06B6D4', '#F59E0B'];
-const PARTICLES = Array.from({ length: 18 }).map((_, i) => ({
+const PARTICLES = Array.from({ length: 20 }).map((_, i) => ({
   id: i,
   color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-  angle: (i / 18) * 2 * Math.PI,
-  distance: 70 + (i % 4) * 25,
+  angle: (i / 20) * 2 * Math.PI,
+  distance: 75 + (i % 4) * 24,
   size: 6 + (i % 3) * 3,
 }));
 
@@ -35,15 +35,19 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   order,
   onClose,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.7)).current;
+  const slideAnim = useRef(new Animated.Value(60)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const confettiAnim = useRef(new Animated.Value(0)).current;
+  const checkBounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
-      scaleAnim.setValue(0);
+      scaleAnim.setValue(0.7);
+      slideAnim.setValue(60);
       opacityAnim.setValue(0);
       confettiAnim.setValue(0);
+      checkBounceAnim.setValue(0);
 
       Animated.parallel([
         Animated.timing(opacityAnim, {
@@ -54,15 +58,30 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
         Animated.spring(scaleAnim, {
           toValue: 1,
           friction: 6,
-          tension: 80,
+          tension: 70,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          friction: 7,
+          tension: 70,
           useNativeDriver: true,
         }),
         Animated.timing(confettiAnim, {
           toValue: 1,
-          duration: 900,
+          duration: 850,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
+        Animated.sequence([
+          Animated.delay(180),
+          Animated.spring(checkBounceAnim, {
+            toValue: 1,
+            friction: 4,
+            tension: 90,
+            useNativeDriver: true,
+          }),
+        ]),
       ]).start();
     }
   }, [visible]);
@@ -72,8 +91,17 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <Animated.View style={[styles.overlay, { opacity: opacityAnim }]}>
-        <Animated.View style={[styles.dialog, { transform: [{ scale: scaleAnim }] }]}>
-          
+        <Animated.View
+          style={[
+            styles.dialog,
+            {
+              transform: [
+                { scale: scaleAnim },
+                { translateY: slideAnim },
+              ],
+            },
+          ]}
+        >
           {/* Confetti Explosion Burst */}
           <View style={styles.confettiContainer} pointerEvents="none">
             {PARTICLES.map((p) => {
@@ -86,12 +114,12 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                 outputRange: [0, Math.sin(p.angle) * p.distance],
               });
               const particleOpacity = confettiAnim.interpolate({
-                inputRange: [0, 0.7, 1],
+                inputRange: [0, 0.75, 1],
                 outputRange: [1, 1, 0],
               });
               const particleScale = confettiAnim.interpolate({
                 inputRange: [0, 0.5, 1],
-                outputRange: [0.4, 1.2, 0.6],
+                outputRange: [0.3, 1.25, 0.5],
               });
 
               return (
@@ -112,56 +140,61 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
             })}
           </View>
 
-          {/* Success Check Badge */}
-          <View style={styles.badgeWrapper}>
+          {/* Bouncing Success Check Badge */}
+          <Animated.View
+            style={[
+              styles.badgeWrapper,
+              { transform: [{ scale: checkBounceAnim }] },
+            ]}
+          >
             <View style={styles.checkCircle}>
               <Text style={styles.checkIcon}>✓</Text>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* Order Title */}
-          <Text style={styles.title}>Order Dispatched!</Text>
-          <Text style={styles.orderSubtitle}>
-            Order #{order.order_id} • ₹{order.order_val}
+          {/* User Requested Celebratory Message */}
+          <Text style={styles.title}>Order Confirmed!</Text>
+          <Text style={styles.packingMessage}>
+            Your dark store is packing your bags 🎒
           </Text>
 
-          {/* SLA Banner */}
+          {/* ETA Pill */}
           <View style={styles.slaBadge}>
             <Text style={styles.slaLightning}>⚡</Text>
-            <Text style={styles.slaText}>Arriving in {order.eta_mins} minutes</Text>
+            <Text style={styles.slaText}>Delivering in {order.eta_mins} minutes</Text>
           </View>
 
-          {/* Telemetry Summary Card */}
-          <View style={styles.detailsCard}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Assigned Hub:</Text>
-              <Text style={styles.detailValue} numberOfLines={1}>{order.assigned_store}</Text>
+          {/* Real-Time Routing Summary */}
+          <View style={styles.routingCard}>
+            <View style={styles.routingRow}>
+              <Text style={styles.routingLabel}>Order ID:</Text>
+              <Text style={styles.routingValueBold}>#{order.order_id}</Text>
             </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Road Distance:</Text>
-              <Text style={styles.detailValueGreen}>{order.distance_km} km away</Text>
+            <View style={styles.routingRow}>
+              <Text style={styles.routingLabel}>Assigned Hub:</Text>
+              <Text style={styles.routingValueBold} numberOfLines={1}>{order.assigned_store}</Text>
             </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Delivery Fleet:</Text>
-              <Text style={styles.detailValue}>{order.rider}</Text>
+            <View style={styles.routingRow}>
+              <Text style={styles.routingLabel}>Road Distance:</Text>
+              <Text style={styles.routingValueGreen}>{order.distance_km} km away</Text>
             </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Delivery Address:</Text>
-              <Text style={styles.detailValue} numberOfLines={1}>{order.delivery_address || 'Aurangabad'}</Text>
+            <View style={styles.routingRow}>
+              <Text style={styles.routingLabel}>Assigned Fleet:</Text>
+              <Text style={styles.routingValue}>{order.rider}</Text>
             </View>
           </View>
 
-          {/* Streamlit Sync Indicator */}
+          {/* Streamlit Command Center Live Sync Callout */}
           <View style={styles.syncBanner}>
             <View style={styles.pulseDot} />
             <Text style={styles.syncText}>
-              Telemetry live on Streamlit Command Center
+              Live 3D Telemetry active in Streamlit Command Center
             </Text>
           </View>
 
-          {/* CTA Buttons */}
+          {/* Primary Action Button */}
           <TouchableOpacity style={styles.primaryButton} onPress={onClose} activeOpacity={0.85}>
-            <Text style={styles.primaryButtonText}>View Order Status</Text>
+            <Text style={styles.primaryButtonText}>Track Live Telemetry</Text>
           </TouchableOpacity>
         </Animated.View>
       </Animated.View>
@@ -175,24 +208,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: SPACING.xl,
   },
   dialog: {
-    width: width - 48,
+    width: width - 40,
     maxWidth: 400,
     backgroundColor: COLORS.surface,
-    borderRadius: 24,
-    padding: 24,
+    borderRadius: BORDER_RADIUS.xxl,
+    padding: SPACING.xxl,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    ...SHADOWS.modal,
   },
   confettiContainer: {
     position: 'absolute',
-    top: 50,
+    top: 55,
     left: '50%',
     width: 0,
     height: 0,
@@ -204,17 +233,16 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   badgeWrapper: {
-    marginBottom: 14,
-    marginTop: 4,
+    marginBottom: SPACING.md,
   },
   checkCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: COLORS.primaryGreen,
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    backgroundColor: COLORS.brandGreen,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.primaryGreen,
+    shadowColor: COLORS.brandGreen,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
@@ -223,91 +251,98 @@ const styles = StyleSheet.create({
   checkIcon: {
     color: '#FFF',
     fontSize: 38,
-    fontWeight: '800',
+    fontWeight: '900',
     marginTop: -2,
   },
   title: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '900',
     color: COLORS.textPrimary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
+    textAlign: 'center',
   },
-  orderSubtitle: {
-    fontSize: 13,
+  packingMessage: {
+    fontSize: 13.5,
     color: COLORS.textSecondary,
     fontWeight: '600',
     marginTop: 4,
-    marginBottom: 14,
+    marginBottom: SPACING.md,
+    textAlign: 'center',
   },
   slaBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF9D2',
+    backgroundColor: COLORS.brandYellowLight,
     borderWidth: 1,
     borderColor: '#F3E58D',
-    paddingHorizontal: 14,
+    paddingHorizontal: SPACING.md,
     paddingVertical: 7,
-    borderRadius: 20,
-    marginBottom: 16,
+    borderRadius: BORDER_RADIUS.full,
+    marginBottom: SPACING.md,
   },
   slaLightning: {
-    fontSize: 15,
+    fontSize: 14,
     marginRight: 6,
   },
   slaText: {
-    fontSize: 13.5,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '800',
     color: '#7A5B00',
   },
-  detailsCard: {
+  routingCard: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    backgroundColor: COLORS.surfaceSecondary,
+    borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
     borderColor: COLORS.border,
-    padding: 14,
-    marginBottom: 14,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
   },
-  detailRow: {
+  routingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 5,
+    paddingVertical: 4,
   },
-  detailLabel: {
-    fontSize: 12.5,
+  routingLabel: {
+    fontSize: 12,
     color: COLORS.textSecondary,
     fontWeight: '500',
   },
-  detailValue: {
+  routingValue: {
+    fontSize: 12,
+    color: COLORS.textPrimary,
+    fontWeight: '600',
+  },
+  routingValueBold: {
     fontSize: 12.5,
     color: COLORS.textPrimary,
-    fontWeight: '700',
-    maxWidth: '58%',
+    fontWeight: '800',
+    maxWidth: '60%',
     textAlign: 'right',
   },
-  detailValueGreen: {
+  routingValueGreen: {
     fontSize: 12.5,
-    color: COLORS.primaryGreen,
-    fontWeight: '700',
+    color: COLORS.brandGreen,
+    fontWeight: '800',
   },
   syncBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(99, 102, 241, 0.08)',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 20,
+    borderRadius: BORDER_RADIUS.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 7,
+    marginBottom: SPACING.lg,
     width: '100%',
     justifyContent: 'center',
   },
   pulseDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: COLORS.accentIndigo,
-    marginRight: 7,
+    marginRight: 6,
   },
   syncText: {
     fontSize: 11,
@@ -315,12 +350,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   primaryButton: {
-    backgroundColor: COLORS.primaryGreen,
+    backgroundColor: COLORS.brandGreen,
     width: '100%',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
-    shadowColor: COLORS.primaryGreen,
+    shadowColor: COLORS.brandGreen,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -329,6 +364,6 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#FFF',
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });

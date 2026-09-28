@@ -9,20 +9,20 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import { LocationBar } from '../components/LocationBar';
 import { CartItemRow } from '../components/CartItemRow';
 import { BillSummary } from '../components/BillSummary';
 import { CelebrationModal } from '../components/CelebrationModal';
-import { submitOrder } from '../services/api';
-import { CartItem, DispatchedOrder, OrderPayload } from '../types';
+import { placeLiveOrder } from '../services/api';
+import { CartItem, DispatchedOrder } from '../types';
 
-const INITIAL_CART_ITEMS: CartItem[] = [
+const MOCK_GROCERY_ITEMS: CartItem[] = [
   {
     id: 'item-1',
-    name: 'Amul Taaza Toned Milk',
-    unit: '500 ml',
+    name: 'Amul Taaza Toned Fresh Milk',
+    unit: '500 ml pouch',
     price: 27,
     quantity: 2,
     emoji: '🥛',
@@ -31,7 +31,7 @@ const INITIAL_CART_ITEMS: CartItem[] = [
   {
     id: 'item-2',
     name: 'Britannia 100% Whole Wheat Bread',
-    unit: '400 g',
+    unit: '400 g pack',
     price: 45,
     quantity: 1,
     emoji: '🍞',
@@ -39,8 +39,8 @@ const INITIAL_CART_ITEMS: CartItem[] = [
   },
   {
     id: 'item-3',
-    name: "Lay's India's Magic Masala",
-    unit: '50 g',
+    name: "Lay's India's Magic Masala Chips",
+    unit: '50 g pouch',
     price: 20,
     quantity: 2,
     emoji: '🥔',
@@ -49,7 +49,7 @@ const INITIAL_CART_ITEMS: CartItem[] = [
   {
     id: 'item-4',
     name: 'Fortune Sunlite Refined Sunflower Oil',
-    unit: '1 L',
+    unit: '1 Litre pouch',
     price: 145,
     quantity: 1,
     emoji: '🌻',
@@ -57,20 +57,13 @@ const INITIAL_CART_ITEMS: CartItem[] = [
   },
   {
     id: 'item-5',
-    name: 'Tata Salt Vacuum Evaporated',
-    unit: '1 kg',
+    name: 'Tata Salt Vacuum Evaporated Iodized',
+    unit: '1 kg packet',
     price: 28,
     quantity: 1,
     emoji: '🧂',
     category: 'Pantry',
   },
-];
-
-const DELIVERY_INSTRUCTIONS = [
-  { id: '1', label: '🚪 Leave at door', icon: '🚪' },
-  { id: '2', label: '🔕 Don\'t ring bell', icon: '🔕' },
-  { id: '3', label: '📞 Avoid calling', icon: '📞' },
-  { id: '4', label: '🛡️ Guard delivery', icon: '🛡️' },
 ];
 
 export const CheckoutScreen: React.FC = () => {
@@ -84,65 +77,66 @@ export const CheckoutScreen: React.FC = () => {
     neighborhoodOptions,
   } = useCurrentLocation();
 
-  const [cartItems, setCartItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
-  const [selectedInstruction, setSelectedInstruction] = useState<string>('1');
+  const [cartItems, setCartItems] = useState<CartItem[]>(MOCK_GROCERY_ITEMS);
   const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false);
   const [confirmedOrder, setConfirmedOrder] = useState<DispatchedOrder | null>(null);
   const [celebrationVisible, setCelebrationVisible] = useState<boolean>(false);
 
-  // Cart calculations
-  const itemTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Cart financial calculations
+  const itemTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const deliveryFee = 0; // Quick-commerce free delivery promise
   const platformFee = itemTotal > 0 ? 2 : 0;
-  const deliveryFee = 0; // Free delivery
-  const grandTotal = itemTotal + platformFee + deliveryFee;
-  const savings = 25; // Standard delivery fee waiver
+  const grandTotal = itemTotal + deliveryFee + platformFee;
+  const totalItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleIncrement = (id: string) => {
     setCartItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: item.quantity + 1 } : item))
+      prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i))
     );
   };
 
   const handleDecrement = (id: string) => {
     setCartItems((prev) =>
       prev
-        .map((item) => (item.id === id ? { ...item, quantity: Math.max(0, item.quantity - 1) } : item))
-        .filter((item) => item.quantity > 0)
+        .map((i) => (i.id === id ? { ...i, quantity: Math.max(0, i.quantity - 1) } : i))
+        .filter((i) => i.quantity > 0)
     );
   };
 
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
-      Alert.alert('Empty Cart', 'Please add items to your cart before checking out.');
+      Alert.alert('Empty Basket', 'Please add items to your grocery cart before placing an order.');
+      return;
+    }
+
+    if (!location) {
+      Alert.alert('Location Missing', 'Please enable GPS or select a delivery location.');
       return;
     }
 
     setIsPlacingOrder(true);
 
-    const payload: OrderPayload = {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      customer_name: 'Neel Belsare',
-      customer_phone: '+91 98765 43210',
-      delivery_address: address,
-      items: cartItems.map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      order_value: grandTotal,
-    };
-
     try {
-      const response = await submitOrder(payload);
+      // Call placeLiveOrder using current user coordinates
+      const response = await placeLiveOrder(location.latitude, location.longitude, {
+        customer_name: 'Neel Belsare',
+        delivery_address: address,
+        items: cartItems.map((i) => ({
+          name: i.name,
+          quantity: i.quantity,
+          price: i.price,
+        })),
+        order_value: grandTotal,
+      });
+
       if (response && response.success) {
         setConfirmedOrder(response.order);
         setCelebrationVisible(true);
       } else {
-        Alert.alert('Order Failed', response?.message || 'Could not dispatch order.');
+        Alert.alert('Dispatch Notice', response?.message || 'Could not route order.');
       }
-    } catch (err: any) {
-      Alert.alert('Connection Error', err.message || 'Failed to connect to dark store router.');
+    } catch (error: any) {
+      Alert.alert('Routing Error', error.message || 'Unable to connect to dark-store router.');
     } finally {
       setIsPlacingOrder(false);
     }
@@ -150,18 +144,7 @@ export const CheckoutScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      {/* Brand Header */}
-      <View style={styles.header}>
-        <View style={styles.headerBrandRow}>
-          <Text style={styles.logoText}>blink<Text style={styles.logoHighlight}>it</Text></Text>
-          <View style={styles.slaBadgeHeader}>
-            <Text style={styles.slaBadgeText}>⚡ 10 MINUTES</Text>
-          </View>
-        </View>
-        <Text style={styles.headerSub}>Chhatrapati Sambhajinagar Quick Commerce</Text>
-      </View>
-
-      {/* GPS Location Bar */}
+      {/* 1. Sticky Quick-Commerce Location Bar */}
       <LocationBar
         location={location}
         address={address}
@@ -172,25 +155,30 @@ export const CheckoutScreen: React.FC = () => {
         options={neighborhoodOptions}
       />
 
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Delivery ETA Alert */}
-        <View style={styles.etaCard}>
-          <View style={styles.etaIconCircle}>
-            <Text style={styles.etaIcon}>⚡</Text>
+      {/* 2. Scrollable Body */}
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Sub-15 Min SLA Banner */}
+        <View style={styles.slaBanner}>
+          <View style={styles.slaIconBadge}>
+            <Text style={styles.slaLightning}>⚡</Text>
           </View>
-          <View style={styles.etaDetails}>
-            <Text style={styles.etaTitle}>Sub-15 Minute Delivery Promised</Text>
-            <Text style={styles.etaSub}>
-              Routed automatically to the nearest Aurangabad dark store hub via Haversine geometry.
+          <View style={styles.slaTextCol}>
+            <Text style={styles.slaBannerTitle}>Guaranteed 10-15 Min Delivery</Text>
+            <Text style={styles.slaBannerSub}>
+              Automatically dispatched from your strictly nearest Chhatrapati Sambhajinagar hub.
             </Text>
           </View>
         </View>
 
-        {/* Cart Items Section */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Cart Items ({cartItems.reduce((acc, i) => acc + i.quantity, 0)})</Text>
-            <Text style={styles.stepInfo}>Step 1 of 2</Text>
+        {/* Grocery Cart Items Section */}
+        <View style={styles.cartSection}>
+          <View style={styles.cartSectionHeader}>
+            <Text style={styles.cartSectionTitle}>Grocery Basket ({totalItemCount} items)</Text>
+            <Text style={styles.reviewStepText}>Review items</Text>
           </View>
 
           {cartItems.map((item) => (
@@ -203,78 +191,57 @@ export const CheckoutScreen: React.FC = () => {
           ))}
 
           {cartItems.length === 0 && (
-            <View style={styles.emptyCart}>
-              <Text style={styles.emptyText}>Your grocery basket is empty</Text>
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>🛒</Text>
+              <Text style={styles.emptyTitle}>Your cart is currently empty</Text>
             </View>
           )}
         </View>
 
-        {/* Delivery Instructions Chips */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Delivery Instructions</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
-            {DELIVERY_INSTRUCTIONS.map((chip) => {
-              const isSelected = selectedInstruction === chip.id;
-              return (
-                <TouchableOpacity
-                  key={chip.id}
-                  style={[styles.instructionChip, isSelected && styles.instructionChipSelected]}
-                  onPress={() => setSelectedInstruction(chip.id)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.instructionChipText, isSelected && styles.instructionChipTextSelected]}>
-                    {chip.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
-
-        {/* Bill Summary */}
+        {/* Bill Receipt Component */}
         <BillSummary
           itemTotal={itemTotal}
           deliveryFee={deliveryFee}
           platformFee={platformFee}
           grandTotal={grandTotal}
-          savings={savings}
+          savings={25}
         />
 
-        {/* Streamlit Bridge Integration Notice */}
-        <View style={styles.bridgeNotice}>
-          <Text style={styles.bridgeNoticeTitle}>📡 Streamlit Telemetry Link</Text>
-          <Text style={styles.bridgeNoticeText}>
-            Submitting this order sends live GPS coordinates to the FastAPI bridge (<Text style={{fontWeight: '700'}}>Port 8000</Text>), which instantly triggers 3D Arc & telemetry animation in your Streamlit Command Center dashboard.
+        {/* Backend Routing Note */}
+        <View style={styles.telemetryCard}>
+          <Text style={styles.telemetryTitle}>📡 Real-Time Dispatch Pipeline</Text>
+          <Text style={styles.telemetryBody}>
+            Tapping "Place Order" transmits your GPS coordinates to the FastAPI backend, calculates Haversine nearest dark-store geometry, and broadcasts live 3D Arc vectors to the Streamlit Command Center.
           </Text>
         </View>
       </ScrollView>
 
-      {/* Sticky Bottom Order Bar */}
-      <View style={styles.bottomBar}>
-        <View style={styles.bottomPriceCol}>
-          <Text style={styles.bottomToPayLabel}>TO PAY</Text>
-          <Text style={styles.bottomPriceValue}>₹{grandTotal}</Text>
-          <Text style={styles.bottomSavingsSub}>Free Delivery Applied</Text>
+      {/* 3. Sticky Bottom Checkout Footer */}
+      <View style={styles.stickyFooter}>
+        <View style={styles.footerPriceCol}>
+          <Text style={styles.footerToPayLabel}>TO PAY</Text>
+          <Text style={styles.footerGrandTotal}>₹{grandTotal}</Text>
+          <Text style={styles.footerSavingsText}>Free Delivery Saved ₹25</Text>
         </View>
 
         <TouchableOpacity
-          style={[styles.placeOrderBtn, isPlacingOrder && styles.placeOrderBtnDisabled]}
+          style={[styles.placeOrderButton, (isPlacingOrder || cartItems.length === 0) && styles.disabledButton]}
           onPress={handlePlaceOrder}
           disabled={isPlacingOrder || cartItems.length === 0}
-          activeOpacity={0.85}
+          activeOpacity={0.88}
         >
           {isPlacingOrder ? (
             <ActivityIndicator color="#FFF" size="small" />
           ) : (
             <View style={styles.placeOrderRow}>
               <Text style={styles.placeOrderText}>Place Order</Text>
-              <Text style={styles.placeOrderArrow}>➔</Text>
+              <Text style={styles.placeOrderChevron}>➔</Text>
             </View>
           )}
         </TouchableOpacity>
       </View>
 
-      {/* Celebratory Dispatch Modal with Micro-Animations */}
+      {/* 4. Celebratory Animated Modal */}
       <CelebrationModal
         visible={celebrationVisible}
         order={confirmedOrder}
@@ -289,215 +256,152 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  header: {
-    backgroundColor: COLORS.primaryYellow,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2BD1C',
-  },
-  headerBrandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  logoText: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: COLORS.textPrimary,
-    letterSpacing: -0.8,
-  },
-  logoHighlight: {
-    color: COLORS.primaryGreen,
-  },
-  slaBadgeHeader: {
-    backgroundColor: COLORS.primaryGreen,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  slaBadgeText: {
-    color: '#FFF',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  headerSub: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: '#554200',
-    marginTop: 2,
-  },
-  container: {
+  scrollArea: {
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxxl,
   },
-  etaCard: {
+  slaBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFBEA',
+    backgroundColor: COLORS.brandYellowLight,
     borderWidth: 1,
     borderColor: '#F6E05E',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 14,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
   },
-  etaIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: COLORS.primaryYellow,
+  slaIconBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.brandYellow,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: SPACING.md,
   },
-  etaIcon: {
-    fontSize: 20,
+  slaLightning: {
+    fontSize: 18,
   },
-  etaDetails: {
+  slaTextCol: {
     flex: 1,
   },
-  etaTitle: {
+  slaBannerTitle: {
     fontSize: 13.5,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#744210',
   },
-  etaSub: {
+  slaBannerSub: {
     fontSize: 11,
     color: '#975A16',
     marginTop: 2,
+    lineHeight: 15,
   },
-  sectionCard: {
+  cartSection: {
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
   },
-  sectionHeader: {
+  cartSectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: SPACING.xs,
   },
-  sectionTitle: {
-    fontSize: 14.5,
+  cartSectionTitle: {
+    fontSize: 15,
     fontWeight: '800',
     color: COLORS.textPrimary,
   },
-  stepInfo: {
-    fontSize: 11,
-    fontWeight: '600',
+  reviewStepText: {
+    fontSize: 11.5,
     color: COLORS.textMuted,
+    fontWeight: '600',
   },
-  emptyCart: {
-    paddingVertical: 24,
+  emptyContainer: {
+    paddingVertical: SPACING.xxxl,
     alignItems: 'center',
   },
-  emptyText: {
+  emptyIcon: {
+    fontSize: 32,
+    marginBottom: SPACING.xs,
+  },
+  emptyTitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
-  },
-  chipsScroll: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  instructionChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: '#F8FAFC',
-    marginRight: 8,
-  },
-  instructionChipSelected: {
-    borderColor: COLORS.primaryGreen,
-    backgroundColor: '#F0FDF4',
-  },
-  instructionChipText: {
-    fontSize: 12,
     fontWeight: '600',
-    color: COLORS.textSecondary,
   },
-  instructionChipTextSelected: {
-    color: COLORS.primaryGreen,
-    fontWeight: '700',
-  },
-  bridgeNotice: {
+  telemetryCard: {
     backgroundColor: '#EEF2FF',
-    borderRadius: 12,
+    borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
     borderColor: '#C7D2FE',
-    padding: 14,
-    marginTop: 4,
+    padding: SPACING.md,
+    marginTop: SPACING.xs,
   },
-  bridgeNoticeTitle: {
+  telemetryTitle: {
     fontSize: 12.5,
     fontWeight: '800',
     color: COLORS.accentIndigo,
     marginBottom: 4,
   },
-  bridgeNoticeText: {
+  telemetryBody: {
     fontSize: 11.5,
     color: '#3730A3',
     lineHeight: 16,
   },
-  bottomBar: {
+  stickyFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: COLORS.surface,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 8,
+    ...SHADOWS.stickyFooter,
   },
-  bottomPriceCol: {
+  footerPriceCol: {
     flex: 1,
   },
-  bottomToPayLabel: {
+  footerToPayLabel: {
     fontSize: 10,
     fontWeight: '800',
     color: COLORS.textSecondary,
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
-  bottomPriceValue: {
-    fontSize: 19,
+  footerGrandTotal: {
+    fontSize: 20,
     fontWeight: '900',
     color: COLORS.textPrimary,
   },
-  bottomSavingsSub: {
+  footerSavingsText: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.primaryGreen,
+    color: COLORS.brandGreen,
   },
-  placeOrderBtn: {
-    backgroundColor: COLORS.primaryGreen,
-    paddingHorizontal: 28,
+  placeOrderButton: {
+    backgroundColor: COLORS.brandGreen,
+    paddingHorizontal: SPACING.xxl,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 160,
-    shadowColor: COLORS.primaryGreen,
+    minWidth: 165,
+    shadowColor: COLORS.brandGreen,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
   },
-  placeOrderBtnDisabled: {
-    opacity: 0.7,
+  disabledButton: {
+    opacity: 0.65,
   },
   placeOrderRow: {
     flexDirection: 'row',
@@ -509,7 +413,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginRight: 6,
   },
-  placeOrderArrow: {
+  placeOrderChevron: {
     color: '#FFF',
     fontSize: 15,
     fontWeight: '800',

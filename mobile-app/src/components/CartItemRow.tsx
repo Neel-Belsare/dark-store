@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { COLORS } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { CartItem } from '../types';
 
 interface CartItemRowProps {
@@ -16,33 +16,42 @@ export const CartItemRow: React.FC<CartItemRowProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <View style={styles.emojiBox}>
-        <Text style={styles.emoji}>{item.emoji}</Text>
+      {/* Product Image / Visual Placeholder */}
+      <View style={styles.imagePlaceholder}>
+        <Text style={styles.emojiText}>{item.emoji || '🛒'}</Text>
       </View>
 
-      <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.unit}>{item.unit}</Text>
-        <Text style={styles.price}>₹{item.price}</Text>
+      {/* Item Details */}
+      <View style={styles.detailsContainer}>
+        <Text style={styles.itemName} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Text style={styles.itemUnit}>{item.unit}</Text>
+        <Text style={styles.itemPrice}>₹{item.price}</Text>
       </View>
 
-      <View style={styles.stepper}>
+      {/* Quick-Commerce Quantity Stepper */}
+      <View style={styles.stepperContainer}>
         <TouchableOpacity
-          style={styles.stepBtn}
+          style={styles.stepperBtn}
           onPress={() => onDecrement(item.id)}
           activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.stepBtnText}>−</Text>
+          <Text style={styles.stepperMinus}>−</Text>
         </TouchableOpacity>
 
-        <Text style={styles.qtyText}>{item.quantity}</Text>
+        <View style={styles.qtyBox}>
+          <Text style={styles.stepperQty}>{item.quantity}</Text>
+        </View>
 
         <TouchableOpacity
-          style={styles.stepBtn}
+          style={styles.stepperBtn}
           onPress={() => onIncrement(item.id)}
           activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.stepBtnText}>+</Text>
+          <Text style={styles.stepperPlus}>+</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -54,68 +63,81 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    paddingVertical: 12,
+    paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.borderSubtle,
   },
-  emojiBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 10,
-    backgroundColor: '#F8FAFC',
-    justifyContent: 'center',
-    alignItems: 'center',
+  imagePlaceholder: {
+    width: 52,
+    height: 52,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.surfaceSecondary,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
   },
-  emoji: {
-    fontSize: 24,
+  emojiText: {
+    fontSize: 26,
   },
-  info: {
+  detailsContainer: {
     flex: 1,
-    marginRight: 10,
+    marginRight: SPACING.md,
   },
-  name: {
-    fontSize: 13.5,
+  itemName: {
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.textPrimary,
+    letterSpacing: -0.2,
   },
-  unit: {
+  itemUnit: {
     fontSize: 11.5,
     color: COLORS.textSecondary,
-    marginVertical: 1,
+    marginTop: 2,
+    marginBottom: 3,
   },
-  price: {
-    fontSize: 13,
+  itemPrice: {
+    fontSize: 13.5,
     fontWeight: '800',
     color: COLORS.textPrimary,
   },
-  stepper: {
+  stepperContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0FDF4',
+    backgroundColor: COLORS.brandGreenLight,
     borderWidth: 1,
-    borderColor: COLORS.primaryGreen,
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 3,
+    borderColor: COLORS.brandGreen,
+    borderRadius: BORDER_RADIUS.sm,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
-  stepBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+  stepperBtn: {
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  stepBtnText: {
-    fontSize: 15,
+  stepperMinus: {
+    fontSize: 16,
     fontWeight: '800',
-    color: COLORS.primaryGreen,
+    color: COLORS.brandGreen,
+    marginTop: -2,
   },
-  qtyText: {
+  stepperPlus: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: COLORS.brandGreen,
+    marginTop: -1,
+  },
+  qtyBox: {
+    minWidth: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepperQty: {
     fontSize: 13,
     fontWeight: '800',
-    color: COLORS.primaryGreen,
-    paddingHorizontal: 6,
-    minWidth: 20,
-    textAlign: 'center',
+    color: COLORS.brandGreen,
   },
 });
