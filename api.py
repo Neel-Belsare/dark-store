@@ -499,8 +499,45 @@ def health_check():
 @app.get("/api/stores")
 def get_stores():
     """Get list of all Aurangabad fulfillment hubs with coordinates and delivery radii."""
+    if supabase_client and supabase_client.is_supabase_enabled():
+        cloud_stores = supabase_client.get_dark_stores()
+        if cloud_stores is not None and not cloud_stores.empty:
+            return cloud_stores.to_dict(orient="records")
+
     df = load_dark_stores()
     return df.to_dict(orient="records")
+
+@app.get("/api/riders")
+def get_riders():
+    """Get delivery courier fleet profiles and real-time status."""
+    if supabase_client and supabase_client.is_supabase_enabled():
+        riders = supabase_client.get_riders()
+        if riders:
+            return riders
+
+    # Fallback to local default rider fleet
+    return [
+        {"rider_id": "rider-101", "name": "Suresh Patil", "vehicle_type": "EV Scooter", "speed_kmh": 28.0, "rating": 4.92, "status": "available"},
+        {"rider_id": "rider-102", "name": "Ramesh Shinde", "vehicle_type": "ICE Motorcycle", "speed_kmh": 32.0, "rating": 4.88, "status": "delivering"},
+        {"rider_id": "rider-103", "name": "Amit Kulkarni", "vehicle_type": "EV Scooter", "speed_kmh": 26.5, "rating": 4.95, "status": "available"},
+        {"rider_id": "rider-104", "name": "Rahul Deshmukh", "vehicle_type": "ICE Motorcycle", "speed_kmh": 34.0, "rating": 4.78, "status": "available"},
+        {"rider_id": "rider-105", "name": "Pooja Jadhav", "vehicle_type": "EV Scooter", "speed_kmh": 29.0, "rating": 4.96, "status": "available"}
+    ]
+
+@app.get("/api/users")
+def get_users():
+    """Get registered consumers and loyalty tiers."""
+    if supabase_client and supabase_client.is_supabase_enabled():
+        users = supabase_client.get_users()
+        if users:
+            return users
+
+    # Fallback
+    return [
+        {"user_id": "user-001", "full_name": "Neel Belsare", "loyalty_tier": "Gold", "total_orders": 47},
+        {"user_id": "user-002", "full_name": "Mansi Gaike", "loyalty_tier": "Gold", "total_orders": 39},
+        {"user_id": "user-003", "full_name": "Rohan Sharma", "loyalty_tier": "Silver", "total_orders": 22}
+    ]
 
 @app.get("/api/serviceability")
 @app.get("/api/serviceability/check")

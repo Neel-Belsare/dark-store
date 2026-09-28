@@ -233,20 +233,53 @@ def get_dark_stores() -> Optional[pd.DataFrame]:
         return None
 
     try:
-        res = client.table("dark_stores").select("*").execute()
-        if res.data and len(res.data) > 0:
-            df = pd.DataFrame(res.data)
-            # Normalize column names to match local CSV expectations
-            column_mapping = {
-                "store_name": "Store Name",
-                "coverage_area": "Coverage Area",
-                "latitude": "Latitude",
-                "longitude": "Longitude",
-                "delivery_radius_km": "Delivery Radius (km)",
-                "status": "Status"
-            }
-            return df.rename(columns=column_mapping)
+        # Check 'stores' table first, then 'dark_stores'
+        for tbl in ["stores", "dark_stores"]:
+            try:
+                res = client.table(tbl).select("*").execute()
+                if res.data and len(res.data) > 0:
+                    df = pd.DataFrame(res.data)
+                    column_mapping = {
+                        "store_name": "Store Name",
+                        "coverage_area": "Coverage Area",
+                        "latitude": "Latitude",
+                        "longitude": "Longitude",
+                        "delivery_radius_km": "Delivery Radius (km)",
+                        "status": "Status"
+                    }
+                    return df.rename(columns=column_mapping)
+            except Exception:
+                continue
         return None
     except Exception as e:
         print(f"[Supabase Error] Failed to fetch dark stores: {e}")
         return None
+
+
+def get_riders() -> List[Dict[str, Any]]:
+    """Fetches the active delivery fleet from Supabase riders table."""
+    client = get_supabase_client()
+    if not client:
+        return []
+
+    try:
+        res = client.table("riders").select("*").order("rating", desc=True).execute()
+        return res.data or []
+    except Exception as e:
+        print(f"[Supabase Error] Failed to fetch riders: {e}")
+        return []
+
+
+def get_users() -> List[Dict[str, Any]]:
+    """Fetches registered consumers from Supabase users table."""
+    client = get_supabase_client()
+    if not client:
+        return []
+
+    try:
+        res = client.table("users").select("*").order("total_orders", desc=True).execute()
+        return res.data or []
+    except Exception as e:
+        print(f"[Supabase Error] Failed to fetch users: {e}")
+        return []
+
