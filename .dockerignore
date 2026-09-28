@@ -1,0 +1,25 @@
+# Git & OS metadata
+.git
+.gitignore
+.DS_Store
+
+# Python virtualenvs and caches
+__pycache__/
+*.py[cod]
+*$py.class
+env/
+venv/
+.venv/
+
+# Frontend / Mobile artifacts (separate deployment)
+node_modules/
+mobile-app/node_modules/
+mobile-app/.expo/
+mobile-app/dist/
+mobile-app/web-build/
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

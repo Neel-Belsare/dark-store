@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -59,8 +60,11 @@ with st.sidebar:
     st.markdown("---")
 
 # Load data
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_data():
-    df = pd.read_csv("data/processed/Merged_Pune_Dark_Store_Data.csv")
+    csv_path = os.path.join(BASE_DIR, "data", "processed", "Merged_Pune_Dark_Store_Data.csv")
+    df = pd.read_csv(csv_path)
     return df
 
 df = load_data()
