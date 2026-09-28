@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
 
 interface BillSummaryProps {
   itemTotal: number;
@@ -19,18 +19,24 @@ export const BillSummary: React.FC<BillSummaryProps> = ({
 }) => {
   return (
     <View style={styles.card}>
+      {/* Receipt Top Header */}
       <View style={styles.cardHeader}>
-        <Text style={styles.receiptIcon}>🧾</Text>
-        <Text style={styles.cardTitle}>Bill Summary</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.receiptIcon}>🧾</Text>
+          <Text style={styles.cardTitle}>Bill Details</Text>
+        </View>
+        <View style={styles.invoiceBadge}>
+          <Text style={styles.invoiceText}>FINAL SUMMARY</Text>
+        </View>
       </View>
 
-      {/* Item Total */}
+      {/* 1. Item Total */}
       <View style={styles.row}>
         <Text style={styles.label}>Item total</Text>
         <Text style={styles.value}>₹{itemTotal}</Text>
       </View>
 
-      {/* Delivery Fee with Strikethrough & Free Badge */}
+      {/* 2. Delivery Partner Fee (With Strikethrough & Free Badge) */}
       <View style={styles.row}>
         <View style={styles.labelWithPill}>
           <Text style={styles.label}>Delivery partner fee</Text>
@@ -48,34 +54,41 @@ export const BillSummary: React.FC<BillSummaryProps> = ({
         </View>
       </View>
 
-      {/* Handling & Platform Fee */}
+      {/* 3. Handling & Platform Fee */}
       {platformFee > 0 && (
         <View style={styles.row}>
-          <Text style={styles.label}>Handling & platform charge</Text>
+          <Text style={styles.label}>Handling & dark store fee</Text>
           <Text style={styles.value}>₹{platformFee}</Text>
         </View>
       )}
 
-      {/* Receipt Divider Line */}
+      {/* Perforated Receipt Divider */}
       <View style={styles.receiptDivider} />
 
-      {/* Grand Total */}
+      {/* 4. Grand Total / To Pay */}
       <View style={styles.totalRow}>
         <View>
-          <Text style={styles.totalLabel}>Grand Total</Text>
-          <Text style={styles.inclusiveText}>Inclusive of all taxes</Text>
+          <Text style={styles.totalLabel}>To Pay</Text>
+          <Text style={styles.inclusiveText}>Inclusive of all taxes & packaging</Text>
         </View>
         <Text style={styles.grandTotalValue}>₹{grandTotal}</Text>
       </View>
 
-      {/* Savings Callout */}
+      {/* 5. Savings Callout Banner */}
       {savings > 0 && (
         <View style={styles.savingsBanner}>
+          <Text style={styles.savingsEmoji}>🎉</Text>
           <Text style={styles.savingsText}>
-            🎉 You saved ₹{savings} with Free 10-Minute Dark Store Delivery
+            You saved <Text style={styles.savingsHighlight}>₹{savings}</Text> on this order with Instant Dark Store Delivery
           </Text>
         </View>
       )}
+
+      {/* Security Assurance */}
+      <View style={styles.securityRow}>
+        <Text style={styles.securityIcon}>🔒</Text>
+        <Text style={styles.securityText}>100% Safe & Secure Payments via UPI, Cards, NetBanking</Text>
+      </View>
     </View>
   );
 };
@@ -83,36 +96,56 @@ export const BillSummary: React.FC<BillSummaryProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     marginVertical: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderSubtle,
     ...SHADOWS.card,
   },
   cardHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SPACING.md,
+    paddingBottom: SPACING.xs,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   receiptIcon: {
     fontSize: 16,
-    marginRight: SPACING.xs,
+    marginRight: SPACING.xs + 2,
   },
   cardTitle: {
-    fontSize: 14.5,
+    fontSize: TYPOGRAPHY.bodyLarge,
     fontWeight: '800',
     color: COLORS.textPrimary,
     letterSpacing: -0.2,
+  },
+  invoiceBadge: {
+    backgroundColor: COLORS.surfaceSecondary,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.xs,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+  },
+  invoiceText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: COLORS.textSecondary,
+    letterSpacing: 0.5,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 5,
+    marginVertical: 6,
   },
   label: {
-    fontSize: 13,
+    fontSize: TYPOGRAPHY.bodySmall,
     color: COLORS.textSecondary,
     fontWeight: '500',
   },
@@ -121,14 +154,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   freePill: {
-    fontSize: 9.5,
-    fontWeight: '800',
+    fontSize: 9,
+    fontWeight: '900',
     color: COLORS.brandGreen,
     backgroundColor: COLORS.brandGreenLight,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: BORDER_RADIUS.xs,
     marginLeft: 6,
+    borderWidth: 0.5,
+    borderColor: COLORS.brandGreenBorder,
     overflow: 'hidden',
   },
   feeCol: {
@@ -136,62 +171,89 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   strikethroughFee: {
-    fontSize: 12.5,
+    fontSize: TYPOGRAPHY.sub,
     color: COLORS.textMuted,
     textDecorationLine: 'line-through',
     marginRight: 6,
   },
   freeFeeText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: TYPOGRAPHY.bodySmall,
+    fontWeight: '800',
     color: COLORS.brandGreen,
   },
   value: {
-    fontSize: 13,
+    fontSize: TYPOGRAPHY.bodySmall,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
   receiptDivider: {
     height: 1,
     backgroundColor: COLORS.border,
-    borderStyle: 'dashed',
     marginVertical: SPACING.md,
+    borderStyle: 'dashed',
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 2,
+    marginVertical: 4,
   },
   totalLabel: {
-    fontSize: 15,
+    fontSize: TYPOGRAPHY.subtitle,
     fontWeight: '900',
     color: COLORS.textPrimary,
+    letterSpacing: -0.3,
   },
   inclusiveText: {
     fontSize: 10.5,
     color: COLORS.textMuted,
-    marginTop: 1,
+    marginTop: 2,
   },
   grandTotalValue: {
-    fontSize: 19,
+    fontSize: TYPOGRAPHY.hero,
     fontWeight: '900',
     color: COLORS.textPrimary,
+    letterSpacing: -0.4,
   },
   savingsBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.brandGreenLight,
-    borderRadius: BORDER_RADIUS.sm,
-    paddingVertical: 8,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: 10,
     paddingHorizontal: SPACING.md,
     marginTop: SPACING.md,
-    alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#C6F6D5',
+    borderColor: COLORS.brandGreenBorder,
+  },
+  savingsEmoji: {
+    fontSize: 16,
+    marginRight: SPACING.xs + 2,
   },
   savingsText: {
+    flex: 1,
     fontSize: 11.5,
-    fontWeight: '700',
+    fontWeight: '600',
     color: COLORS.brandGreenDark,
-    textAlign: 'center',
+    lineHeight: 16,
+  },
+  savingsHighlight: {
+    fontWeight: '900',
+  },
+  securityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.md,
+    paddingTop: SPACING.xs,
+  },
+  securityIcon: {
+    fontSize: 12,
+    marginRight: 4,
+  },
+  securityText: {
+    fontSize: 10.5,
+    color: COLORS.textMuted,
+    fontWeight: '600',
   },
 });

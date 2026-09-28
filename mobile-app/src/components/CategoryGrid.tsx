@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
 import { Category } from '../types';
 
 export const MOCK_CATEGORIES: Category[] = [
@@ -23,32 +23,56 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
 }) => {
   return (
     <View style={styles.container}>
+      {/* Section Header with Clear Option */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>Shop by Category</Text>
+        <View style={styles.headerTitleGroup}>
+          <Text style={styles.sectionTitle}>Shop by Category</Text>
+          <Text style={styles.sectionSubtitle}>Handpicked from nearest micro-fulfillment center</Text>
+        </View>
+
         {selectedCategory && (
-          <TouchableOpacity onPress={() => onSelectCategory(null)}>
-            <Text style={styles.clearFilterText}>Show All</Text>
+          <TouchableOpacity
+            style={styles.clearFilterBadge}
+            onPress={() => onSelectCategory(null)}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.clearFilterText}>Show All ✕</Text>
           </TouchableOpacity>
         )}
       </View>
 
+      {/* Uniform 3-Column Grid Layout */}
       <View style={styles.grid}>
         {MOCK_CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.title;
+
           return (
-            <TouchableOpacity
+            <Pressable
               key={cat.id}
-              style={[styles.card, isSelected && styles.cardSelected]}
+              style={({ pressed }) => [
+                styles.card,
+                isSelected && styles.cardSelected,
+                pressed && styles.cardPressed,
+              ]}
               onPress={() => onSelectCategory(isSelected ? null : cat.title)}
-              activeOpacity={0.75}
             >
+              {/* Category Icon Squircle Container */}
               <View style={[styles.iconBox, isSelected && styles.iconBoxSelected]}>
                 <Text style={styles.iconText}>{cat.icon}</Text>
               </View>
-              <Text style={[styles.catTitle, isSelected && styles.catTitleSelected]} numberOfLines={2}>
+
+              {/* Title & Item Count */}
+              <Text
+                style={[styles.catTitle, isSelected && styles.catTitleSelected]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
                 {cat.title}
               </Text>
-            </TouchableOpacity>
+
+              {isSelected && <View style={styles.selectedIndicatorDot} />}
+            </Pressable>
           );
         })}
       </View>
@@ -64,63 +88,102 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
+    alignItems: 'flex-start',
+    marginBottom: SPACING.md,
+  },
+  headerTitleGroup: {
+    flex: 1,
+    paddingRight: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: TYPOGRAPHY.subtitle,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
+  },
+  sectionSubtitle: {
+    fontSize: TYPOGRAPHY.footnote,
+    fontWeight: '500',
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  clearFilterBadge: {
+    backgroundColor: COLORS.brandGreenLight,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.brandGreenBorder,
   },
   clearFilterText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
     color: COLORS.brandGreen,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    rowGap: SPACING.md,
   },
   card: {
-    width: '31%',
+    width: '31.2%',
+    minHeight: 106,
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.sm,
     alignItems: 'center',
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: COLORS.borderSubtle,
+    position: 'relative',
     ...SHADOWS.small,
+  },
+  cardPressed: {
+    opacity: 0.92,
+    transform: [{ scale: 0.98 }],
   },
   cardSelected: {
     borderColor: COLORS.brandGreen,
     backgroundColor: COLORS.brandGreenLight,
+    ...SHADOWS.cardHover,
   },
   iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: COLORS.surfaceSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   iconBoxSelected: {
     backgroundColor: '#DCFCE7',
+    borderColor: COLORS.brandGreenBorder,
   },
   iconText: {
-    fontSize: 22,
+    fontSize: 24,
   },
   catTitle: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
     color: COLORS.textPrimary,
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 15,
   },
   catTitleSelected: {
     color: COLORS.brandGreenDark,
+    fontWeight: '800',
+  },
+  selectedIndicatorDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: COLORS.brandGreen,
   },
 });

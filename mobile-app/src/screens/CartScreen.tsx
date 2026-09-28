@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
 import { useCart } from '../context/CartContext';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import { CartItemRow } from '../components/CartItemRow';
@@ -22,10 +22,11 @@ interface CartScreenProps {
 }
 
 const DELIVERY_INSTRUCTIONS = [
-  { id: '1', label: '🚪 Leave at door', icon: '🚪' },
-  { id: '2', label: '🔕 Don\'t ring bell', icon: '🔕' },
-  { id: '3', label: '📞 Avoid calling', icon: '📞' },
-  { id: '4', label: '🛡️ Leave at guard', icon: '🛡️' },
+  { id: '1', label: 'Leave at door', icon: '🚪' },
+  { id: '2', label: "Don't ring bell", icon: '🔕' },
+  { id: '3', label: 'Avoid calling', icon: '📞' },
+  { id: '4', label: 'Leave at guard', icon: '🛡️' },
+  { id: '5', label: 'Pet in house', icon: '🐶' },
 ];
 
 export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
@@ -98,14 +99,44 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
     onNavigateToHome();
   };
 
+  const handlePromptClearCart = () => {
+    Alert.alert(
+      'Clear Basket?',
+      'Are you sure you want to remove all items from your basket?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear', style: 'destructive', onPress: clearCart },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
-      {/* Top Header */}
+      {/* Top Navigation Bar */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Review Basket ({totalItemCount})</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onNavigateToHome}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>Checkout</Text>
+            <Text style={styles.headerSubtitle}>
+              {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'} in your cart
+            </Text>
+          </View>
+        </View>
+
         {cartItems.length > 0 && (
-          <TouchableOpacity onPress={clearCart}>
-            <Text style={styles.clearCartText}>Clear</Text>
+          <TouchableOpacity
+            style={styles.clearBtn}
+            onPress={handlePromptClearCart}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.clearBtnText}>Clear Cart</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -115,22 +146,35 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Delivery Address Pill */}
+        {/* Delivery Address Pill & SLA Banner */}
         <View style={styles.addressCard}>
-          <View style={styles.addressLeft}>
-            <View style={styles.addressIconBox}>
-              <Text style={styles.addressIcon}>📍</Text>
+          <View style={styles.slaRow}>
+            <View style={styles.slaBadge}>
+              <Text style={styles.slaBolt}>⚡</Text>
+              <Text style={styles.slaText}>10 MINS DELIVERY</Text>
             </View>
-            <View style={styles.addressTexts}>
-              <View style={styles.badgeRow}>
-                <Text style={styles.addressBadgeTitle}>DELIVERING TO</Text>
-                <View style={[styles.gpsDot, isUsingGPS ? styles.gpsActive : styles.gpsManual]} />
-                <Text style={styles.gpsLabel}>{isUsingGPS ? 'GPS Locked' : 'Selected Hub'}</Text>
-              </View>
-              <Text style={styles.addressLine} numberOfLines={1}>{address}</Text>
+            <View style={styles.gpsStatusPill}>
+              <View style={[styles.gpsDot, isUsingGPS ? styles.gpsActive : styles.gpsManual]} />
+              <Text style={styles.gpsStatusText}>
+                {isUsingGPS ? 'Live GPS Locked' : 'Selected Hub'}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.addressDivider} />
+
+          <View style={styles.addressBody}>
+            <View style={styles.addressIconCircle}>
+              <Text style={styles.addressIconEmoji}>📍</Text>
+            </View>
+            <View style={styles.addressTextCol}>
+              <Text style={styles.addressLabel}>Delivering to</Text>
+              <Text style={styles.addressLine} numberOfLines={2}>
+                {address}
+              </Text>
               {location && (
                 <Text style={styles.coordsLine}>
-                  {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+                  {location.latitude.toFixed(4)}° N, {location.longitude.toFixed(4)}° E
                 </Text>
               )}
             </View>
@@ -140,7 +184,18 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
         {/* Cart Items List */}
         {cartItems.length > 0 ? (
           <View style={styles.itemsSection}>
-            <Text style={styles.sectionTitle}>Items Added</Text>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionTitleLeft}>
+                <Text style={styles.sectionTitle}>Basket Items</Text>
+                <View style={styles.countBadge}>
+                  <Text style={styles.countBadgeText}>{totalItemCount}</Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={onNavigateToHome} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Text style={styles.addMoreLink}>+ Add More</Text>
+              </TouchableOpacity>
+            </View>
+
             {cartItems.map((item) => (
               <CartItemRow
                 key={item.id}
@@ -151,14 +206,21 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
             ))}
           </View>
         ) : (
+          /* Empty Cart State */
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyIcon}>🛒</Text>
-            <Text style={styles.emptyTitle}>Your cart is empty</Text>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIcon}>🛍️</Text>
+            </View>
+            <Text style={styles.emptyTitle}>Your basket is empty</Text>
             <Text style={styles.emptySub}>
-              Explore fresh groceries and essentials from our 12 dark store hubs.
+              Browse through fresh groceries and everyday essentials dispatched in 10 minutes from our nearest dark store.
             </Text>
-            <TouchableOpacity style={styles.shopNowBtn} onPress={onNavigateToHome} activeOpacity={0.85}>
-              <Text style={styles.shopNowText}>Browse Groceries</Text>
+            <TouchableOpacity
+              style={styles.shopNowBtn}
+              onPress={onNavigateToHome}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.shopNowText}>Start Shopping ➔</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -167,7 +229,13 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
         {cartItems.length > 0 && (
           <View style={styles.instructionsSection}>
             <Text style={styles.sectionTitle}>Delivery Instructions</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsRow}>
+            <Text style={styles.instructionsSub}>Choose preference for our delivery rider</Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsRow}
+            >
               {DELIVERY_INSTRUCTIONS.map((chip) => {
                 const isSelected = selectedInstruction === chip.id;
                 return (
@@ -175,8 +243,9 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
                     key={chip.id}
                     style={[styles.chip, isSelected && styles.chipSelected]}
                     onPress={() => setSelectedInstruction(chip.id)}
-                    activeOpacity={0.8}
+                    activeOpacity={0.75}
                   >
+                    <Text style={styles.chipIcon}>{chip.icon}</Text>
                     <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
                       {chip.label}
                     </Text>
@@ -198,12 +267,29 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
           />
         )}
 
-        {/* Backend Routing Card */}
+        {/* Dark Store Haversine Router Telemetry Card */}
         {cartItems.length > 0 && (
           <View style={styles.telemetryCard}>
-            <Text style={styles.telemetryTitle}>⚡ Dark Store Haversine Router</Text>
+            <View style={styles.telemetryHeader}>
+              <View style={styles.telemetryPill}>
+                <Text style={styles.telemetryDot}>●</Text>
+                <Text style={styles.telemetryPillText}>AI DISPATCH ENGINE</Text>
+              </View>
+              <Text style={styles.telemetrySubTag}>12 Aurangabad Hubs</Text>
+            </View>
+            <Text style={styles.telemetryTitle}>Nearest Dark Store Routing</Text>
             <Text style={styles.telemetryText}>
-              Checkout calculates the exact Haversine distance from your location to all 12 operational dark stores in Aurangabad and broadcasts the 3D delivery vector to the Streamlit Command Center.
+              Checkout calculates the exact Haversine vector from your location to all 12 operational dark stores in Aurangabad and dispatches your order instantly to the Streamlit Command Center.
+            </Text>
+          </View>
+        )}
+
+        {/* Cancellation Notice */}
+        {cartItems.length > 0 && (
+          <View style={styles.policyCard}>
+            <Text style={styles.policyIcon}>⏱️</Text>
+            <Text style={styles.policyText}>
+              Orders cannot be cancelled once packed to guarantee rapid 10-minute dispatch.
             </Text>
           </View>
         )}
@@ -214,18 +300,27 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
         <View style={styles.footer}>
           <View style={styles.footerPriceCol}>
             <Text style={styles.toPayLabel}>TO PAY</Text>
-            <Text style={styles.grandTotalText}>₹{grandTotal}</Text>
-            <Text style={styles.freeDeliveryLabel}>Free 10-Min Delivery</Text>
+            <View style={styles.totalWithSavings}>
+              <Text style={styles.grandTotalText}>₹{grandTotal}</Text>
+              {savings > 0 && (
+                <View style={styles.savingsPill}>
+                  <Text style={styles.savingsPillText}>SAVE ₹{savings}</Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.freeDeliveryLabel}>⚡ FREE Delivery applied</Text>
           </View>
 
           <TouchableOpacity
-            style={styles.checkoutBtn}
+            style={[styles.checkoutBtn, isLoading && styles.checkoutBtnDisabled]}
             onPress={handleCheckout}
             disabled={isLoading}
             activeOpacity={0.88}
           >
             <View style={styles.btnRow}>
-              <Text style={styles.checkoutText}>Checkout</Text>
+              <Text style={styles.checkoutText}>
+                {isLoading ? 'Routing...' : 'Place Order'}
+              </Text>
               <Text style={styles.checkoutArrow}>➔</Text>
             </View>
           </TouchableOpacity>
@@ -258,15 +353,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.borderSubtle,
+    ...SHADOWS.small,
   },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: '800',
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: SPACING.md,
+    padding: SPACING.xs,
+  },
+  backArrow: {
+    fontSize: 22,
+    fontWeight: '700',
     color: COLORS.textPrimary,
   },
-  clearCartText: {
-    fontSize: 12,
+  headerTitle: {
+    fontSize: TYPOGRAPHY.h3,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    letterSpacing: -0.3,
+  },
+  headerSubtitle: {
+    fontSize: TYPOGRAPHY.caption,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+    marginTop: 1,
+  },
+  clearBtn: {
+    backgroundColor: COLORS.dangerRedLight,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+  },
+  clearBtnText: {
+    fontSize: 11,
     fontWeight: '700',
     color: COLORS.dangerRed,
   },
@@ -275,55 +399,57 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: 90,
+    paddingBottom: 110,
   },
   addressCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.small,
+    borderColor: COLORS.borderSubtle,
+    ...SHADOWS.card,
   },
-  addressLeft: {
+  slaRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  addressIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#F0FDF4',
+  slaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.brandYellowLight,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
-    borderColor: '#C6F6D5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.md,
+    borderColor: '#FDE68A',
   },
-  addressIcon: {
-    fontSize: 18,
+  slaBolt: {
+    fontSize: 12,
+    marginRight: 4,
   },
-  addressTexts: {
-    flex: 1,
+  slaText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#854D0E',
+    letterSpacing: 0.4,
   },
-  badgeRow: {
+  gpsStatusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 2,
-  },
-  addressBadgeTitle: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: COLORS.textMuted,
-    letterSpacing: 0.5,
-    marginRight: 6,
+    backgroundColor: COLORS.surfaceSecondary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
   },
   gpsDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    marginRight: 5,
   },
   gpsActive: {
     backgroundColor: COLORS.brandGreen,
@@ -331,100 +457,193 @@ const styles = StyleSheet.create({
   gpsManual: {
     backgroundColor: COLORS.warningAmber,
   },
-  gpsLabel: {
+  gpsStatusText: {
     fontSize: 10,
     fontWeight: '700',
     color: COLORS.textSecondary,
   },
+  addressDivider: {
+    height: 1,
+    backgroundColor: COLORS.borderSubtle,
+    marginVertical: SPACING.md,
+  },
+  addressBody: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  addressIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.brandGreenLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#C6F6D5',
+  },
+  addressIconEmoji: {
+    fontSize: 17,
+  },
+  addressTextCol: {
+    flex: 1,
+  },
+  addressLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
   addressLine: {
-    fontSize: 13,
+    fontSize: TYPOGRAPHY.bodySmall,
     fontWeight: '700',
     color: COLORS.textPrimary,
+    lineHeight: 18,
   },
   coordsLine: {
-    fontSize: 10.5,
+    fontSize: 10,
     color: COLORS.textMuted,
-    marginTop: 1,
+    marginTop: 2,
   },
   itemsSection: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderSubtle,
     marginBottom: SPACING.md,
     ...SHADOWS.card,
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+    paddingBottom: SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderSubtle,
+  },
+  sectionTitleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   sectionTitle: {
-    fontSize: 14.5,
+    fontSize: TYPOGRAPHY.h3,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
+    letterSpacing: -0.2,
+  },
+  countBadge: {
+    backgroundColor: COLORS.surfaceSecondary,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+    marginLeft: 6,
+  },
+  countBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.textSecondary,
+  },
+  addMoreLink: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: COLORS.brandGreen,
   },
   emptyCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.xxxl,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderSubtle,
     marginTop: SPACING.lg,
+    ...SHADOWS.card,
   },
-  emptyIcon: {
-    fontSize: 48,
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.brandYellowLight,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: SPACING.md,
   },
+  emptyIcon: {
+    fontSize: 34,
+  },
   emptyTitle: {
-    fontSize: 16,
+    fontSize: TYPOGRAPHY.h2,
     fontWeight: '800',
     color: COLORS.textPrimary,
   },
   emptySub: {
-    fontSize: 12,
+    fontSize: TYPOGRAPHY.bodySmall,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    marginVertical: SPACING.sm,
-    lineHeight: 16,
+    marginVertical: SPACING.md,
+    lineHeight: 18,
+    paddingHorizontal: SPACING.md,
   },
   shopNowBtn: {
     backgroundColor: COLORS.brandGreen,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: 10,
-    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.xxl,
+    paddingVertical: 12,
+    borderRadius: BORDER_RADIUS.full,
     marginTop: SPACING.sm,
+    shadowColor: COLORS.brandGreen,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
   },
   shopNowText: {
     color: '#FFF',
-    fontSize: 13,
+    fontSize: TYPOGRAPHY.bodySmall,
     fontWeight: '800',
   },
   instructionsSection: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderSubtle,
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
+  },
+  instructionsSub: {
+    fontSize: TYPOGRAPHY.caption,
+    color: COLORS.textSecondary,
+    marginTop: 2,
     marginBottom: SPACING.md,
   },
   chipsRow: {
     flexDirection: 'row',
-    marginTop: SPACING.sm,
+    paddingVertical: 2,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: BORDER_RADIUS.sm,
+    paddingVertical: 9,
+    borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderSubtle,
     backgroundColor: COLORS.surfaceSecondary,
     marginRight: 8,
   },
   chipSelected: {
     borderColor: COLORS.brandGreen,
-    backgroundColor: '#F0FDF4',
+    backgroundColor: COLORS.brandGreenLight,
+  },
+  chipIcon: {
+    fontSize: 14,
+    marginRight: 6,
   },
   chipText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.textSecondary,
   },
@@ -434,23 +653,78 @@ const styles = StyleSheet.create({
   },
   telemetryCard: {
     backgroundColor: '#EEF2FF',
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.xl,
     borderWidth: 1,
     borderColor: '#C7D2FE',
-    padding: SPACING.md,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
   },
-  telemetryTitle: {
-    fontSize: 12,
+  telemetryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  telemetryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E0E7FF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.xs,
+  },
+  telemetryDot: {
+    fontSize: 8,
+    color: COLORS.accentIndigo,
+    marginRight: 5,
+  },
+  telemetryPillText: {
+    fontSize: 9.5,
     fontWeight: '800',
     color: COLORS.accentIndigo,
+    letterSpacing: 0.5,
+  },
+  telemetrySubTag: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#6366F1',
+  },
+  telemetryTitle: {
+    fontSize: TYPOGRAPHY.bodySmall,
+    fontWeight: '800',
+    color: '#1E1B4B',
     marginBottom: 4,
   },
   telemetryText: {
-    fontSize: 11,
-    color: '#3730A3',
+    fontSize: 11.5,
+    color: '#4338CA',
+    lineHeight: 16,
+  },
+  policyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surfaceSecondary,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    marginBottom: SPACING.md,
+  },
+  policyIcon: {
+    fontSize: 16,
+    marginRight: SPACING.sm,
+  },
+  policyText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.caption,
+    color: COLORS.textSecondary,
     lineHeight: 15,
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -458,41 +732,64 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: COLORS.borderSubtle,
     ...SHADOWS.stickyFooter,
   },
   footerPriceCol: {
     flex: 1,
+    marginRight: SPACING.md,
   },
   toPayLabel: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
     letterSpacing: 0.5,
   },
+  totalWithSavings: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 1,
+  },
   grandTotalText: {
-    fontSize: 19,
+    fontSize: TYPOGRAPHY.h2,
     fontWeight: '900',
     color: COLORS.textPrimary,
+    letterSpacing: -0.5,
+  },
+  savingsPill: {
+    backgroundColor: COLORS.brandGreenLight,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.xs,
+    marginLeft: 6,
+  },
+  savingsPillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: COLORS.brandGreen,
   },
   freeDeliveryLabel: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     color: COLORS.brandGreen,
   },
   checkoutBtn: {
     backgroundColor: COLORS.brandGreen,
-    paddingHorizontal: SPACING.xxl,
+    paddingHorizontal: SPACING.xl,
     paddingVertical: 14,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 160,
+    minWidth: 155,
     shadowColor: COLORS.brandGreen,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 5,
+  },
+  checkoutBtnDisabled: {
+    backgroundColor: COLORS.textMuted,
+    shadowOpacity: 0,
   },
   btnRow: {
     flexDirection: 'row',
@@ -500,13 +797,13 @@ const styles = StyleSheet.create({
   },
   checkoutText: {
     color: '#FFF',
-    fontSize: 15,
-    fontWeight: '900',
+    fontSize: TYPOGRAPHY.bodyMedium,
+    fontWeight: '800',
     marginRight: 6,
   },
   checkoutArrow: {
     color: '#FFF',
-    fontSize: 15,
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '800',
   },
 });

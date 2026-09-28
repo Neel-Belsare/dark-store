@@ -5,8 +5,9 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Pressable,
 } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import { LocationBar } from '../components/LocationBar';
 import { SearchBar } from '../components/SearchBar';
@@ -124,52 +125,73 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
 
   return (
     <View style={styles.container}>
-      {/* 1. Sticky Location Header Bar */}
-      <LocationBar
-        location={location}
-        address={address}
-        isUsingGPS={isUsingGPS}
-        loading={locationLoading}
-        onRefreshGPS={fetchLiveGPS}
-        onSelectOption={setManualLocation}
-        options={neighborhoodOptions}
-      />
+      {/* ================================================================= */}
+      {/* 1. STICKY TOP HEADER SURFACE (LocationBar + SearchBar)            */}
+      {/* ================================================================= */}
+      <View style={styles.stickyHeader}>
+        {/* Visually Distinct Quick-Commerce Location Bar */}
+        <LocationBar
+          location={location}
+          address={address}
+          isUsingGPS={isUsingGPS}
+          loading={locationLoading}
+          onRefreshGPS={fetchLiveGPS}
+          onSelectOption={setManualLocation}
+          options={neighborhoodOptions}
+        />
 
-      {/* 2. Grocery Search Input */}
-      <SearchBar query={searchQuery} onChangeQuery={setSearchQuery} />
+        {/* Sticky Search Input Bar */}
+        <SearchBar query={searchQuery} onChangeQuery={setSearchQuery} />
+      </View>
 
-      {/* 3. Scrollable Storefront Body */}
+      {/* ================================================================= */}
+      {/* 2. SCROLLABLE STOREFRONT BODY                                     */}
+      {/* ================================================================= */}
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Sub-15 Min SLA Hero Banner */}
+        {/* High-Converting Blinkit Signature Hero Banner */}
         <View style={styles.heroBanner}>
-          <View style={styles.heroBadge}>
-            <Text style={styles.heroBadgeText}>⚡ 10 MINUTES DELIVERY</Text>
+          <View style={styles.heroLeft}>
+            <View style={styles.heroBadge}>
+              <Text style={styles.heroBadgeIcon}>⚡</Text>
+              <Text style={styles.heroBadgeText}>10 MINUTES DELIVERY</Text>
+            </View>
+            <Text style={styles.heroTitle}>India's Last Minute App</Text>
+            <Text style={styles.heroSubtitle}>
+              Fresh groceries & essentials delivered from your nearest hub
+            </Text>
           </View>
-          <Text style={styles.heroTitle}>Groceries Delivered at Light Speed</Text>
-          <Text style={styles.heroSubtitle}>
-            From nearest dark store in Chhatrapati Sambhajinagar
-          </Text>
+          <View style={styles.heroRight}>
+            <Text style={styles.heroEmoji}>🛵</Text>
+          </View>
         </View>
 
-        {/* Categories Grid */}
+        {/* Categories Section */}
         <CategoryGrid
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
 
-        {/* Popular Products Horizontal Scroller */}
+        {/* Horizontal Popular Groceries Section */}
         <View style={styles.productsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              {selectedCategory ? `${selectedCategory}` : 'Popular Items'}
-            </Text>
-            <Text style={styles.seeAllText}>
-              {filteredProducts.length} items
-            </Text>
+            <View>
+              <Text style={styles.sectionTitle}>
+                {selectedCategory ? selectedCategory : 'Popular Groceries'}
+              </Text>
+              <Text style={styles.sectionSubtitle}>
+                {filteredProducts.length} items in stock
+              </Text>
+            </View>
+
+            {selectedCategory && (
+              <TouchableOpacity onPress={() => setSelectedCategory(null)}>
+                <Text style={styles.seeAllText}>View All</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <ScrollView
@@ -194,43 +216,58 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
         {/* Quick-Commerce Value Props */}
         <View style={styles.featuresRow}>
           <View style={styles.featureItem}>
-            <Text style={styles.featureIcon}>⚡</Text>
+            <View style={[styles.featureIconBox, { backgroundColor: '#E8F8EE' }]}>
+              <Text style={styles.featureIcon}>⚡</Text>
+            </View>
             <Text style={styles.featureTitle}>Sub-15m Promise</Text>
             <Text style={styles.featureSub}>Dedicated courier dispatch</Text>
           </View>
+
           <View style={styles.featureItem}>
-            <Text style={styles.featureIcon}>🛡️</Text>
+            <View style={[styles.featureIconBox, { backgroundColor: '#FEF9C3' }]}>
+              <Text style={styles.featureIcon}>🛡️</Text>
+            </View>
             <Text style={styles.featureTitle}>Zero Delivery Fee</Text>
             <Text style={styles.featureSub}>Instant savings on all carts</Text>
           </View>
+
           <View style={styles.featureItem}>
-            <Text style={styles.featureIcon}>🏬</Text>
+            <View style={[styles.featureIconBox, { backgroundColor: '#EEF2F6' }]}>
+              <Text style={styles.featureIcon}>🏬</Text>
+            </View>
             <Text style={styles.featureTitle}>12 City Hubs</Text>
             <Text style={styles.featureSub}>Real-time stock matching</Text>
           </View>
         </View>
       </ScrollView>
 
-      {/* Floating Bottom Mini-Cart Bar */}
+      {/* ================================================================= */}
+      {/* 3. FLOATING BOTTOM MINI-CART BAR (Quick Checkout Trigger)         */}
+      {/* ================================================================= */}
       {totalItemCount > 0 && (
         <View style={styles.floatingCartContainer}>
-          <TouchableOpacity
-            style={styles.floatingCart}
+          <Pressable
+            style={({ pressed }) => [
+              styles.floatingCart,
+              pressed && styles.floatingCartPressed,
+            ]}
             onPress={onNavigateToCart}
-            activeOpacity={0.88}
           >
             <View style={styles.cartInfoLeft}>
-              <Text style={styles.cartItemsCount}>
-                🛒 {totalItemCount} {totalItemCount === 1 ? 'ITEM' : 'ITEMS'}
-              </Text>
+              <View style={styles.cartBadgePill}>
+                <Text style={styles.cartItemsCount}>
+                  🛒 {totalItemCount} {totalItemCount === 1 ? 'ITEM' : 'ITEMS'}
+                </Text>
+              </View>
               <Text style={styles.cartTotalPrice}>₹{grandTotal}</Text>
+              <Text style={styles.cartSavedNotice}>Free Delivery Applied</Text>
             </View>
 
             <View style={styles.cartActionRight}>
               <Text style={styles.viewCartText}>View Cart</Text>
               <Text style={styles.viewCartArrow}>➔</Text>
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
     </View>
@@ -242,112 +279,165 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  stickyHeader: {
+    backgroundColor: COLORS.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderSubtle,
+    zIndex: 10,
+    ...SHADOWS.small,
+  },
   scrollArea: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 90,
+    paddingBottom: 110,
   },
+
+  /* Hero Banner */
   heroBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: COLORS.brandYellow,
     marginHorizontal: SPACING.lg,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.md,
     marginBottom: SPACING.xs,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
     borderWidth: 1,
     borderColor: '#F6E05E',
     ...SHADOWS.small,
   },
+  heroLeft: {
+    flex: 1,
+    paddingRight: SPACING.sm,
+  },
   heroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.brandGreen,
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 4,
+    paddingVertical: 3.5,
+    borderRadius: BORDER_RADIUS.xs + 2,
+    marginBottom: 6,
+  },
+  heroBadgeIcon: {
+    fontSize: 9,
+    marginRight: 3,
   },
   heroBadgeText: {
     color: '#FFF',
     fontSize: 9.5,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontWeight: '900',
+    letterSpacing: 0.6,
   },
   heroTitle: {
-    fontSize: 16,
+    fontSize: TYPOGRAPHY.title,
     fontWeight: '900',
     color: COLORS.textPrimary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   heroSubtitle: {
-    fontSize: 11.5,
-    color: '#554200',
+    fontSize: TYPOGRAPHY.footnote,
+    color: '#713F12',
     fontWeight: '600',
-    marginTop: 2,
+    marginTop: 3,
+    lineHeight: 16,
   },
+  heroRight: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroEmoji: {
+    fontSize: 28,
+  },
+
+  /* Products Section */
   productsSection: {
-    marginTop: SPACING.xs,
+    marginTop: SPACING.sm,
     paddingLeft: SPACING.lg,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingRight: SPACING.lg,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.md,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: TYPOGRAPHY.title,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
+  },
+  sectionSubtitle: {
+    fontSize: TYPOGRAPHY.footnote,
+    fontWeight: '500',
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
   seeAllText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.sub,
+    fontWeight: '800',
+    color: COLORS.brandGreen,
   },
   horizontalProducts: {
     paddingRight: SPACING.lg,
-    paddingBottom: SPACING.sm,
+    paddingBottom: SPACING.md,
   },
   emptySearch: {
-    paddingVertical: SPACING.xl,
+    paddingVertical: SPACING.xxl,
     paddingRight: SPACING.lg,
     alignItems: 'center',
   },
   emptyIcon: {
-    fontSize: 32,
-    marginBottom: 4,
+    fontSize: 36,
+    marginBottom: SPACING.sm,
   },
   emptyTitle: {
-    fontSize: 14,
+    fontSize: TYPOGRAPHY.bodyLarge,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
   emptySub: {
-    fontSize: 11.5,
+    fontSize: TYPOGRAPHY.sub,
     color: COLORS.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
   },
+
+  /* Value Props */
   featuresRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.lg,
-    padding: SPACING.md,
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderSubtle,
+    ...SHADOWS.small,
   },
   featureItem: {
+    flex: 1,
     alignItems: 'center',
-    width: '32%',
+    paddingHorizontal: SPACING.xs,
+  },
+  featureIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
   },
   featureIcon: {
-    fontSize: 20,
-    marginBottom: 4,
+    fontSize: 16,
   },
   featureTitle: {
     fontSize: 11,
@@ -359,55 +449,80 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    marginTop: 1,
+    marginTop: 2,
   },
+
+  /* Floating Mini-Cart */
   floatingCartContainer: {
     position: 'absolute',
-    bottom: SPACING.md,
+    bottom: SPACING.lg,
     left: SPACING.lg,
     right: SPACING.lg,
+    zIndex: 50,
   },
   floatingCart: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     backgroundColor: COLORS.brandGreen,
-    paddingHorizontal: SPACING.lg,
+    borderRadius: BORDER_RADIUS.xl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 12,
-    borderRadius: BORDER_RADIUS.md,
-    shadowColor: COLORS.brandGreen,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
+    paddingHorizontal: SPACING.lg,
+    ...SHADOWS.stickyFooter,
+  },
+  floatingCartPressed: {
+    opacity: 0.95,
+    transform: [{ scale: 0.99 }],
   },
   cartInfoLeft: {
     flexDirection: 'column',
   },
+  cartBadgePill: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: BORDER_RADIUS.xs,
+    marginBottom: 2,
+  },
   cartItemsCount: {
-    fontSize: 10.5,
+    color: '#FFF',
+    fontSize: 10,
     fontWeight: '800',
-    color: '#DCFCE7',
     letterSpacing: 0.5,
   },
   cartTotalPrice: {
-    fontSize: 16,
-    fontWeight: '900',
     color: '#FFF',
+    fontSize: 17,
+    fontWeight: '900',
+  },
+  cartSavedNotice: {
+    color: '#D1FAE5',
+    fontSize: 9.5,
+    fontWeight: '600',
   },
   cartActionRight: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FFF',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: BORDER_RADIUS.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   viewCartText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFF',
+    color: COLORS.brandGreenDark,
+    fontSize: 13,
+    fontWeight: '900',
     marginRight: 6,
   },
   viewCartArrow: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFF',
+    color: COLORS.brandGreenDark,
+    fontSize: 13,
+    fontWeight: '900',
   },
 });
