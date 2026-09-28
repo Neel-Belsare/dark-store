@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Blinkit Quick-Commerce",
+    "slug": "blinkit-dark-store-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#F7D435"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Blinkit requires your GPS location to find the nearest dark store hub in Aurangabad for 10-minute instant delivery."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F7D435"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

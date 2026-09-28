@@ -11,3 +11,14 @@ ENV/
 
 # macOS
 .DS_Store
+
+# Node & Expo
+node_modules/
+.expo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dynamic order queue
+latest_order.json
+order_history.json

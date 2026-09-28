@@ -581,6 +581,26 @@ def generate_mock_customer_order(df_stores):
         "timestamp": pd.Timestamp.now().strftime("%H:%M:%S")
     }
 
+def check_for_external_order():
+    """Check if an incoming mobile order was submitted via the FastAPI bridge."""
+    order_file = os.path.join(BASE_DIR, "latest_order.json")
+    if os.path.exists(order_file):
+        try:
+            with open(order_file, "r") as f:
+                return json.load(f)
+        except Exception:
+            return None
+    return None
+
+# Check if an external mobile order arrived via FastAPI
+external_order = check_for_external_order()
+if external_order:
+    ext_id = external_order.get("order_id")
+    if ext_id and st.session_state.get("last_synced_order_id") != ext_id:
+        st.session_state["active_order"] = external_order
+        st.session_state["last_synced_order_id"] = ext_id
+        st.session_state["just_simulated"] = True
+
 # Session state initialization for live order simulation
 if "active_order" not in st.session_state or st.session_state["active_order"] is None:
     st.session_state["active_order"] = generate_mock_customer_order(df_stores)
@@ -945,7 +965,7 @@ with tab_sim:
     </div>
     """, unsafe_allow_html=True)
 
-    col_action1, col_action2, col_spacer = st.columns([1.5, 1, 2.5])
+    col_action1, col_action2, col_action3, col_spacer = st.columns([1.5, 1.4, 1.2, 1.5])
     with col_action1:
         if st.button("🚀 Simulate New Customer Order", type="primary", use_container_width=True):
             st.session_state["active_order"] = generate_mock_customer_order(df_stores)
@@ -953,13 +973,42 @@ with tab_sim:
             st.rerun()
 
     with col_action2:
-        if st.button("🔄 Reset / Clear Order", use_container_width=True):
+        if st.button("📱 Sync Live Mobile Order", use_container_width=True):
+            ext_ord = check_for_external_order()
+            if ext_ord:
+                st.session_state["active_order"] = ext_ord
+                st.session_state["just_simulated"] = True
+                st.toast(f"✅ Loaded Mobile Order #{ext_ord['order_id']}", icon="📱")
+            else:
+                st.info("No mobile orders detected yet. Place an order via mobile app or call POST /api/order.")
+            st.rerun()
+
+    with col_action3:
+        if st.button("🔄 Reset / Clear", use_container_width=True):
             st.session_state["active_order"] = generate_mock_customer_order(df_stores)
             st.session_state["just_simulated"] = False
             st.rerun()
 
     cur_ord = st.session_state.get("active_order")
     if cur_ord:
+        # Order Source Badge
+        order_src = cur_ord.get("source", "Synthetic Simulation")
+        is_mobile = "Mobile" in order_src
+        badge_bg = "rgba(16, 185, 129, 0.12)" if is_mobile else "rgba(99, 102, 241, 0.12)"
+        badge_tx = "#10b981" if is_mobile else "#6366f1"
+        badge_border = "rgba(16, 185, 129, 0.3)" if is_mobile else "rgba(99, 102, 241, 0.25)"
+        
+        st.markdown(f"""
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 99px; background: {badge_bg}; color: {badge_tx}; border: 1px solid {badge_border};">
+                {'📱 Live GPS Order from Mobile App (Expo Blinkit)' if is_mobile else '🧪 Synthetic Order Simulation Engine'} • #{cur_ord['order_id']}
+            </span>
+            <span style="font-size: 11.5px; color: var(--mut); background: var(--card); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line);">
+                FastAPI Bridge: <code style="color: var(--acc);">POST /api/order</code> (Port 8000)
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+
         # Order KPIs
         st.markdown(f"""
         <div class="kpis" style="margin: 10px 0 20px 0;">
