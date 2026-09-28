@@ -17,123 +17,354 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 # 1. Page Configuration
 # ------------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Aurangabad Dark Store Feasibility Dashboard",
+    page_title="Aurangabad Dark Store Command Center",
     page_icon="🛒",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ------------------------------------------------------------------------------
-# 2. UI Styling & Developer Attribution
+# 2. UI Styling & Design System Injection (Command Center Theme)
 # ------------------------------------------------------------------------------
 st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-    /* Global Light Theme Colors */
+    :root {
+        --bg: #f4f6fb;
+        --card: #ffffff;
+        --line: #e4e8f1;
+        --tx: #0f172a;
+        --mut: #64748b;
+        --acc: #6366f1;
+        --acc2: #06b6d4;
+        --warn: #f59e0b;
+        --ok: #10b981;
+        --glow: rgba(99, 102, 241, 0.12);
+    }
+
+    /* Global App Background & Typography */
     .stApp {
-        background-color: #f8fafc;
-        color: #0f172a;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg) !important;
+        background-image: 
+            radial-gradient(900px 400px at 10% -10%, var(--glow), transparent),
+            radial-gradient(700px 400px at 100% 0, rgba(6, 182, 212, 0.12), transparent) !important;
+        color: var(--tx) !important;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
     }
-    
-    /* Sidebar Light Theme */
+
+    /* Sidebar Styling */
     section[data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-right: 1px solid #e2e8f0;
+        background-color: var(--card) !important;
+        border-right: 1px solid var(--line) !important;
+    }
+    section[data-testid="stSidebar"] * {
+        font-family: 'Inter', sans-serif !important;
     }
 
-    /* Metric Cards - Elevated Modern Light Theme */
-    div[data-testid="stMetric"] {
-        background: #ffffff !important;
-        padding: 18px 22px;
-        border-radius: 14px;
-        border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
-        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Header & Live Network Indicator */
+    .header-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        padding-top: 4px;
     }
-    div[data-testid="stMetric"]:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(10, 102, 194, 0.12) !important;
-        border-color: #3b82f6 !important;
+    .header-box h1 {
+        font-size: 28px;
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--tx);
+        line-height: 1.2;
     }
-    div[data-testid="stMetric"] label {
-        color: #64748b !important;
-        font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
+    .header-box h1 span {
+        background: linear-gradient(90deg, var(--acc), var(--acc2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
     }
-    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
-        color: #0f172a !important;
-        font-weight: 800 !important;
-        font-size: 1.85rem !important;
+    .header-box .sub {
+        color: var(--mut);
+        font-size: 14px;
+        margin: 6px 0 0;
+        font-weight: 400;
     }
-
-    /* Tabs Styling - Modern Light Theme */
-    button[data-baseweb="tab"] {
-        font-size: 15px;
+    .live {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--ok);
+        background: rgba(16, 185, 129, 0.12);
+        padding: 7px 14px;
+        border-radius: 99px;
         font-weight: 600;
-        color: #64748b;
-        padding: 10px 18px;
-        border-radius: 8px 8px 0 0;
-        transition: color 0.15s ease;
+        letter-spacing: 0.02em;
+    }
+    .live i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--ok);
+        box-shadow: 0 0 0 0 var(--ok);
+        animation: pulse-dot 1.8s infinite;
+    }
+    @keyframes pulse-dot {
+        70% { box-shadow: 0 0 0 8px transparent; }
+    }
+
+    /* KPI Metrics Cards Grid */
+    .kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 14px;
+        margin: 20px 0 28px 0;
+    }
+    .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.08);
+    }
+    .kpi {
+        position: relative;
+        overflow: hidden;
+    }
+    .kpi:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 3px;
+        width: 100%;
+        background: linear-gradient(90deg, var(--acc), var(--acc2));
+    }
+    .kpi small {
+        color: var(--mut);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 600;
+        display: block;
+    }
+    .kpi b {
+        display: block;
+        font-size: 30px;
+        margin: 6px 0 4px;
+        letter-spacing: -0.02em;
+        font-weight: 800;
+        color: var(--tx);
+        line-height: 1.1;
+    }
+    .kpi em {
+        font-style: normal;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--ok);
+    }
+
+    /* Tab Navigation (Command Center Style) */
+    div[data-baseweb="tab-list"] {
+        display: flex !important;
+        gap: 6px !important;
+        overflow-x: auto !important;
+        background: var(--card) !important;
+        border: 1px solid var(--line) !important;
+        padding: 6px !important;
+        border-radius: 14px !important;
+        margin-bottom: 24px !important;
+    }
+    div[data-baseweb="tab-highlight"] {
+        display: none !important;
+    }
+    button[data-baseweb="tab"] {
+        border: 0 !important;
+        background: none !important;
+        color: var(--mut) !important;
+        font: 600 13px 'Inter', sans-serif !important;
+        padding: 10px 16px !important;
+        border-radius: 10px !important;
+        white-space: nowrap !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
     }
     button[data-baseweb="tab"]:hover {
-        color: #0a66c2 !important;
+        color: var(--acc) !important;
+        background: var(--glow) !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
-        color: #0a66c2 !important;
-        font-weight: 700 !important;
-        border-bottom: 3px solid #0a66c2 !important;
+        background: linear-gradient(135deg, var(--acc), #8b5cf6) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25) !important;
     }
 
-    /* Highlight Banner Cards */
-    .summary-card {
-        background: #ffffff;
+    /* Executive Summary Grid & Alert Rows */
+    .grid {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 16px;
+    }
+    @media (max-width: 860px) {
+        .grid { grid-template-columns: 1fr; }
+    }
+    h2.card-title {
+        font-size: 16px;
+        margin: 0 0 4px;
+        font-weight: 700;
+        color: var(--tx);
+    }
+    .hint {
+        color: var(--mut);
+        font-size: 12.5px;
+        margin: 0 0 14px;
+        font-weight: 400;
+    }
+    .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
         border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        padding: 18px 22px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-        margin-bottom: 16px;
+        border: 1px solid var(--line);
+        margin-bottom: 8px;
+        background: #ffffff;
     }
-    .badge-active {
-        background-color: #ecfdf5;
-        color: #059669;
-        padding: 3px 10px;
-        border-radius: 9999px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
+    .row .n {
+        flex: 1;
+        min-width: 0;
     }
-    .badge-proposed {
-        background-color: #fffbeb;
-        color: #d97706;
-        padding: 3px 10px;
-        border-radius: 9999px;
+    .row strong {
+        font-size: 14px;
+        color: var(--tx);
+        display: block;
+    }
+    .row span {
+        display: block;
+        color: var(--mut);
         font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
+        margin-top: 2px;
+    }
+    .bar {
+        height: 6px;
+        border-radius: 9px;
+        background: var(--line);
+        margin-top: 8px;
+        overflow: hidden;
+    }
+    .bar i {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--warn), #ef4444);
+        border-radius: 9px;
+    }
+    .tag {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--warn);
+        background: rgba(245, 158, 11, 0.14);
+        padding: 5px 9px;
+        border-radius: 99px;
+        white-space: nowrap;
     }
 
-    /* Hide Default Streamlit Footer */
+    /* Donut Box Layout */
+    .donutbox {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        padding: 6px 0;
+    }
+    .leg div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        margin: 6px 0;
+        color: var(--mut);
+        font-weight: 500;
+    }
+    .leg i {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+    }
+
+    /* Custom Table with Rank Badges */
+    .tbl {
+        overflow-x: auto;
+    }
+    table.custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+        min-width: 520px;
+    }
+    table.custom-table th {
+        color: var(--mut);
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid var(--line);
+    }
+    table.custom-table td {
+        padding: 13px 10px;
+        border-bottom: 1px solid var(--line);
+        color: var(--tx);
+        font-weight: 500;
+    }
+    table.custom-table td.r, table.custom-table th.r {
+        text-align: right;
+    }
+    .rk {
+        display: inline-grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        background: var(--glow);
+        color: var(--acc);
+        font-weight: 800;
+        font-size: 12px;
+        margin-right: 10px;
+    }
+    tr:first-child .rk, table.custom-table tr:first-child td .rk {
+        background: linear-gradient(135deg, #f59e0b, #ef4444);
+        color: #fff;
+    }
+
+    /* Hide Default Footer */
     footer { visibility: hidden; }
 
-    /* Custom Floating Footer */
+    /* Custom Floating Attribution Footer */
     .custom-footer {
         position: fixed;
         right: 20px;
-        bottom: 12px;
+        bottom: 14px;
         z-index: 999999;
         font-size: 13px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: #ffffff;
-        padding: 7px 16px;
-        border-radius: 8px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e2e8f0;
-        color: #334155;
+        font-family: 'Inter', sans-serif;
+        background: var(--card);
+        padding: 8px 16px;
+        border-radius: 99px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--line);
+        color: var(--mut);
     }
     .custom-footer a {
-        color: #0a66c2;
+        color: var(--acc);
         text-decoration: none;
         font-weight: 600;
     }
@@ -158,7 +389,6 @@ def load_demographics_data():
     if os.path.exists(data_path):
         return pd.read_csv(data_path)
     
-    # Fallback synthetic generator for Aurangabad localities
     neighborhoods = [
         {'Neighborhood': 'CIDCO (N-1 to N-12)', 'Latitude': 19.8735, 'Longitude': 75.3621, 'Estimated Population (2024)_x': 185000, 'Population Density (per sq km)': 14200, 'Growth Rate (%)': 4.2, 'Internet Penetration Rate (%)': 84.5, 'E-Commerce Activity Index (1-10)': 9},
         {'Neighborhood': 'Garkheda', 'Latitude': 19.8596, 'Longitude': 75.3512, 'Estimated Population (2024)_x': 142000, 'Population Density (per sq km)': 12500, 'Growth Rate (%)': 4.8, 'Internet Penetration Rate (%)': 82.0, 'E-Commerce Activity Index (1-10)': 8},
@@ -237,11 +467,10 @@ def get_forecasting_engine():
     np.random.seed(42)
     dates = pd.date_range(start='2024-01-01', periods=365, freq='D')
     
-    # Seasonality and baseline demand modeled for Aurangabad hubs
     demand = (
         np.random.randint(60, 480, size=len(dates))
         + np.sin(np.linspace(0, 12, len(dates))) * 45
-        + (dates.dayofweek >= 5) * 35  # Weekend spike
+        + (dates.dayofweek >= 5) * 35
     )
     localities = np.random.choice(
         ['CIDCO', 'Garkheda', 'Nirala Bazar', 'Waluj', 'Chikalthana', 'Beed Bypass', 'Osmanpura'],
@@ -279,13 +508,12 @@ df_climate = load_climate_impact_data()
 # 4. Sidebar: Dynamic Cross-Filtering & Session State Reactivity
 # ------------------------------------------------------------------------------
 with st.sidebar:
-    st.title("📍 Chhatrapati Sambhajinagar")
-    st.caption("Quick-Commerce Strategy & Feasibility Engine")
+    st.markdown("### 📍 Chhatrapati Sambhajinagar")
+    st.caption("Dark Store Command Center Settings")
     st.markdown("---")
 
     st.subheader("🎛️ Dynamic Cross-Filters")
 
-    # Target Neighborhoods Multi-Select
     all_neighborhoods = sorted(df_demographics['Neighborhood'].unique().tolist())
     selected_neighborhoods = st.multiselect(
         "Target Neighborhoods",
@@ -294,7 +522,6 @@ with st.sidebar:
         help="Select micro-markets to include in cross-analysis."
     )
 
-    # Double-Ended Slider: Population Density Range
     min_density = int(df_demographics['Population Density (per sq km)'].min())
     max_density = int(df_demographics['Population Density (per sq km)'].max())
     density_range = st.slider(
@@ -306,7 +533,6 @@ with st.sidebar:
         help="Filter micro-markets within specific population density boundaries."
     )
 
-    # Double-Ended Slider: Weather / Monsoon Friction Scale
     weather_friction_range = st.slider(
         "Monsoon / Weather Impact Scale",
         min_value=1,
@@ -316,7 +542,6 @@ with st.sidebar:
         help="Filter climate months by delivery friction scale (1=Favorable, 5=Severe Monsoon)."
     )
 
-    # Simulated Delivery Buffer Radius Slider
     simulated_radius = st.slider(
         "Simulated Delivery Radius (km)",
         min_value=1.5,
@@ -326,7 +551,6 @@ with st.sidebar:
         help="Simulate dark store fulfillment catchment radius for buffer & SLA calculations."
     )
 
-    # Store Status Selector
     status_options = ["All", "Active", "Proposed"]
     selected_status = st.selectbox(
         "Dark Store Status",
@@ -335,7 +559,6 @@ with st.sidebar:
         help="Filter fulfillment stores by operational readiness."
     )
 
-    # Forecast Horizon
     forecast_days = st.slider(
         "Demand Forecast Horizon (Days)",
         min_value=3,
@@ -349,12 +572,11 @@ with st.sidebar:
     st.markdown("### 👨‍💻 Developer")
     st.markdown("**Neel Belsare**")
     st.markdown("[🔗 Connect on LinkedIn](https://www.linkedin.com/in/neel-belsare-719b9a314/)")
-    st.caption("Quick-Commerce Analytics v3.0 • Aurangabad")
+    st.caption("Quick-Commerce Analytics v3.0 • Command Center")
 
 # ------------------------------------------------------------------------------
 # 5. Cross-Filtering Execution & Toast Notification
 # ------------------------------------------------------------------------------
-# Filter Demographics by Neighborhood and Density bounds
 target_list = selected_neighborhoods if selected_neighborhoods else all_neighborhoods
 filtered_df = df_demographics[
     (df_demographics['Neighborhood'].isin(target_list)) &
@@ -362,19 +584,17 @@ filtered_df = df_demographics[
     (df_demographics['Population Density (per sq km)'] <= density_range[1])
 ].copy()
 
-# Filter Stores by Operational Status
 if selected_status != "All":
     filtered_stores = df_stores[df_stores['Status'] == selected_status].copy()
 else:
     filtered_stores = df_stores.copy()
 
-# Filter Climate Data by Friction scale
 filtered_climate = df_climate[
     (df_climate['Delivery Impact Scale (1-5)'] >= weather_friction_range[0]) &
     (df_climate['Delivery Impact Scale (1-5)'] <= weather_friction_range[1])
 ].copy()
 
-# Live Session-State Toast Notifications for satisfying user feedback
+# Live Session-State Toast Notifications
 current_state_key = (
     tuple(sorted(target_list)),
     density_range,
@@ -389,157 +609,215 @@ if "prev_filter_state" in st.session_state and st.session_state["prev_filter_sta
 st.session_state["prev_filter_state"] = current_state_key
 
 # ------------------------------------------------------------------------------
-# 6. Main Dashboard Header & KPI Metrics Cards
+# 6. Main Dashboard Header & KPI Metrics Cards (Command Center Design)
 # ------------------------------------------------------------------------------
-st.title("🛒 Aurangabad Quick-Commerce Dark Store Dashboard")
-st.markdown(
-    "Strategic feasibility analysis, 3D geospatial network coverage, and demand forecasting "
-    "across **Chhatrapati Sambhajinagar (Aurangabad)** micro-markets."
-)
+st.markdown("""
+<div class="header-box">
+  <div>
+    <h1>🛒 Aurangabad <span>Dark Store Command Center</span></h1>
+    <p class="sub">Feasibility analysis, network coverage and demand forecasting across Chhatrapati Sambhajinagar micro-markets.</p>
+  </div>
+  <div class="live"><i></i>Live network</div>
+</div>
+""", unsafe_allow_html=True)
 
-# High-Level Metrics Strip using elevated styled st.metric cards
-kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
-
-total_active_stores = len(filtered_stores[filtered_stores['Status'] == 'Active'])
-total_proposed_stores = len(filtered_stores[filtered_stores['Status'] == 'Proposed'])
+# Metrics calculation
+total_active_stores = len(df_stores[df_stores['Status'] == 'Active'])
+total_proposed_stores = len(df_stores[df_stores['Status'] == 'Proposed'])
 total_serviceable_pop = int(filtered_df['Estimated Population (2024)_x'].sum()) if not filtered_df.empty else 0
 total_monthly_orders = int(filtered_df['Predicted Online Order Volume (Monthly)'].sum()) if not filtered_df.empty else 0
 avg_density = int(filtered_df['Population Density (per sq km)'].mean()) if not filtered_df.empty else 0
 est_delivery_sla = round(9.0 + (simulated_radius * 1.4), 1)
 
-kpi1.metric(
-    label="Active Stores",
-    value=f"{total_active_stores}",
-    delta=f"{total_proposed_stores} Proposed" if selected_status == "All" else f"{selected_status} View"
-)
-kpi2.metric(
-    label="Serviceable Population",
-    value=f"{total_serviceable_pop:,}",
-    delta=f"{len(filtered_df)} Micro-Markets"
-)
-kpi3.metric(
-    label="Est. Monthly Orders",
-    value=f"{total_monthly_orders:,}",
-    delta="Predicted Demand"
-)
-kpi4.metric(
-    label="Avg Delivery Buffer",
-    value=f"{simulated_radius:.1f} km",
-    delta=f"{avg_density:,}/km² Density"
-)
-kpi5.metric(
-    label="Avg Delivery SLA",
-    value=f"{est_delivery_sla:.0f} mins",
-    delta="Ultra-Fast QC",
-    delta_color="normal"
-)
-
-st.markdown("---")
+# Render Custom HTML KPI Cards with exact user styling
+kpis_html = f"""
+<section class="kpis">
+  <div class="card kpi"><small>Active stores</small><b>{total_active_stores}</b><em>+{total_proposed_stores} proposed</em></div>
+  <div class="card kpi"><small>Serviceable population</small><b>{total_serviceable_pop:,}</b><em>{len(filtered_df)} micro-markets</em></div>
+  <div class="card kpi"><small>Est. monthly orders</small><b>{total_monthly_orders:,}</b><em>Predicted demand</em></div>
+  <div class="card kpi"><small>Avg delivery buffer</small><b>{simulated_radius:.1f} km</b><em>{avg_density:,}/km² density</em></div>
+  <div class="card kpi"><small>Avg delivery SLA</small><b>{est_delivery_sla:.0f} mins</b><em>Ultra-fast QC</em></div>
+</section>
+"""
+st.markdown(kpis_html, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
 # 7. Dashboard Layout: Modern Structured Tabs
 # ------------------------------------------------------------------------------
 tab_summary, tab_map, tab_demographics, tab_forecast, tab_climate = st.tabs([
     "📊 Executive Summary",
-    "🗺️ Geospatial View (3D & 2D)",
+    "🗺️ Geospatial View",
     "👥 Demographic Heatmaps",
-    "📈 Demand Forecasting Engine",
-    "🌦️ Climate & Monsoon Impact"
+    "📈 Demand Forecasting",
+    "🌦️ Climate & Monsoon"
 ])
 
 # ------------------------------------------------------------------------------
 # TAB 1: Executive Summary
 # ------------------------------------------------------------------------------
 with tab_summary:
-    st.subheader("Executive Market Overview & Strategic Expansion")
-    
-    col_summary_l, col_summary_r = st.columns([3, 2])
+    col_l, col_r = st.columns([1.25, 1])
 
-    with col_summary_l:
-        st.markdown("### 🚨 High-Volume Micro-Markets Requiring 2+ Stores")
-        st.caption("Fulfillment clusters exceeding **80,000 monthly orders** require dual micro-hubs to satisfy the sub-12 minute delivery SLA.")
-        
-        high_demand = filtered_df[filtered_df['Predicted Online Order Volume (Monthly)'] > 80000].sort_values(
+    with col_l:
+        st.markdown("""
+        <div class="card" style="margin-bottom: 16px;">
+            <h2 class="card-title">🚨 High-volume micro-markets needing 2+ stores</h2>
+            <p class="hint">Clusters above 80,000 monthly orders need dual hubs to hold a sub-12 minute SLA.</p>
+        """, unsafe_allow_html=True)
+
+        high_demand_df = filtered_df[filtered_df['Predicted Online Order Volume (Monthly)'] > 80000].sort_values(
             'Predicted Online Order Volume (Monthly)', ascending=False
         )
-        if not high_demand.empty:
-            for _, row in high_demand.iterrows():
-                st.warning(
-                    f"**{row['Neighborhood']}**: Generating **{row['Predicted Online Order Volume (Monthly)']:,} orders/month** "
-                    f"with density **{row['Population Density (per sq km)']:,} people/km²**. Secondary micro-hub recommended."
-                )
+
+        if not high_demand_df.empty:
+            max_orders_val = high_demand_df['Predicted Online Order Volume (Monthly)'].max()
+            rows_html = ""
+            for _, row in high_demand_df.iterrows():
+                orders_val = int(row['Predicted Online Order Volume (Monthly)'])
+                density_val = int(row['Population Density (per sq km)'])
+                pct = int((orders_val / max_orders_val) * 100) if max_orders_val > 0 else 50
+                rows_html += f"""
+                <div class="row">
+                  <div class="n">
+                    <strong>{row['Neighborhood']}</strong>
+                    <span>{orders_val:,} orders/mo · {density_val:,} people/km²</span>
+                    <div class="bar"><i style="width:{pct}%"></i></div>
+                  </div>
+                  <span class="tag">Add hub</span>
+                </div>
+                """
+            st.markdown(rows_html + "</div>", unsafe_allow_html=True)
         else:
-            st.success("No micro-markets in the current selection exceed the single-store capacity threshold (80k orders/mo).")
+            st.markdown("""
+                <div style="padding: 12px 0; color: var(--ok); font-size: 13.5px; font-weight: 500;">
+                    ✅ All micro-markets in current selection operate within single-store capacity limits.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        st.markdown("---")
-        st.markdown("### 🏆 Top 5 Priority Expansion Zones")
-        st.caption("Ranked by estimated monthly online orders and shopper density.")
-        if not filtered_df.empty:
-            top_expansion = filtered_df.nlargest(5, 'Predicted Online Order Volume (Monthly)')[
-                ['Neighborhood', 'Estimated Online Shoppers', 'Predicted Online Order Volume (Monthly)', 'Population Density (per sq km)']
-            ]
-            st.dataframe(
-                top_expansion.style.format({
-                    'Estimated Online Shoppers': '{:,}',
-                    'Predicted Online Order Volume (Monthly)': '{:,}',
-                    'Population Density (per sq km)': '{:,}'
-                }),
-                use_container_width=True
-            )
-        else:
-            st.info("Adjust filter criteria to view expansion priorities.")
+    with col_r:
+        # Donut Chart SVG Card
+        active_count = len(df_stores[df_stores['Status'] == 'Active'])
+        proposed_count = len(df_stores[df_stores['Status'] == 'Proposed'])
+        total_count = active_count + proposed_count
+        dash_active = round((active_count / total_count) * 99.9, 1) if total_count > 0 else 91.6
+        dash_gap = round(99.9 - dash_active, 1)
 
-    with col_summary_r:
-        st.markdown("### 🏬 Dark Store Network Composition")
-        status_counts = df_stores['Status'].value_counts()
-        fig_donut = go.Figure(data=[go.Pie(
-            labels=status_counts.index,
-            values=status_counts.values,
-            hole=0.62,
-            marker_colors=['#0a66c2', '#f59e0b'],
-            textinfo='label+value',
-            hoverinfo='label+percent'
-        )])
-        fig_donut.update_layout(
-            title="Active vs. Proposed Store Hubs",
-            template="plotly_white",
-            height=280,
-            margin=dict(l=10, r=10, t=40, b=10),
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#1e293b")
-        )
-        st.plotly_chart(fig_donut, use_container_width=True)
+        donut_html = f"""
+        <div class="card" style="margin-bottom: 16px;">
+          <h2 class="card-title">🏬 Network composition</h2>
+          <p class="hint">Active vs. proposed store hubs</p>
+          <div class="donutbox">
+            <svg width="170" height="170" viewBox="0 0 42 42" role="img" aria-label="Donut: {active_count} active, {proposed_count} proposed">
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#f59e0b" stroke-width="5"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#6366f1" stroke-width="5" stroke-dasharray="{dash_active} {dash_gap}" stroke-linecap="round" transform="rotate(-90 21 21)"/>
+              <text x="21" y="22" text-anchor="middle" font-size="8" font-weight="800" style="fill:var(--tx);font-family:Inter,sans-serif">{total_count}</text>
+              <text x="21" y="27.5" text-anchor="middle" font-size="3" style="fill:var(--mut);font-family:Inter,sans-serif">total hubs</text>
+            </svg>
+            <div class="leg">
+              <div><i style="background:#6366f1"></i>Active · {active_count}</div>
+              <div><i style="background:#f59e0b"></i>Proposed · {proposed_count}</div>
+            </div>
+          </div>
+        </div>
+        """
+        st.markdown(donut_html, unsafe_allow_html=True)
 
-        st.markdown("### ⏱️ Estimated SLA vs Delivery Radius")
+        # SLA vs Delivery Radius Card
+        st.markdown("""
+        <div class="card">
+          <h2 class="card-title">⏱️ SLA vs delivery radius</h2>
+          <p class="hint">Estimated delivery time by catchment radius</p>
+        """, unsafe_allow_html=True)
+
         radius_steps = np.arange(1.5, 6.5, 0.5)
         sla_steps = [round(9.0 + (r * 1.4), 1) for r in radius_steps]
-        fig_sla = go.Figure(data=[go.Scatter(
+        
+        fig_sla = go.Figure()
+        fig_sla.add_trace(go.Scatter(
             x=radius_steps,
             y=sla_steps,
-            mode='lines+markers',
-            line=dict(color='#2563eb', width=3),
-            marker=dict(size=7, color='#1d4ed8')
-        )])
-        fig_sla.add_vline(x=simulated_radius, line_dash="dash", line_color="#ef4444", annotation_text=f"Selected: {simulated_radius}km")
+            mode='lines',
+            line=dict(color='#818cf8', width=3),
+            fill='tozeroy',
+            fillcolor='rgba(99, 102, 241, 0.12)',
+            hoverinfo='x+y',
+            name='Delivery SLA'
+        ))
+        fig_sla.add_vline(
+            x=simulated_radius,
+            line_dash="dash",
+            line_color="#f59e0b",
+            annotation_text=f"Selected: {simulated_radius}km · {est_delivery_sla:.0f} min",
+            annotation_font=dict(color="#f59e0b", size=11, family="Inter")
+        )
+        fig_sla.add_trace(go.Scatter(
+            x=[simulated_radius],
+            y=[est_delivery_sla],
+            mode='markers',
+            marker=dict(size=10, color='#f59e0b'),
+            showlegend=False
+        ))
         fig_sla.update_layout(
-            title="Delivery Time SLA vs Buffer Radius",
-            xaxis_title="Catchment Radius (km)",
-            yaxis_title="Estimated SLA (Minutes)",
             template="plotly_white",
-            height=230,
-            margin=dict(l=10, r=10, t=35, b=20),
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#1e293b")
+            height=180,
+            margin=dict(l=10, r=10, t=20, b=25),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            xaxis=dict(title=dict(text="Radius (km)", font=dict(family="Inter", size=11, color="#64748b")), tickfont=dict(family="Inter", size=10, color="#64748b")),
+            yaxis=dict(title=dict(text="Minutes", font=dict(family="Inter", size=11, color="#64748b")), tickfont=dict(family="Inter", size=10, color="#64748b")),
+            font=dict(family="Inter", color="#0f172a")
         )
         st.plotly_chart(fig_sla, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # Top 5 Priority Expansion Zones Table
+    st.markdown("""
+    <div class="card" style="margin-top: 16px;">
+      <h2 class="card-title">🏆 Top 5 priority expansion zones</h2>
+      <p class="hint">Ranked by estimated monthly online orders and shopper density.</p>
+      <div class="tbl">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Neighborhood</th>
+              <th class="r">Online shoppers</th>
+              <th class="r">Orders / month</th>
+              <th class="r">Density /km²</th>
+            </tr>
+          </thead>
+          <tbody>
+    """, unsafe_allow_html=True)
+
+    if not filtered_df.empty:
+        top_exp = filtered_df.nlargest(5, 'Predicted Online Order Volume (Monthly)')
+        table_rows = ""
+        for idx, (_, row) in enumerate(top_exp.iterrows(), start=1):
+            shoppers = f"{int(row['Estimated Online Shoppers']):,}"
+            orders = f"{int(row['Predicted Online Order Volume (Monthly)']):,}"
+            density = f"{int(row['Population Density (per sq km)']):,}"
+            table_rows += f"""
+            <tr>
+              <td><span class="rk">{idx}</span>{row['Neighborhood']}</td>
+              <td class="r">{shoppers}</td>
+              <td class="r">{orders}</td>
+              <td class="r">{density}</td>
+            </tr>
+            """
+        st.markdown(table_rows + "</tbody></table></div></div>", unsafe_allow_html=True)
+    else:
+        st.markdown("<tr><td colspan='4'>No micro-markets meet current filter criteria.</td></tr></tbody></table></div></div>", unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
-# TAB 2: Geospatial View (3D & 2D)
+# TAB 2: Geospatial View
 # ------------------------------------------------------------------------------
 with tab_map:
-    st.subheader("🗺️ Geospatial Coverage & Network Topology")
+    st.markdown("""
+    <div class="card" style="margin-bottom: 16px;">
+        <h2 class="card-title">🗺️ Geospatial Coverage & Network Topology</h2>
+        <p class="hint">Toggle between 3D Spatial Deck (PyDeck) and 2D Real-World Service Boundaries (Leaflet).</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     map_view_mode = st.radio(
         "Select Geospatial Engine:",
@@ -548,12 +826,6 @@ with tab_map:
     )
 
     if map_view_mode == "✨ 3D Spatial Deck (PyDeck)":
-        st.markdown(
-            "Interactive **3D Column & Scatter Deck** for Chhatrapati Sambhajinagar. "
-            "Column height represents **Monthly Order Demand** per micro-market, while circular points represent **Dark Store Fulfillment Hubs**."
-        )
-
-        # Prepare PyDeck DataFrames with formatted HTML tooltips
         deck_demographics = filtered_df.copy()
         if not deck_demographics.empty:
             deck_demographics['elevation_val'] = deck_demographics['Predicted Online Order Volume (Monthly)'].astype(float)
@@ -569,11 +841,11 @@ with tab_map:
 
         deck_stores = filtered_stores.copy()
         if not deck_stores.empty:
-            # Color code: Emerald green for Active, Amber for Proposed
+            # Theme accents: Active = Emerald, Proposed = Amber
             deck_stores['color_r'] = deck_stores['Status'].apply(lambda s: 16 if s == 'Active' else 245)
             deck_stores['color_g'] = deck_stores['Status'].apply(lambda s: 185 if s == 'Active' else 158)
             deck_stores['color_b'] = deck_stores['Status'].apply(lambda s: 129 if s == 'Active' else 11)
-            deck_stores['fill_color'] = deck_stores.apply(lambda r: [r['color_r'], r['color_g'], r['color_b'], 210], axis=1)
+            deck_stores['fill_color'] = deck_stores.apply(lambda r: [r['color_r'], r['color_g'], r['color_b'], 215], axis=1)
             deck_stores['tooltip_html'] = (
                 "<b>🏪 " + deck_stores['Store Name'].astype(str) + "</b><br/>"
                 "Status: <b>" + deck_stores['Status'].astype(str) + "</b><br/>"
@@ -584,7 +856,6 @@ with tab_map:
             deck_stores['fill_color'] = []
             deck_stores['tooltip_html'] = ""
 
-        # 3D Extruded Column Layer for Micro-Markets
         column_layer = pdk.Layer(
             "ColumnLayer",
             data=deck_demographics,
@@ -592,12 +863,11 @@ with tab_map:
             get_elevation="elevation_val",
             elevation_scale=0.06,
             radius=320,
-            get_fill_color=[37, 99, 235, 175],
+            get_fill_color=[99, 102, 241, 185],
             pickable=True,
             auto_highlight=True
         )
 
-        # 3D Scatterplot Layer for Dark Store Hubs
         store_layer = pdk.Layer(
             "ScatterplotLayer",
             data=deck_stores,
@@ -625,19 +895,20 @@ with tab_map:
             tooltip={
                 "html": "{tooltip_html}",
                 "style": {
-                    "backgroundColor": "#0f172a",
-                    "color": "#f8fafc",
+                    "backgroundColor": "#0f1629",
+                    "color": "#e8edf9",
+                    "fontFamily": "Inter, sans-serif",
                     "fontSize": "13px",
-                    "borderRadius": "8px",
+                    "borderRadius": "10px",
                     "padding": "10px 14px",
-                    "boxShadow": "0 4px 14px rgba(0, 0, 0, 0.2)"
+                    "boxShadow": "0 8px 24px rgba(0, 0, 0, 0.25)",
+                    "border": "1px solid #1e2a47"
                 }
             }
         )
 
         st.pydeck_chart(deck, use_container_width=True)
-
-        st.caption("💡 **Tip**: Hold **Right Click + Drag** to rotate in 3D, and **Scroll** to zoom. Hover over any column or marker for detailed micro-market metrics.")
+        st.caption("💡 **Tip**: Hold **Right Click + Drag** to rotate in 3D, and **Scroll** to zoom. Hover over columns or store hubs for detailed metrics.")
 
     else:
         st.markdown(
@@ -645,30 +916,27 @@ with tab_map:
             f"and simulated fulfillment buffer circles (**{simulated_radius} km radius**)."
         )
 
-        # Initialize Folium Map centered on Aurangabad with clean OpenStreetMap tiles
         aurangabad_map = folium.Map(
             location=[19.8762, 75.3433],
             zoom_start=12,
             tiles="OpenStreetMap"
         )
 
-        # FeatureGroups for interactive layer toggling
         fg_stores = folium.FeatureGroup(name="🏪 Dark Store Hubs & Buffers", show=True)
         fg_blinkit = folium.FeatureGroup(name="🟡 Blinkit Service Zones", show=True)
         fg_zepto = folium.FeatureGroup(name="🟣 Zepto Service Zones", show=True)
         fg_custom = folium.FeatureGroup(name="🔵 Custom Boundary Zones", show=True)
 
-        # Add Dark Store Markers & Delivery Radius Circles to Store FeatureGroup
         for _, store in filtered_stores.iterrows():
             is_active = (store['Status'] == 'Active')
             marker_color = "blue" if is_active else "orange"
             icon_type = "shopping-cart" if is_active else "clock"
 
             popup_html = f"""
-            <div style='font-family: sans-serif; font-size: 13px; width: 220px;'>
-                <h4 style='margin: 0 0 6px 0; color: #0a66c2;'>{store['Store Name']}</h4>
+            <div style='font-family: Inter, sans-serif; font-size: 13px; width: 220px;'>
+                <h4 style='margin: 0 0 6px 0; color: #6366f1;'>{store['Store Name']}</h4>
                 <p style='margin: 2px 0;'><b>Coverage:</b> {store['Coverage Area']}</p>
-                <p style='margin: 2px 0;'><b>Status:</b> <span style='color: {"#059669" if is_active else "#d97706"}; font-weight: bold;'>{store['Status']}</span></p>
+                <p style='margin: 2px 0;'><b>Status:</b> <span style='color: {"#10b981" if is_active else "#f59e0b"}; font-weight: bold;'>{store['Status']}</span></p>
                 <p style='margin: 2px 0;'><b>Delivery Radius:</b> {simulated_radius} km</p>
             </div>
             """
@@ -683,20 +951,18 @@ with tab_map:
             folium.Circle(
                 location=[store['Latitude'], store['Longitude']],
                 radius=simulated_radius * 1000,
-                color="#0a66c2" if is_active else "#f39c12",
+                color="#6366f1" if is_active else "#f59e0b",
                 weight=1.5,
                 fill=True,
-                fill_color="#0a66c2" if is_active else "#f39c12",
+                fill_color="#6366f1" if is_active else "#f59e0b",
                 fill_opacity=0.12,
                 tooltip=f"{store['Store Name']} - {simulated_radius}km Coverage Zone"
             ).add_to(fg_stores)
 
-        # Load and Render GeoJSON files from data/geojson/
         geojson_dir = os.path.join(BASE_DIR, "data", "geojson")
         loaded_polygons = []
 
         def sanitize_geojson_keys(obj):
-            """Sanitize property keys with hyphens (e.g. stroke-width -> stroke_width) to prevent Leaflet JS errors."""
             if isinstance(obj, dict):
                 if 'features' in obj and isinstance(obj['features'], list):
                     for feat in obj['features']:
@@ -745,8 +1011,8 @@ with tab_map:
                             target_fg = fg_zepto
                             brand = "Zepto"
                         else:
-                            stroke_color = "#1f618d"
-                            fill_color = "#3498db"
+                            stroke_color = "#6366f1"
+                            fill_color = "#818cf8"
                             target_fg = fg_custom
                             brand = "Custom"
 
@@ -762,7 +1028,7 @@ with tab_map:
                             },
                             tooltip=f"<b>{brand} Delivery Polygon:</b> {zone_label}",
                             popup=folium.Popup(
-                                f"<div style='font-family: sans-serif; font-size: 13px;'>"
+                                f"<div style='font-family: Inter, sans-serif; font-size: 13px;'>"
                                 f"<b style='color: {stroke_color};'>{brand} Real-World Service Zone</b><br>"
                                 f"<b>Zone:</b> {zone_label}<br>"
                                 f"<b>Source:</b> {os.path.basename(g_path)}</div>",
@@ -794,7 +1060,6 @@ with tab_map:
         else:
             st.info("💡 Place GeoJSON boundary files in `data/geojson/` to overlay real-world service boundaries.")
 
-    # Store Directory Table
     st.markdown("### 🏢 Dark Store Fulfillment Hubs Directory")
     st.dataframe(
         filtered_stores[['Store Name', 'Status', 'Coverage Area', 'Delivery Radius (km)', 'Latitude', 'Longitude']],
@@ -802,13 +1067,17 @@ with tab_map:
     )
 
 # ------------------------------------------------------------------------------
-# TAB 3: Demographic Heatmaps & Visualizations
+# TAB 3: Demographic Heatmaps
 # ------------------------------------------------------------------------------
 with tab_demographics:
-    st.subheader("👥 Micro-Market Demographic Analysis & Interactive Heatmaps")
+    st.markdown("""
+    <div class="card" style="margin-bottom: 16px;">
+        <h2 class="card-title">👥 Micro-Market Demographic Analysis & Interactive Heatmaps</h2>
+        <p class="hint">Multi-dimensional correlation between population density, internet adoption, and projected order demand.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     if not filtered_df.empty:
-        # Dynamic Bubble Chart: Density vs Monthly Orders vs Shoppers
         fig_bubble = px.scatter(
             filtered_df,
             x='Population Density (per sq km)',
@@ -826,19 +1095,18 @@ with tab_demographics:
                 'Population Density (per sq km)': 'Population Density (people/km²)',
                 'Predicted Online Order Volume (Monthly)': 'Predicted Monthly Orders'
             },
-            color_continuous_scale='Tealgrn',
+            color_continuous_scale=[[0, '#06b6d4'], [0.5, '#6366f1'], [1, '#8b5cf6']],
             template="plotly_white"
         )
         fig_bubble.update_layout(
             height=420,
             margin=dict(l=20, r=20, t=40, b=40),
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#1e293b")
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter", color="#0f172a")
         )
         st.plotly_chart(fig_bubble, use_container_width=True)
 
-        # Multi-column grid for sorted comparison bar charts
         col_c1, col_c2 = st.columns(2)
 
         with col_c1:
@@ -848,16 +1116,16 @@ with tab_demographics:
                 y='Projected Population (2025)',
                 title="Projected Population (2025) by Area",
                 labels={'Projected Population (2025)': 'Population'},
-                color_discrete_sequence=['#2563eb'],
+                color_discrete_sequence=['#6366f1'],
                 template="plotly_white"
             )
             fig_pop.update_layout(
                 xaxis_tickangle=-40,
                 height=380,
                 margin=dict(l=20, r=20, t=40, b=80),
-                plot_bgcolor="#ffffff",
-                paper_bgcolor="#ffffff",
-                font=dict(color="#1e293b")
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Inter", color="#0f172a")
             )
             st.plotly_chart(fig_pop, use_container_width=True)
 
@@ -868,20 +1136,19 @@ with tab_demographics:
                 y='Predicted Online Order Volume (Monthly)',
                 title="Predicted Monthly Orders by Area",
                 labels={'Predicted Online Order Volume (Monthly)': 'Monthly Orders'},
-                color_discrete_sequence=['#0d9488'],
+                color_discrete_sequence=['#06b6d4'],
                 template="plotly_white"
             )
             fig_orders.update_layout(
                 xaxis_tickangle=-40,
                 height=380,
                 margin=dict(l=20, r=20, t=40, b=80),
-                plot_bgcolor="#ffffff",
-                paper_bgcolor="#ffffff",
-                font=dict(color="#1e293b")
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Inter", color="#0f172a")
             )
             st.plotly_chart(fig_orders, use_container_width=True)
 
-        # Correlation Heatmap for demographic variables
         st.markdown("### 📊 Demographic Feature Correlation Matrix")
         numeric_cols = [
             'Population Density (per sq km)',
@@ -895,23 +1162,22 @@ with tab_demographics:
         fig_corr = px.imshow(
             corr_matrix,
             text_auto=".2f",
-            color_continuous_scale="Blues",
+            color_continuous_scale=[[0, '#f4f6fb'], [0.5, '#818cf8'], [1, '#4f46e5']],
             template="plotly_white",
             title="Correlation Matrix across Micro-Market Variables"
         )
         fig_corr.update_layout(
             height=390,
             margin=dict(l=20, r=20, t=40, b=40),
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#1e293b")
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter", color="#0f172a")
         )
         st.plotly_chart(fig_corr, use_container_width=True)
 
     else:
         st.warning("No micro-markets match current density and neighborhood filters.")
 
-    # Detailed Dataset Inspector & Download
     with st.expander("🔍 Inspect Full Market Dataset & Export"):
         st.dataframe(filtered_df, use_container_width=True)
         csv_data = filtered_df.to_csv(index=False).encode('utf-8')
@@ -923,35 +1189,37 @@ with tab_demographics:
         )
 
 # ------------------------------------------------------------------------------
-# TAB 4: Demand Forecasting Engine (Machine Learning)
+# TAB 4: Demand Forecasting Engine
 # ------------------------------------------------------------------------------
 with tab_forecast:
-    st.subheader("📈 Machine Learning Demand Forecasting Engine")
-    st.markdown("Predictive order volumes modeled for Aurangabad micro-markets with temporal seasonality.")
+    st.markdown("""
+    <div class="card" style="margin-bottom: 16px;">
+        <h2 class="card-title">📈 Machine Learning Demand Forecasting Engine</h2>
+        <p class="hint">Predictive order volumes modeled for Aurangabad micro-markets with temporal seasonality.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     raw_df, df_model, model, X_train, y_test, y_pred, mae, rmse, r2 = get_forecasting_engine()
 
-    # Model Performance KPIs
     m_col1, m_col2, m_col3 = st.columns(3)
     m_col1.metric("Mean Absolute Error (MAE)", f"{mae:.2f}", delta="Orders Deviation", delta_color="inverse")
     m_col2.metric("Root Mean Squared Error (RMSE)", f"{rmse:.2f}", delta="Variance", delta_color="inverse")
     m_col3.metric("Model R² Score", f"{r2:.3f}", delta="Goodness of Fit")
 
-    # Actual vs Predicted Scatter Plot
     fig_eval = go.Figure()
     fig_eval.add_trace(go.Scatter(
         x=y_test.index,
         y=y_test,
         mode='markers',
         name='Actual Orders',
-        marker=dict(color='#0a66c2', size=7, opacity=0.75)
+        marker=dict(color='#6366f1', size=7, opacity=0.75)
     ))
     fig_eval.add_trace(go.Scatter(
         x=y_test.index,
         y=y_pred,
         mode='markers',
         name='Predicted Demand',
-        marker=dict(color='#e74c3c', size=7, symbol='x')
+        marker=dict(color='#f59e0b', size=7, symbol='x')
     ))
     fig_eval.update_layout(
         title="Actual vs Predicted Demand on Validation Set",
@@ -959,15 +1227,14 @@ with tab_forecast:
         yaxis_title="Daily Orders per Hub",
         hovermode="x unified",
         template="plotly_white",
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        font=dict(color="#1e293b"),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter", color="#0f172a"),
         height=380,
         margin=dict(l=20, r=20, t=40, b=40)
     )
     st.plotly_chart(fig_eval, use_container_width=True)
 
-    # Forward Forecasting
     st.markdown(f"### 🔮 Forward Demand Forecast ({forecast_days} Days)")
     last_date = df_model.index.max()
     future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=forecast_days, freq='D')
@@ -1000,23 +1267,22 @@ with tab_forecast:
             y=future_pred,
             mode='lines+markers',
             name='Forecasted Demand',
-            line=dict(color='#27ae60', width=3),
-            marker=dict(size=8, color='#2ecc71')
+            line=dict(color='#10b981', width=3),
+            marker=dict(size=8, color='#059669')
         ))
         fig_future.update_layout(
             title=f"{forecast_days}-Day Forward Demand Projection",
             xaxis_title="Timeline",
             yaxis_title="Orders / Hub",
             template="plotly_white",
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#1e293b"),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter", color="#0f172a"),
             height=320,
             margin=dict(l=20, r=20, t=40, b=40)
         )
         st.plotly_chart(fig_future, use_container_width=True)
 
-    # Interactive Rider Fleet Sizing Calculator
     st.markdown("### 🛵 Delivery Fleet Sizing Calculator")
     calc_col1, calc_col2 = st.columns(2)
     with calc_col1:
@@ -1041,11 +1307,12 @@ with tab_forecast:
 # TAB 5: Climate & Monsoon Delivery Impact
 # ------------------------------------------------------------------------------
 with tab_climate:
-    st.subheader("🌦️ Marathwada Climate & Monsoon Delivery Impact")
-    st.markdown(
-        "Seasonal delivery bottlenecks in Aurangabad: High monsoon precipitation (July-August) and "
-        "peak summer temperatures (April-May) impact rider turnaround and delivery SLAs."
-    )
+    st.markdown("""
+    <div class="card" style="margin-bottom: 16px;">
+        <h2 class="card-title">🌦️ Marathwada Climate & Monsoon Delivery Impact</h2>
+        <p class="hint">Seasonal delivery bottlenecks in Aurangabad: High monsoon precipitation (July-August) and peak summer temperatures (April-May).</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     c_col1, c_col2 = st.columns([2, 1])
 
@@ -1056,7 +1323,7 @@ with tab_climate:
                 x=filtered_climate['Month'],
                 y=filtered_climate['Avg Rainfall (mm)'],
                 name='Avg Rainfall (mm)',
-                marker_color='#38bdf8'
+                marker_color='#06b6d4'
             ))
             fig_climate.add_trace(go.Scatter(
                 x=filtered_climate['Month'],
@@ -1064,8 +1331,8 @@ with tab_climate:
                 name='Delivery Impact Scale (1-5)',
                 yaxis='y2',
                 mode='lines+markers',
-                line=dict(color='#ea580c', width=3),
-                marker=dict(size=8, color='#c2410c')
+                line=dict(color='#f59e0b', width=3),
+                marker=dict(size=8, color='#d97706')
             ))
             fig_climate.update_layout(
                 title="Rainfall vs Delivery Friction Scale in Aurangabad",
@@ -1074,9 +1341,9 @@ with tab_climate:
                 yaxis2=dict(title="Impact Scale (1-5)", overlaying='y', side='right', range=[0, 6]),
                 legend=dict(x=0.01, y=0.99),
                 template="plotly_white",
-                plot_bgcolor="#ffffff",
-                paper_bgcolor="#ffffff",
-                font=dict(color="#1e293b"),
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Inter", color="#0f172a"),
                 height=380,
                 margin=dict(l=20, r=20, t=40, b=40)
             )
@@ -1098,6 +1365,5 @@ with tab_climate:
             "• **Winter Optimal Window**: November-January provides peak delivery efficiency with zero weather bottlenecks."
         )
 
-    # Filtered climate dataset viewer
     with st.expander("📋 View Monthly Climate & Impact Table"):
         st.dataframe(filtered_climate, use_container_width=True)
