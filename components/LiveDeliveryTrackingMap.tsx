@@ -563,6 +563,28 @@ export const LiveDeliveryTrackingMap: React.FC<LiveDeliveryTrackingMapProps> = (
                 </div>
               </div>
 
+              {/* 4 Fulfillment Milestones Indicator */}
+              <div className="mb-3 grid grid-cols-4 gap-1.5 text-center">
+                {[
+                  { key: 'placed', label: 'Placed', icon: '✓', active: true },
+                  { key: 'packed', label: 'Packed', icon: '📦', active: progress >= 0.1 },
+                  { key: 'dispatched', label: 'Dispatched', icon: '🛵', active: progress >= 0.3 },
+                  { key: 'arriving', label: 'Arriving', icon: '🏠', active: progress >= 0.85 },
+                ].map((m) => (
+                  <div
+                    key={m.key}
+                    className={`rounded-lg py-1 px-1 border transition-all ${
+                      m.active
+                        ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300 shadow-sm shadow-emerald-500/10'
+                        : 'border-slate-800 bg-slate-950/30 text-slate-500'
+                    }`}
+                  >
+                    <div className="text-[11px] leading-none mb-0.5">{m.icon}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-tight">{m.label}</div>
+                  </div>
+                ))}
+              </div>
+
               {/* Synchronized Linear Progress Bar */}
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[11px] font-bold text-slate-400">

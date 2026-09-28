@@ -588,13 +588,22 @@ def check_for_external_order():
     if os.path.exists(order_file):
         try:
             with open(order_file, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                if data.get("active") is False or data.get("status") == "completed":
+                    return None
+                return data
         except Exception:
             return None
     return None
 
 def render_animated_delivery_tracking_map(cur_ord, df_stores):
-    """Render an interactive Leaflet map featuring real-time animated rider traversal along the delivery route."""
+    """
+    Renders an interactive multi-route delivery tracking map:
+    1. First draws ALL candidate routes from dark store to customer in distinct colors.
+    2. Dynamically evaluates and selects the SHORTEST route.
+    3. Dims alternative routes, illuminates the shortest route in glowing emerald green,
+       and dispatches the courier along that optimal path.
+    """
     other_stores = []
     if df_stores is not None and not df_stores.empty:
         for _, row in df_stores.iterrows():
@@ -619,29 +628,29 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
         html, body, #map {{ width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }}
         
         .hub-marker {{
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             background: rgba(16, 185, 129, 0.25);
-            border: 2px solid #10b981;
+            border: 2.5px solid #10b981;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 17px;
-            box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+            font-size: 18px;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.7);
             animation: pulse-hub 2s infinite;
         }}
         .cust-marker {{
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             background: rgba(6, 182, 212, 0.25);
-            border: 2px solid #06b6d4;
+            border: 2.5px solid #06b6d4;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 17px;
-            box-shadow: 0 0 16px rgba(6, 182, 212, 0.6);
+            font-size: 18px;
+            box-shadow: 0 0 18px rgba(6, 182, 212, 0.7);
             animation: pulse-cust 2s infinite;
         }}
         .rider-marker {{
@@ -654,7 +663,7 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.9);
+            box-shadow: 0 0 22px rgba(16, 185, 129, 0.95);
             position: relative;
         }}
         .rider-label {{
@@ -667,7 +676,7 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
             color: #34d399;
             font-size: 10px;
             font-weight: 800;
-            padding: 2px 7px;
+            padding: 2px 8px;
             border-radius: 99px;
             border: 1px solid #10b981;
             box-shadow: 0 2px 8px rgba(0,0,0,0.5);
@@ -682,20 +691,69 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
             50% {{ transform: scale(1.12); }}
         }}
 
+        /* Multi-Route Top Evaluation Banner */
+        .route-eval-banner {{
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 8px 18px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transition: all 0.4s ease;
+        }}
+        .evaluating {{
+            background: rgba(15, 23, 42, 0.92);
+            border: 1.5px solid #f59e0b;
+            color: #fbbf24;
+        }}
+        .selected {{
+            background: rgba(6, 78, 59, 0.95);
+            border: 1.5px solid #10b981;
+            color: #34d399;
+        }}
+        .eval-dot {{
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse-hub 1s infinite;
+        }}
+
+        /* Route Distance Tag Tooltips */
+        .route-tag {{
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            white-space: nowrap;
+        }}
+
+        /* Bottom HUD Card */
         .hud-card {{
             position: absolute;
             bottom: 16px;
             left: 16px;
             z-index: 1000;
-            background: rgba(15, 23, 42, 0.92);
+            background: rgba(15, 23, 42, 0.94);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(51, 65, 85, 0.8);
             border-radius: 16px;
             padding: 14px 18px;
             color: #f1f5f9;
-            width: 320px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+            width: 340px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
         }}
         .hud-title {{
             font-size: 10px;
@@ -720,6 +778,33 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
             color: #ffffff;
             margin-top: 3px;
         }}
+        
+        /* Candidate Route Selector Pills */
+        .route-pills-row {{
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }}
+        .route-pill {{
+            flex: 1;
+            padding: 5px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: #1e293b;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .route-pill.active {{
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            color: #34d399;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }}
+
         .hud-metrics {{
             display: flex;
             justify-content: space-between;
@@ -790,28 +875,47 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
     <body>
       <div id="map"></div>
       
+      <!-- Multi-Route Analysis Status Banner -->
+      <div id="eval-banner" class="route-eval-banner evaluating">
+        <span class="eval-dot"></span>
+        <span id="eval-banner-text">🔍 Analyzing 3 Candidate Routes from Hub to Customer...</span>
+      </div>
+
       <div class="hud-card">
         <div class="hud-title">
           <span class="hud-dot"></span>
-          <span>Live Rider Dispatch • Order #{cur_ord['order_id']}</span>
+          <span>Autonomous Dispatch • Order #{cur_ord['order_id']}</span>
         </div>
         <div class="hud-rider">🛵 {cur_ord['rider']}</div>
         
+        <!-- Interactive Candidate Routes Selector -->
+        <div class="route-pills-row">
+          <div class="route-pill active" id="pill-r1" onclick="selectRoute(0)">
+            <span id="pill-text-r1">Route 1 (Shortest)</span>
+          </div>
+          <div class="route-pill" id="pill-r2" onclick="selectRoute(1)">
+            <span id="pill-text-r2">Route 2</span>
+          </div>
+          <div class="route-pill" id="pill-r3" onclick="selectRoute(2)">
+            <span id="pill-text-r3">Route 3</span>
+          </div>
+        </div>
+
         <div class="hud-metrics">
           <div>
-            <div class="hud-metric-label">Live SLA</div>
+            <div class="hud-metric-label">Optimized SLA</div>
             <div class="hud-metric-val" id="eta-val" style="color: #34d399;">{cur_ord['eta_mins']} mins</div>
           </div>
           <div style="text-align: right;">
-            <div class="hud-metric-label">Remaining</div>
+            <div class="hud-metric-label">Distance (Shortest)</div>
             <div class="hud-metric-val" id="dist-val">{cur_ord['distance_km']:.2f} km</div>
           </div>
         </div>
 
         <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; font-weight: 600;">
-          <span>Hub Staging</span>
+          <span>Hub Dispatched</span>
           <span id="pct-val" style="color: #34d399; font-weight: 700;">0%</span>
-          <span>Customer Gate</span>
+          <span>Customer Doorstep</span>
         </div>
         <div class="hud-bar-bg">
           <div class="hud-bar-fill" id="progress-bar"></div>
@@ -819,7 +923,7 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
 
         <div class="hud-controls">
           <button class="hud-btn" id="pause-btn" onclick="togglePause()">⏸️ Pause</button>
-          <button class="hud-btn hud-btn-primary" onclick="restartTrip()">🔄 Replay Route</button>
+          <button class="hud-btn hud-btn-primary" onclick="restartTrip()">🔄 Re-evaluate Routes</button>
         </div>
       </div>
 
@@ -828,8 +932,6 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
         var storeLon = {cur_ord['store_lon']};
         var custLat = {cur_ord['cust_lat']};
         var custLon = {cur_ord['cust_lon']};
-        var totalDistanceKm = {cur_ord['distance_km']:.2f};
-        var initialEtaMins = {cur_ord['eta_mins']};
         var otherStores = {other_stores_json};
 
         var map = L.map('map', {{
@@ -838,9 +940,10 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
 
         L.control.zoom({{ position: 'topright' }}).addTo(map);
 
-        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
-          maxZoom: 19
+        L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+          attribution: '&copy; OpenStreetMap &copy; CARTO',
+          maxZoom: 19,
+          subdomains: 'abcd'
         }}).addTo(map);
 
         otherStores.forEach(function(s) {{
@@ -856,8 +959,8 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
         var hubIcon = L.divIcon({{
           className: '',
           html: '<div class="hub-marker">🏬</div>',
-          iconSize: [36, 36],
-          iconAnchor: [18, 18]
+          iconSize: [38, 38],
+          iconAnchor: [19, 19]
         }});
         L.marker([storeLat, storeLon], {{ icon: hubIcon }})
           .addTo(map)
@@ -866,8 +969,8 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
         var custIcon = L.divIcon({{
           className: '',
           html: '<div class="cust-marker">🏠</div>',
-          iconSize: [36, 36],
-          iconAnchor: [18, 18]
+          iconSize: [38, 38],
+          iconAnchor: [19, 19]
         }});
         L.marker([custLat, custLon], {{ icon: custIcon }})
           .addTo(map)
@@ -884,11 +987,62 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
         }});
         var riderMarker = L.marker([storeLat, storeLon], {{ icon: riderIcon, zIndexOffset: 1000 }}).addTo(map);
 
-        var baseRoutePolyline = null;
+        // Candidate Routes storage
+        var candidateRoutes = [];
+        var polylines = [];
+        var tagMarkers = [];
+        var selectedRouteIndex = 0;
+        var activeRouteCoords = [];
         var traveledPolyline = null;
-        var routeCoordinates = [];
 
-        async function fetchRoute() {{
+        function calculateDistance(pts) {{
+          var total = 0;
+          for (var i = 0; i < pts.length - 1; i++) {{
+            total += L.latLng(pts[i]).distanceTo(L.latLng(pts[i + 1]));
+          }}
+          return total;
+        }}
+
+        // Generate 3 realistic candidate paths connecting Hub to Customer
+        function buildCandidateRoutes(primaryPts) {{
+          var dLat = custLat - storeLat;
+          var dLon = custLon - storeLon;
+
+          // Route 1: Direct Primary Road
+          var r1 = primaryPts;
+
+          // Route 2: Secondary Bypass Corridor (bows outward along perpendicular vector)
+          var r2 = [
+            [storeLat, storeLon],
+            [storeLat + dLat * 0.25 - dLon * 0.28, storeLon + dLon * 0.25 + dLat * 0.28],
+            [storeLat + dLat * 0.55 - dLon * 0.35, storeLon + dLon * 0.55 + dLat * 0.35],
+            [storeLat + dLat * 0.85 - dLon * 0.18, storeLon + dLon * 0.85 + dLat * 0.18],
+            [custLat, custLon]
+          ];
+
+          // Route 3: Inner Grid / Residential Streets (steps sharply through intersections)
+          var r3 = [
+            [storeLat, storeLon],
+            [storeLat + dLat * 0.20 + dLon * 0.25, storeLon + dLon * 0.05],
+            [storeLat + dLat * 0.40 + dLon * 0.32, storeLon + dLon * 0.45],
+            [storeLat + dLat * 0.70 + dLon * 0.22, storeLon + dLon * 0.55],
+            [storeLat + dLat * 0.88 + dLon * 0.12, storeLon + dLon * 0.88],
+            [custLat, custLon]
+          ];
+
+          var dist1 = calculateDistance(r1);
+          var dist2 = calculateDistance(r2);
+          var dist3 = calculateDistance(r3);
+
+          return [
+            {{ name: 'Route 1 (Arterial)', coords: r1, distMeters: dist1, distKm: (dist1/1000).toFixed(2), color: '#06b6d4' }},
+            {{ name: 'Route 2 (Bypass)', coords: r2, distMeters: dist2, distKm: (dist2/1000).toFixed(2), color: '#f59e0b' }},
+            {{ name: 'Route 3 (Inner Grid)', coords: r3, distMeters: dist3, distKm: (dist3/1000).toFixed(2), color: '#8b5cf6' }}
+          ];
+        }}
+
+        async function fetchAndEvaluateRoutes() {{
+          var primaryCoords = [];
           var url = 'https://router.project-osrm.org/route/v1/driving/' + storeLon + ',' + storeLat + ';' + custLon + ',' + custLat + '?overview=full&geometries=geojson';
           try {{
             var controller = new AbortController();
@@ -897,40 +1051,144 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
             clearTimeout(timeoutId);
             var data = await resp.json();
             if (data.routes && data.routes.length > 0 && data.routes[0].geometry.coordinates.length > 1) {{
-              routeCoordinates = data.routes[0].geometry.coordinates.map(function(pt) {{ return [pt[1], pt[0]]; }});
+              primaryCoords = data.routes[0].geometry.coordinates.map(function(pt) {{ return [pt[1], pt[0]]; }});
             }} else {{
-              throw new Error('No OSRM route');
+              throw new Error('Fallback required');
             }}
-          }} catch (err) {{
+          }} catch (e) {{
             var midLat = (storeLat + custLat) / 2;
             var midLon = (storeLon + custLon) / 2;
-            routeCoordinates = [
+            primaryCoords = [
               [storeLat, storeLon],
-              [storeLat, midLon],
+              [storeLat + (custLat - storeLat) * 0.3, storeLon + (custLon - storeLon) * 0.1],
               [midLat, midLon],
-              [custLat, midLon],
+              [storeLat + (custLat - storeLat) * 0.8, storeLon + (custLon - storeLon) * 0.9],
               [custLat, custLon]
             ];
           }}
 
-          baseRoutePolyline = L.polyline(routeCoordinates, {{
-            color: '#06b6d4',
-            weight: 5,
-            opacity: 0.8,
-            dashArray: '8, 8',
-            lineCap: 'round',
-            lineJoin: 'round'
-          }}).addTo(map);
+          candidateRoutes = buildCandidateRoutes(primaryCoords);
 
+          // Find strictly shortest route
+          var minIdx = 0;
+          var minDist = candidateRoutes[0].distMeters;
+          for (var i = 1; i < candidateRoutes.length; i++) {{
+            if (candidateRoutes[i].distMeters < minDist) {{
+              minDist = candidateRoutes[i].distMeters;
+              minIdx = i;
+            }}
+          }}
+          selectedRouteIndex = minIdx;
+          activeRouteCoords = candidateRoutes[minIdx].coords;
+
+          // Update HUD Pills
+          document.getElementById('pill-text-r1').innerText = candidateRoutes[0].distKm + ' km' + (minIdx === 0 ? ' (Shortest)' : '');
+          document.getElementById('pill-text-r2').innerText = candidateRoutes[1].distKm + ' km' + (minIdx === 1 ? ' (Shortest)' : '');
+          document.getElementById('pill-text-r3').innerText = candidateRoutes[2].distKm + ' km' + (minIdx === 2 ? ' (Shortest)' : '');
+
+          // =================================================================
+          // STAGE 1: Draw ALL 3 candidate routes simultaneously
+          // =================================================================
+          polylines.forEach(function(p) {{ map.removeLayer(p); }});
+          tagMarkers.forEach(function(m) {{ map.removeLayer(m); }});
+          polylines = [];
+          tagMarkers = [];
+
+          candidateRoutes.forEach(function(route, idx) {{
+            var poly = L.polyline(route.coords, {{
+              color: route.color,
+              weight: 4.5,
+              opacity: 0.85,
+              dashArray: '8, 8',
+              lineCap: 'round',
+              lineJoin: 'round'
+            }}).addTo(map);
+            polylines.push(poly);
+
+            // Add distance label pill near route midpoint
+            var midPt = route.coords[Math.floor(route.coords.length / 2)];
+            var tagIcon = L.divIcon({{
+              className: '',
+              html: '<div class="route-tag" style="border-color:' + route.color + '">🛣️ ' + route.name + ': ' + route.distKm + ' km</div>',
+              iconSize: [120, 24],
+              iconAnchor: [60, 12]
+            }});
+            var marker = L.marker(midPt, {{ icon: tagIcon }}).addTo(map);
+            tagMarkers.push(marker);
+          }});
+
+          var banner = document.getElementById('eval-banner');
+          var bannerText = document.getElementById('eval-banner-text');
+          banner.className = 'route-eval-banner evaluating';
+          bannerText.innerText = '🔍 Analyzing 3 Candidate Routes from Hub to Customer...';
+
+          // =================================================================
+          // STAGE 2: After 2.6s, select and highlight SHORTEST route
+          // =================================================================
+          setTimeout(function() {{
+            lockShortestRoute(minIdx);
+          }}, 2600);
+        }}
+
+        function lockShortestRoute(idx) {{
+          selectedRouteIndex = idx;
+          var winningRoute = candidateRoutes[idx];
+          activeRouteCoords = winningRoute.coords;
+
+          // Update Banner
+          var banner = document.getElementById('eval-banner');
+          var bannerText = document.getElementById('eval-banner-text');
+          banner.className = 'route-eval-banner selected';
+          var savedKm = (Math.max.apply(null, candidateRoutes.map(function(r) {{ return r.distKm; }})) - winningRoute.distKm).toFixed(2);
+          bannerText.innerText = '✅ Shortest Route Selected: ' + winningRoute.name + ' (' + winningRoute.distKm + ' km) • Dispatched!';
+
+          // Highlight winning route, dim the others
+          polylines.forEach(function(p, i) {{
+            if (i === idx) {{
+              p.setStyle({{
+                color: '#10b981',
+                weight: 6.5,
+                opacity: 1.0,
+                dashArray: null
+              }});
+              p.bringToFront();
+            }} else {{
+              p.setStyle({{
+                color: '#64748b',
+                weight: 2.5,
+                opacity: 0.22,
+                dashArray: '5, 8'
+              }});
+            }}
+          }});
+
+          // Update active pill
+          for (var i = 0; i < 3; i++) {{
+            var pill = document.getElementById('pill-r' + (i + 1));
+            if (i === idx) {{
+              pill.className = 'route-pill active';
+            }} else {{
+              pill.className = 'route-pill';
+            }}
+          }}
+
+          document.getElementById('dist-val').innerText = winningRoute.distKm + ' km';
+
+          // Create Traveled Polyline & start rider traversal
+          if (traveledPolyline) map.removeLayer(traveledPolyline);
           traveledPolyline = L.polyline([], {{
             color: '#10b981',
-            weight: 6,
+            weight: 7,
             opacity: 0.95,
             lineCap: 'round',
             lineJoin: 'round'
           }}).addTo(map);
 
           startAnimation();
+        }}
+
+        function selectRoute(idx) {{
+          lockShortestRoute(idx);
         }}
 
         function calculateCumulativeDistances(pts) {{
@@ -977,13 +1235,14 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
           var elapsed = timestamp - startTime;
           currentProgress = Math.min(1, pausedProgress + elapsed / DURATION_MS);
 
-          var distData = calculateCumulativeDistances(routeCoordinates);
-          var ptData = getPointAtProgress(routeCoordinates, distData.dists, distData.total, currentProgress);
+          var distData = calculateCumulativeDistances(activeRouteCoords);
+          var ptData = getPointAtProgress(activeRouteCoords, distData.dists, distData.total, currentProgress);
 
           riderMarker.setLatLng([ptData.lat, ptData.lon]);
-          traveledPolyline.setLatLngs(ptData.traveledPts);
+          if (traveledPolyline) traveledPolyline.setLatLngs(ptData.traveledPts);
 
-          var remDist = Math.max(0, (1 - currentProgress) * totalDistanceKm).toFixed(2);
+          var activeDistKm = parseFloat(candidateRoutes[selectedRouteIndex].distKm);
+          var remDist = Math.max(0, (1 - currentProgress) * activeDistKm).toFixed(2);
           document.getElementById('dist-val').innerText = remDist + ' km';
           
           var pct = Math.round(currentProgress * 100);
@@ -1000,7 +1259,7 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
           }} else if (currentProgress > 0.5) {{
             etaVal.innerText = '2 mins (Nearby)';
           }} else {{
-            etaVal.innerText = Math.max(1, Math.ceil((1 - currentProgress) * initialEtaMins)) + ' mins';
+            etaVal.innerText = Math.max(1, Math.ceil((1 - currentProgress) * 6)) + ' mins';
           }}
 
           if (currentProgress < 1) {{
@@ -1019,7 +1278,7 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
         }}
 
         function restartTrip() {{
-          startAnimation();
+          fetchAndEvaluateRoutes();
         }}
 
         function togglePause() {{
@@ -1038,12 +1297,12 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
           }}
         }}
 
-        fetchRoute();
+        fetchAndEvaluateRoutes();
       </script>
     </body>
     </html>
     """
-    components.html(html_code, height=580)
+    components.html(html_code, height=600)
 
 
 # Check if an external mobile order arrived via FastAPI
@@ -1054,10 +1313,15 @@ if external_order:
         st.session_state["active_order"] = external_order
         st.session_state["last_synced_order_id"] = ext_id
         st.session_state["just_simulated"] = True
+elif external_order is None and st.session_state.get("last_synced_order_id"):
+    # Mobile app completed/reset the order
+    st.session_state["active_order"] = None
+    st.session_state["last_synced_order_id"] = None
+    st.session_state["just_simulated"] = False
 
 # Session state initialization for live order simulation
-if "active_order" not in st.session_state or st.session_state["active_order"] is None:
-    st.session_state["active_order"] = generate_mock_customer_order(df_stores)
+if "active_order" not in st.session_state:
+    st.session_state["active_order"] = None
 if "just_simulated" not in st.session_state:
     st.session_state["just_simulated"] = False
 
@@ -1439,8 +1703,15 @@ with tab_sim:
             st.rerun()
 
     with col_action3:
-        if st.button("🔄 Reset / Clear", use_container_width=True):
-            st.session_state["active_order"] = generate_mock_customer_order(df_stores)
+        if st.button("🔄 Done / Reset", use_container_width=True):
+            order_file = os.path.join(BASE_DIR, "latest_order.json")
+            try:
+                with open(order_file, "w") as f:
+                    json.dump({"active": False, "status": "completed", "reset_at": pd.Timestamp.now().isoformat()}, f, indent=2)
+            except Exception:
+                pass
+            st.session_state["active_order"] = None
+            st.session_state["last_synced_order_id"] = None
             st.session_state["just_simulated"] = False
             st.rerun()
 
@@ -1740,6 +2011,64 @@ with tab_sim:
             </div>
             """
             st.markdown(matrix_table, unsafe_allow_html=True)
+
+            # If warehouse pick plan exists, render warehouse Serpentine pick path
+            if cur_ord.get("warehouse_pick_plan"):
+                pick_plan = cur_ord["warehouse_pick_plan"]
+                st.markdown("""
+                <div class="card" style="margin-top: 14px;">
+                  <h2 class="card-title">🏭 Warehouse Serpentine (S-Shape) Pick Sequence</h2>
+                  <p class="hint">Physical item pick path optimized to minimize picker walking time (0 backtracks)</p>
+                """, unsafe_allow_html=True)
+                
+                pick_rows = ""
+                for step in pick_plan.get("pick_sequence", []):
+                    pick_rows += f"""
+                    <tr>
+                      <td><span class="rk">{step.get('pick_step', 1)}</span><b>{step.get('item_name')}</b></td>
+                      <td class="r"><code style="color: #10b981; font-weight: 700;">Aisle {step.get('aisle')}</code></td>
+                      <td class="r">Shelf {step.get('shelf')} ({step.get('bin')})</td>
+                      <td class="r"><span class="tag">{step.get('zone')}</span></td>
+                    </tr>
+                    """
+                pick_table_html = f"""
+                <div class="tbl">
+                  <table class="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th class="r">Aisle</th>
+                        <th class="r">Location</th>
+                        <th class="r">Zone</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pick_rows}
+                    </tbody>
+                  </table>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--mut);">
+                  <span>Strategy: <b>{pick_plan.get('pick_path_strategy', 'Serpentine S-Shape')}</b></span>
+                  <span>Est. Pick Time: <b>{pick_plan.get('estimated_pick_time_seconds', 75)}s</b></span>
+                </div>
+                </div>
+                """
+                st.markdown(pick_table_html, unsafe_allow_html=True)
+    else:
+        # Standby Mode Display
+        st.markdown("""
+        <div class="card" style="text-align: center; padding: 42px 20px; margin-top: 16px;">
+            <div style="font-size: 46px; margin-bottom: 12px;">📡</div>
+            <h2 class="card-title" style="font-size: 20px;">Dispatch Operations Center • Standby</h2>
+            <p class="hint" style="max-width: 540px; margin: 8px auto 20px auto; font-size: 13.5px; line-height: 1.6;">
+                All 12 Dark Store hubs in Chhatrapati Sambhajinagar are online and operational. Place an order on the mobile app (or click <b>🚀 Simulate New Customer Order</b> above) to trigger live candidate multi-route analysis, shortest path selection, and autonomous courier tracking.
+            </p>
+            <div style="display: inline-flex; gap: 12px; align-items: center; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 8px 18px; border-radius: 99px;">
+                <span class="live"><i></i></span>
+                <span style="font-size: 12px; font-weight: 700; color: #10b981;">Hub Fleet Ready • Listening for Mobile GPS Orders</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
 # TAB 3: Geospatial View

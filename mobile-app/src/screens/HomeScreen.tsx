@@ -26,6 +26,8 @@ export const POPULAR_PRODUCTS: Product[] = [
     category: 'Dairy & Breakfast',
     mrp: 30,
     deliveryMins: 8,
+    stock: 12,
+    lowStockThreshold: 4,
   },
   {
     id: 'prod-2',
@@ -36,6 +38,8 @@ export const POPULAR_PRODUCTS: Product[] = [
     category: 'Dairy & Breakfast',
     mrp: 50,
     deliveryMins: 10,
+    stock: 2,
+    lowStockThreshold: 3,
   },
   {
     id: 'prod-3',
@@ -46,6 +50,8 @@ export const POPULAR_PRODUCTS: Product[] = [
     category: 'Munchies & Snacks',
     mrp: 20,
     deliveryMins: 8,
+    stock: 15,
+    lowStockThreshold: 5,
   },
   {
     id: 'prod-4',
@@ -56,6 +62,8 @@ export const POPULAR_PRODUCTS: Product[] = [
     category: 'Atta, Rice & Dal',
     mrp: 170,
     deliveryMins: 12,
+    stock: 1,
+    lowStockThreshold: 2,
   },
   {
     id: 'prod-5',
@@ -66,6 +74,8 @@ export const POPULAR_PRODUCTS: Product[] = [
     category: 'Cold Drinks',
     mrp: 40,
     deliveryMins: 8,
+    stock: 6,
+    lowStockThreshold: 3,
   },
   {
     id: 'prod-6',
@@ -76,6 +86,8 @@ export const POPULAR_PRODUCTS: Product[] = [
     category: 'Instant Food',
     mrp: 14,
     deliveryMins: 8,
+    stock: 20,
+    lowStockThreshold: 5,
   },
   {
     id: 'prod-7',
@@ -86,6 +98,8 @@ export const POPULAR_PRODUCTS: Product[] = [
     category: 'Fresh Vegetables',
     mrp: 35,
     deliveryMins: 10,
+    stock: 3,
+    lowStockThreshold: 4,
   },
 ];
 

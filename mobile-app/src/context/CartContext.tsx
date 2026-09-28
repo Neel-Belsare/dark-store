@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
-import { CartItem, Product } from '../types';
+import { CartItem, Product, SubstitutionPreference } from '../types';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -14,11 +14,15 @@ interface CartContextType {
   platformFee: number;
   grandTotal: number;
   savings: number;
+  deliveryNotes: string;
+  setDeliveryNotes: (notes: string) => void;
+  substitutionPreference: SubstitutionPreference;
+  setSubstitutionPreference: (pref: SubstitutionPreference) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Initial popular starter items
+// Initial popular starter items with real inventory stock indicators
 const INITIAL_CART_ITEMS: CartItem[] = [
   {
     id: 'prod-1',
@@ -29,6 +33,8 @@ const INITIAL_CART_ITEMS: CartItem[] = [
     category: 'Dairy',
     quantity: 2,
     mrp: 30,
+    stock: 12,
+    lowStockThreshold: 4,
   },
   {
     id: 'prod-2',
@@ -39,6 +45,8 @@ const INITIAL_CART_ITEMS: CartItem[] = [
     category: 'Bakery',
     quantity: 1,
     mrp: 50,
+    stock: 2,
+    lowStockThreshold: 3,
   },
   {
     id: 'prod-3',
@@ -49,19 +57,29 @@ const INITIAL_CART_ITEMS: CartItem[] = [
     category: 'Snacks',
     quantity: 2,
     mrp: 20,
+    stock: 15,
+    lowStockThreshold: 5,
   },
 ];
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
+  const [deliveryNotes, setDeliveryNotes] = useState<string>('Leave at door');
+  const [substitutionPreference, setSubstitutionPreference] = useState<SubstitutionPreference>('similar');
 
   const addToCart = (product: Product) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
+        if (product.stock !== undefined && existing.quantity >= product.stock) {
+          return prev; // capped at stock
+        }
         return prev.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
+      }
+      if (product.stock !== undefined && product.stock <= 0) {
+        return prev;
       }
       return [...prev, { ...product, quantity: 1 }];
     });
@@ -77,7 +95,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
     setCartItems((prev) =>
-      prev.map((item) => (item.id === productId ? { ...item, quantity } : item))
+      prev.map((item) => {
+        if (item.id === productId) {
+          const cappedQty = item.stock !== undefined ? Math.min(quantity, item.stock) : quantity;
+          return { ...item, quantity: cappedQty };
+        }
+        return item;
+      })
     );
   };
 
@@ -116,6 +140,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     platformFee,
     grandTotal,
     savings,
+    deliveryNotes,
+    setDeliveryNotes,
+    substitutionPreference,
+    setSubstitutionPreference,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

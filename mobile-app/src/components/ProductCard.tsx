@@ -19,6 +19,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
     ? Math.round((((product.mrp! - product.price) / product.mrp!) * 100))
     : 0;
 
+  // Inventory threshold states
+  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+  const isLowStock =
+    !isOutOfStock &&
+    product.stock !== undefined &&
+    product.lowStockThreshold !== undefined &&
+    product.stock <= product.lowStockThreshold;
+  const isAtStockCap = product.stock !== undefined && quantity >= product.stock;
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -55,6 +64,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
           {product.unit}
         </Text>
 
+        {/* Low Stock Threshold Warning Pill */}
+        {isLowStock && (
+          <View style={styles.lowStockBadge}>
+            <Text style={styles.lowStockText}>⚠️ Only {product.stock} left!</Text>
+          </View>
+        )}
+
         {/* 3. Pricing & Prominent Add / Stepper Button */}
         <View style={styles.priceRow}>
           <View style={styles.priceContainer}>
@@ -62,7 +78,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
             {hasDiscount && <Text style={styles.mrp}>₹{product.mrp}</Text>}
           </View>
 
-          {quantity === 0 ? (
+          {isOutOfStock ? (
+            <View style={styles.outOfStockBtn}>
+              <Text style={styles.outOfStockText}>SOLD OUT</Text>
+            </View>
+          ) : quantity === 0 ? (
             <TouchableOpacity
               style={styles.addBtn}
               onPress={() => addToCart(product)}
@@ -85,9 +105,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
               <Text style={styles.stepQty}>{quantity}</Text>
 
               <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() => updateQuantity(product.id, quantity + 1)}
-                activeOpacity={0.7}
+                style={[styles.stepBtn, isAtStockCap && styles.stepBtnDisabled]}
+                onPress={() => {
+                  if (!isAtStockCap) {
+                    updateQuantity(product.id, quantity + 1);
+                  }
+                }}
+                disabled={isAtStockCap}
+                activeOpacity={isAtStockCap ? 1 : 0.7}
                 hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}
               >
                 <Text style={styles.stepPlus}>+</Text>
@@ -268,5 +293,38 @@ const styles = StyleSheet.create({
     color: '#FFF',
     textAlign: 'center',
     minWidth: 16,
+  },
+  lowStockBadge: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: BORDER_RADIUS.xs,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  lowStockText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  outOfStockBtn: {
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: BORDER_RADIUS.sm + 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  outOfStockText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+  },
+  stepBtnDisabled: {
+    opacity: 0.35,
   },
 });

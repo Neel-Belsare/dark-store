@@ -14,6 +14,7 @@ import {
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { DispatchedOrder } from '../types';
 import { RealDeliveryMap } from './RealDeliveryMap';
+import { useLiveTracking } from '../hooks/useLiveTracking';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,7 +24,14 @@ interface CelebrationModalProps {
   onClose: () => void;
 }
 
-type OrderStage = 'placed' | 'accepted' | 'on_the_way';
+export type OrderStage = 'placed' | 'packed' | 'dispatched' | 'arriving';
+
+export const STAGE_ORDER: Record<OrderStage, number> = {
+  placed: 0,
+  packed: 1,
+  dispatched: 2,
+  arriving: 3,
+};
 
 // Confetti particle configuration
 const CONFETTI_COLORS = ['#F7D435', '#0C831F', '#6366F1', '#EC4899', '#06B6D4', '#F59E0B'];
@@ -40,9 +48,12 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
   order,
   onClose,
 }) => {
-  // Current progression stage: 'placed' -> 'accepted' -> 'on_the_way'
+  // Current progression stage across the 4 milestones
   const [currentStage, setCurrentStage] = useState<OrderStage>('placed');
   const [etaRemaining, setEtaRemaining] = useState<number>(order?.eta_mins || 5);
+
+  // Live WebSocket Telemetry Stream
+  const { telemetry } = useLiveTracking(visible && order ? order.order_id : null);
 
   // Animated values
   const scaleAnim = useRef(new Animated.Value(0.85)).current;
@@ -78,6 +89,25 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
     );
     riderLoopRef.current.start();
   };
+
+  // Sync with live backend WebSocket telemetry milestones when active
+  useEffect(() => {
+    if (telemetry) {
+      if (telemetry.milestone === 'Order Placed') {
+        setCurrentStage('placed');
+      } else if (telemetry.milestone === 'Packed at Hub') {
+        setCurrentStage('packed');
+      } else if (telemetry.milestone === 'Dispatched') {
+        setCurrentStage('dispatched');
+        startRiderAnimation();
+      } else if (telemetry.milestone === 'Arriving' || telemetry.milestone === 'Delivered') {
+        setCurrentStage('arriving');
+      }
+      if (telemetry.eta_mins !== undefined) {
+        setEtaRemaining(telemetry.eta_mins);
+      }
+    }
+  }, [telemetry]);
 
   useEffect(() => {
     if (visible && order) {
@@ -128,18 +158,24 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
         ]),
       ]).start();
 
-      // Stage 1 -> Stage 2: "Order Accepted" after 2.2 seconds
+      // Automated 4-Milestone Progression fallback simulation:
+      // Milestone 1 -> Milestone 2: "Packed at Hub" after 2.2 seconds
       const t1 = setTimeout(() => {
-        setCurrentStage('accepted');
+        setCurrentStage('packed');
       }, 2200);
 
-      // Stage 2 -> Stage 3: "Rider on the Way" after 4.5 seconds
+      // Milestone 2 -> Milestone 3: "Dispatched" after 4.5 seconds
       const t2 = setTimeout(() => {
-        setCurrentStage('on_the_way');
+        setCurrentStage('dispatched');
         startRiderAnimation();
       }, 4500);
 
-      timersRef.current = [t1, t2];
+      // Milestone 3 -> Milestone 4: "Arriving" after 8.0 seconds
+      const t3 = setTimeout(() => {
+        setCurrentStage('arriving');
+      }, 8000);
+
+      timersRef.current = [t1, t2, t3];
     } else {
       clearTimers();
       setCurrentStage('placed');
@@ -152,7 +188,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
 
   // Dynamic countdown timer as rider travels
   useEffect(() => {
-    if (currentStage === 'on_the_way' && order) {
+    if ((currentStage === 'dispatched' || currentStage === 'arriving') && order) {
       const interval = setInterval(() => {
         setEtaRemaining((prev) => {
           if (prev <= 1) return 1;
@@ -254,14 +290,19 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                   </View>
                 </Animated.View>
               )}
-              {currentStage === 'accepted' && (
+              {currentStage === 'packed' && (
                 <View style={[styles.checkCircle, { backgroundColor: '#F59E0B' }]}>
-                  <Text style={styles.checkIcon}>🎒</Text>
+                  <Text style={styles.checkIcon}>📦</Text>
                 </View>
               )}
-              {currentStage === 'on_the_way' && (
+              {currentStage === 'dispatched' && (
                 <View style={[styles.checkCircle, { backgroundColor: '#06B6D4' }]}>
                   <Text style={styles.checkIcon}>🛵</Text>
+                </View>
+              )}
+              {currentStage === 'arriving' && (
+                <View style={[styles.checkCircle, { backgroundColor: '#10B981' }]}>
+                  <Text style={styles.checkIcon}>🏠</Text>
                 </View>
               )}
             </View>
@@ -269,80 +310,88 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
             {/* Dynamic Stage Title & Subtitle */}
             <Text style={styles.title}>
               {currentStage === 'placed' && 'Order Placed!'}
-              {currentStage === 'accepted' && 'Order Accepted & Packed!'}
-              {currentStage === 'on_the_way' && 'Rider is on the Way!'}
+              {currentStage === 'packed' && 'Packed at Hub!'}
+              {currentStage === 'dispatched' && 'Dispatched & En Route!'}
+              {currentStage === 'arriving' && 'Arriving at Your Door!'}
             </Text>
 
             <Text style={styles.subtitle}>
               {currentStage === 'placed' && 'Routing your cart to the closest dark store...'}
-              {currentStage === 'accepted' && `Bags packed at ${order.assigned_store.split(' - ')[0]}`}
-              {currentStage === 'on_the_way' && `${order.rider} picked up your bag & is driving to you`}
+              {currentStage === 'packed' && `Bags packed at ${order.assigned_store.split(' - ')[0]}`}
+              {currentStage === 'dispatched' && `${order.rider} picked up your bag & is traveling to you`}
+              {currentStage === 'arriving' && `${order.rider} is arriving at your doorstep now`}
             </Text>
 
-            {/* Step-by-Step Order Progression Stepper */}
+            {/* Step-by-Step Order Progression Stepper (4 Milestones) */}
             <View style={styles.stepperContainer}>
-              {/* Step 1 */}
+              {/* Step 1: Placed */}
               <TouchableOpacity
                 onPress={() => setCurrentStage('placed')}
-                style={styles.stepItem}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.stepCircle, styles.stepCircleActive]}>
-                  <Text style={styles.stepCircleText}>✓</Text>
-                </View>
-                <Text style={[styles.stepLabel, styles.stepLabelActive]}>Order Placed</Text>
-              </TouchableOpacity>
-
-              <View
-                style={[
-                  styles.stepLine,
-                  currentStage === 'accepted' || currentStage === 'on_the_way'
-                    ? styles.stepLineActive
-                    : styles.stepLineInactive,
-                ]}
-              />
-
-              {/* Step 2 */}
-              <TouchableOpacity
-                onPress={() => setCurrentStage('accepted')}
                 style={styles.stepItem}
                 activeOpacity={0.8}
               >
                 <View
                   style={[
                     styles.stepCircle,
-                    currentStage === 'accepted' || currentStage === 'on_the_way'
-                      ? styles.stepCircleActive
-                      : styles.stepCirclePending,
+                    STAGE_ORDER[currentStage] >= 0 ? styles.stepCircleActive : styles.stepCirclePending,
                   ]}
                 >
-                  <Text style={styles.stepCircleText}>
-                    {currentStage === 'accepted' || currentStage === 'on_the_way' ? '✓' : '2'}
-                  </Text>
+                  <Text style={styles.stepCircleText}>✓</Text>
                 </View>
                 <Text
                   style={[
                     styles.stepLabel,
-                    currentStage === 'accepted' || currentStage === 'on_the_way'
-                      ? styles.stepLabelActive
-                      : styles.stepLabelPending,
+                    STAGE_ORDER[currentStage] >= 0 ? styles.stepLabelActive : styles.stepLabelPending,
                   ]}
                 >
-                  Accepted
+                  Placed
                 </Text>
               </TouchableOpacity>
 
               <View
                 style={[
                   styles.stepLine,
-                  currentStage === 'on_the_way' ? styles.stepLineActive : styles.stepLineInactive,
+                  STAGE_ORDER[currentStage] >= 1 ? styles.stepLineActive : styles.stepLineInactive,
                 ]}
               />
 
-              {/* Step 3 */}
+              {/* Step 2: Packed */}
+              <TouchableOpacity
+                onPress={() => setCurrentStage('packed')}
+                style={styles.stepItem}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.stepCircle,
+                    STAGE_ORDER[currentStage] >= 1 ? styles.stepCircleActive : styles.stepCirclePending,
+                  ]}
+                >
+                  <Text style={styles.stepCircleText}>
+                    {STAGE_ORDER[currentStage] >= 1 ? '✓' : '2'}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.stepLabel,
+                    STAGE_ORDER[currentStage] >= 1 ? styles.stepLabelActive : styles.stepLabelPending,
+                  ]}
+                >
+                  Packed
+                </Text>
+              </TouchableOpacity>
+
+              <View
+                style={[
+                  styles.stepLine,
+                  STAGE_ORDER[currentStage] >= 2 ? styles.stepLineActive : styles.stepLineInactive,
+                ]}
+              />
+
+              {/* Step 3: Dispatched */}
               <TouchableOpacity
                 onPress={() => {
-                  setCurrentStage('on_the_way');
+                  setCurrentStage('dispatched');
                   startRiderAnimation();
                 }}
                 style={styles.stepItem}
@@ -351,26 +400,63 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                 <View
                   style={[
                     styles.stepCircle,
-                    currentStage === 'on_the_way' ? styles.stepCircleActive : styles.stepCirclePending,
+                    STAGE_ORDER[currentStage] >= 2 ? styles.stepCircleActive : styles.stepCirclePending,
                   ]}
                 >
-                  <Text style={styles.stepCircleText}>{currentStage === 'on_the_way' ? '🛵' : '3'}</Text>
+                  <Text style={styles.stepCircleText}>
+                    {STAGE_ORDER[currentStage] >= 2 ? '🛵' : '3'}
+                  </Text>
                 </View>
                 <Text
                   style={[
                     styles.stepLabel,
-                    currentStage === 'on_the_way' ? styles.stepLabelActive : styles.stepLabelPending,
+                    STAGE_ORDER[currentStage] >= 2 ? styles.stepLabelActive : styles.stepLabelPending,
                   ]}
                 >
-                  On the Way
+                  Dispatched
+                </Text>
+              </TouchableOpacity>
+
+              <View
+                style={[
+                  styles.stepLine,
+                  STAGE_ORDER[currentStage] >= 3 ? styles.stepLineActive : styles.stepLineInactive,
+                ]}
+              />
+
+              {/* Step 4: Arriving */}
+              <TouchableOpacity
+                onPress={() => {
+                  setCurrentStage('arriving');
+                }}
+                style={styles.stepItem}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.stepCircle,
+                    STAGE_ORDER[currentStage] >= 3 ? styles.stepCircleActive : styles.stepCirclePending,
+                  ]}
+                >
+                  <Text style={styles.stepCircleText}>
+                    {STAGE_ORDER[currentStage] >= 3 ? '🏠' : '4'}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.stepLabel,
+                    STAGE_ORDER[currentStage] >= 3 ? styles.stepLabelActive : styles.stepLabelPending,
+                  ]}
+                >
+                  Arriving
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* ============================================================= */}
-            {/* LIVE DELIVERY ROUTE MAP & MOVING RIDER (On the Way stage)      */}
+            {/* LIVE DELIVERY ROUTE MAP & MOVING RIDER (Dispatched/Arriving)  */}
             {/* ============================================================= */}
-            {currentStage === 'on_the_way' ? (
+            {STAGE_ORDER[currentStage] >= 2 ? (
               <View style={styles.mapCardContainer}>
                 {/* Top Badge */}
                 <View style={styles.mapHeaderRow}>
@@ -399,7 +485,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                   <View>
                     <Text style={styles.telemetryMutedLabel}>ESTIMATED ARRIVAL</Text>
                     <Text style={styles.telemetryEtaText}>
-                      {etaRemaining <= 1 ? 'Arriving Now! 🎉' : `~${etaRemaining} Mins`}
+                      {currentStage === 'arriving' || etaRemaining <= 1 ? 'Arriving Now! 🎉' : `~${etaRemaining} Mins`}
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
@@ -446,7 +532,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                 </View>
               </View>
             ) : (
-              /* Staging & Packaging Details (For Placed & Accepted stages) */
+              /* Staging & Packaging Details (For Placed & Packed stages) */
               <View style={styles.stagingCard}>
                 <View style={styles.routingRow}>
                   <Text style={styles.routingLabel}>Order ID:</Text>
@@ -469,7 +555,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
 
                 <TouchableOpacity
                   onPress={() => {
-                    setCurrentStage('on_the_way');
+                    setCurrentStage('dispatched');
                     startRiderAnimation();
                   }}
                   style={styles.viewRouteFastBtn}
@@ -483,7 +569,7 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
             {/* Close / Done Button */}
             <TouchableOpacity style={styles.primaryButton} onPress={onClose} activeOpacity={0.85}>
               <Text style={styles.primaryButtonText}>
-                {currentStage === 'on_the_way' ? 'Continue Shopping 🛍️' : 'Done'}
+                {STAGE_ORDER[currentStage] >= 2 ? 'Continue Shopping 🛍️' : 'Done'}
               </Text>
             </TouchableOpacity>
           </ScrollView>

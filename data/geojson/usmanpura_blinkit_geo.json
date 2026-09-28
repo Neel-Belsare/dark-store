@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Osmanpura Blinkit Catchment",
+        "zone": "Osmanpura / Kranti Chowk",
+        "city": "Chhatrapati Sambhajinagar"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [75.3120, 19.8780],
+            [75.3340, 19.8780],
+            [75.3380, 19.8650],
+            [75.3320, 19.8550],
+            [75.3150, 19.8560],
+            [75.3090, 19.8670],
+            [75.3120, 19.8780]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
@@ -14,19 +16,40 @@ import { CartItemRow } from '../components/CartItemRow';
 import { BillSummary } from '../components/BillSummary';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { CelebrationModal } from '../components/CelebrationModal';
-import { placeLiveOrder } from '../services/api';
-import { DispatchedOrder } from '../types';
+import { placeLiveOrder, checkServiceability, resetLiveOrder } from '../services/api';
+import { DispatchedOrder, ServiceabilityResponse, SubstitutionPreference } from '../types';
 
 interface CartScreenProps {
   onNavigateToHome: () => void;
 }
 
-const DELIVERY_INSTRUCTIONS = [
+const DELIVERY_SUGGESTIONS = [
   { id: '1', label: 'Leave at door', icon: '🚪' },
   { id: '2', label: "Don't ring bell", icon: '🔕' },
   { id: '3', label: 'Avoid calling', icon: '📞' },
   { id: '4', label: 'Leave at guard', icon: '🛡️' },
   { id: '5', label: 'Pet in house', icon: '🐶' },
+];
+
+const SUBSTITUTION_OPTIONS: { id: SubstitutionPreference; title: string; subtitle: string; icon: string }[] = [
+  {
+    id: 'similar',
+    title: 'Smart Replacement',
+    subtitle: 'Auto-replace with equal or higher value brand',
+    icon: '🔄',
+  },
+  {
+    id: 'call_confirm',
+    title: 'Call to Confirm',
+    subtitle: 'Rider calls for approval before picking alternative',
+    icon: '📞',
+  },
+  {
+    id: 'do_not_substitute',
+    title: "Don't Substitute",
+    subtitle: 'Refund unavailable items immediately',
+    icon: '🚫',
+  },
 ];
 
 export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
@@ -40,14 +63,42 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
     grandTotal,
     savings,
     clearCart,
+    deliveryNotes,
+    setDeliveryNotes,
+    substitutionPreference,
+    setSubstitutionPreference,
   } = useCart();
 
   const { location, address, isUsingGPS } = useCurrentLocation();
 
-  const [selectedInstruction, setSelectedInstruction] = useState<string>('1');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [confirmedOrder, setConfirmedOrder] = useState<DispatchedOrder | null>(null);
   const [celebrationVisible, setCelebrationVisible] = useState<boolean>(false);
+  const [serviceability, setServiceability] = useState<ServiceabilityResponse | null>(null);
+  const [checkingServiceability, setCheckingServiceability] = useState<boolean>(false);
+
+  // Real-time GeoJSON Catchment Serviceability Evaluation
+  useEffect(() => {
+    if (location) {
+      let isMounted = true;
+      setCheckingServiceability(true);
+      checkServiceability(location.latitude, location.longitude)
+        .then((res) => {
+          if (isMounted) setServiceability(res);
+        })
+        .catch((err) => {
+          console.warn('Serviceability verification error:', err);
+        })
+        .finally(() => {
+          if (isMounted) setCheckingServiceability(false);
+        });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [location]);
+
+  const isServiceable = serviceability ? serviceability.is_serviceable : true;
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
@@ -60,15 +111,25 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
       return;
     }
 
+    if (!isServiceable) {
+      Alert.alert(
+        'Out of Service Area',
+        `Your delivery address is ${serviceability?.distance_km ?? '>4'} km away, exceeding our quick-commerce dark store radius (4.0 km).`
+      );
+      return;
+    }
+
     // 1. Show animated "Finding your nearest dark store..." overlay
     setIsLoading(true);
 
     try {
-      // 2. Transmit coordinates and items to Python FastAPI backend
+      // 2. Transmit coordinates and enriched payload to Python FastAPI backend
       const response = await placeLiveOrder(location.latitude, location.longitude, {
         customer_name: 'Neel Belsare',
         customer_phone: '+91 98765 43210',
         delivery_address: address,
+        delivery_notes: deliveryNotes,
+        substitution_preference: substitutionPreference,
         items: cartItems.map((item) => ({
           name: item.name,
           quantity: item.quantity,
@@ -93,8 +154,14 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
     }
   };
 
-  const handleCloseCelebration = () => {
+  const handleCloseCelebration = async () => {
     setCelebrationVisible(false);
+    // Bi-directional Done/Reset Sync: Notify backend & Streamlit to return to idle
+    try {
+      await resetLiveOrder();
+    } catch (err) {
+      console.warn('Reset live order sync error:', err);
+    }
     clearCart();
     onNavigateToHome();
   };
@@ -181,6 +248,23 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
           </View>
         </View>
 
+        {/* Catchment Serviceability Warning Banner (When outside dark store radius) */}
+        {!isServiceable && (
+          <View style={styles.serviceabilityAlertCard}>
+            <View style={styles.serviceabilityAlertHeader}>
+              <Text style={styles.serviceabilityAlertEmoji}>🚫</Text>
+              <Text style={styles.serviceabilityAlertTitle}>Location Outside Delivery Zone</Text>
+            </View>
+            <Text style={styles.serviceabilityAlertBody}>
+              {serviceability?.message ||
+                `Your selected address is ${serviceability?.distance_km ?? 'beyond'} km away, which exceeds our 4.0 km 10-minute dark store delivery perimeter.`}
+            </Text>
+            <Text style={styles.serviceabilityAlertSub}>
+              Please select an address within Aurangabad dark store coverage (e.g., Osmanpura, CIDCO, Kranti Chowk).
+            </Text>
+          </View>
+        )}
+
         {/* Cart Items List */}
         {cartItems.length > 0 ? (
           <View style={styles.itemsSection}>
@@ -225,34 +309,95 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
           </View>
         )}
 
-        {/* Delivery Instructions Chips */}
+        {/* Delivery Instructions & Custom Notes Card */}
         {cartItems.length > 0 && (
           <View style={styles.instructionsSection}>
-            <Text style={styles.sectionTitle}>Delivery Instructions</Text>
-            <Text style={styles.instructionsSub}>Choose preference for our delivery rider</Text>
+            <Text style={styles.sectionTitle}>Delivery Notes & Instructions</Text>
+            <Text style={styles.instructionsSub}>Drop-off directions for the dark store courier</Text>
 
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.chipsRow}
             >
-              {DELIVERY_INSTRUCTIONS.map((chip) => {
-                const isSelected = selectedInstruction === chip.id;
+              {DELIVERY_SUGGESTIONS.map((chip) => {
+                const isPresent = deliveryNotes.includes(chip.label);
                 return (
                   <TouchableOpacity
                     key={chip.id}
-                    style={[styles.chip, isSelected && styles.chipSelected]}
-                    onPress={() => setSelectedInstruction(chip.id)}
+                    style={[styles.chip, isPresent && styles.chipSelected]}
+                    onPress={() => {
+                      if (isPresent) {
+                        setDeliveryNotes(
+                          deliveryNotes
+                            .replace(chip.label, '')
+                            .replace(/,\s*,/g, ',')
+                            .replace(/^,\s*|\s*,\s*$/g, '')
+                            .trim()
+                        );
+                      } else {
+                        const newNotes = deliveryNotes ? `${deliveryNotes}, ${chip.label}` : chip.label;
+                        setDeliveryNotes(newNotes);
+                      }
+                    }}
                     activeOpacity={0.75}
                   >
                     <Text style={styles.chipIcon}>{chip.icon}</Text>
-                    <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                    <Text style={[styles.chipText, isPresent && styles.chipTextSelected]}>
                       {chip.label}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </ScrollView>
+
+            {/* Custom Notes Input Field */}
+            <View style={styles.customNotesBox}>
+              <Text style={styles.customNotesLabel}>Courier Note / Flat / Gate Details:</Text>
+              <TextInput
+                style={styles.customNotesInput}
+                placeholder="e.g. Ring bell twice, leave with security guard..."
+                placeholderTextColor={COLORS.textMuted}
+                value={deliveryNotes}
+                onChangeText={setDeliveryNotes}
+                maxLength={140}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* Out-of-Stock Substitution Preferences */}
+        {cartItems.length > 0 && (
+          <View style={styles.substitutionSection}>
+            <Text style={styles.sectionTitle}>Item Substitution Policy</Text>
+            <Text style={styles.instructionsSub}>If an item runs out during warehouse picking</Text>
+
+            <View style={styles.substitutionList}>
+              {SUBSTITUTION_OPTIONS.map((opt) => {
+                const isSelected = substitutionPreference === opt.id;
+                return (
+                  <TouchableOpacity
+                    key={opt.id}
+                    style={[styles.substitutionCard, isSelected && styles.substitutionCardSelected]}
+                    onPress={() => setSubstitutionPreference(opt.id)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.substitutionRadioRow}>
+                      <View style={[styles.radioCircle, isSelected && styles.radioCircleSelected]}>
+                        {isSelected && <View style={styles.radioDot} />}
+                      </View>
+                      <Text style={styles.substitutionIcon}>{opt.icon}</Text>
+                      <View style={styles.substitutionTextCol}>
+                        <Text style={[styles.substitutionTitle, isSelected && styles.substitutionTitleSelected]}>
+                          {opt.title}
+                        </Text>
+                        <Text style={styles.substitutionSubtitle}>{opt.subtitle}</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         )}
 
@@ -277,9 +422,9 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
               </View>
               <Text style={styles.telemetrySubTag}>12 Aurangabad Hubs</Text>
             </View>
-            <Text style={styles.telemetryTitle}>Nearest Dark Store Routing</Text>
+            <Text style={styles.telemetryTitle}>Predictive Dark Store Routing</Text>
             <Text style={styles.telemetryText}>
-              Checkout calculates the exact Haversine vector from your location to all 12 operational dark stores in Aurangabad and dispatches your order instantly to the Streamlit Command Center.
+              Checkout calculates the exact Haversine vector from your location to all 12 operational dark stores in Aurangabad, evaluates weather & traffic modifiers, and dispatches your order instantly to the Streamlit Command Center.
             </Text>
           </View>
         )}
@@ -308,20 +453,29 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
                 </View>
               )}
             </View>
-            <Text style={styles.freeDeliveryLabel}>⚡ FREE Delivery applied</Text>
+            <Text style={styles.freeDeliveryLabel}>
+              {isServiceable ? '⚡ FREE Delivery applied' : '⚠️ Address unserviceable'}
+            </Text>
           </View>
 
           <TouchableOpacity
-            style={[styles.checkoutBtn, isLoading && styles.checkoutBtnDisabled]}
+            style={[
+              styles.checkoutBtn,
+              (isLoading || !isServiceable) && styles.checkoutBtnDisabled,
+            ]}
             onPress={handleCheckout}
-            disabled={isLoading}
+            disabled={isLoading || !isServiceable}
             activeOpacity={0.88}
           >
             <View style={styles.btnRow}>
               <Text style={styles.checkoutText}>
-                {isLoading ? 'Routing...' : 'Place Order'}
+                {isLoading
+                  ? 'Routing...'
+                  : !isServiceable
+                  ? 'Out of Zone'
+                  : 'Place Order'}
               </Text>
-              <Text style={styles.checkoutArrow}>➔</Text>
+              {isServiceable && !isLoading && <Text style={styles.checkoutArrow}>➔</Text>}
             </View>
           </TouchableOpacity>
         </View>
@@ -805,5 +959,129 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     fontWeight: '800',
+  },
+  serviceabilityAlertCard: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1.5,
+    borderColor: '#F87171',
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
+  },
+  serviceabilityAlertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  serviceabilityAlertEmoji: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  serviceabilityAlertTitle: {
+    fontSize: TYPOGRAPHY.bodyMedium,
+    fontWeight: '800',
+    color: '#991B1B',
+  },
+  serviceabilityAlertBody: {
+    fontSize: TYPOGRAPHY.bodySmall,
+    color: '#B91C1C',
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  serviceabilityAlertSub: {
+    fontSize: TYPOGRAPHY.caption,
+    fontWeight: '600',
+    color: '#7F1D1D',
+  },
+  customNotesBox: {
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderSubtle,
+  },
+  customNotesLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+  },
+  customNotesInput: {
+    backgroundColor: COLORS.surfaceSecondary,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 10,
+    fontSize: 12.5,
+    color: COLORS.textPrimary,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+  },
+  substitutionSection: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
+  },
+  substitutionList: {
+    marginTop: 4,
+  },
+  substitutionCard: {
+    backgroundColor: COLORS.surfaceSecondary,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: 8,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
+  substitutionCardSelected: {
+    backgroundColor: COLORS.brandGreenLight,
+    borderColor: COLORS.brandGreen,
+  },
+  substitutionRadioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  radioCircleSelected: {
+    borderColor: COLORS.brandGreen,
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.brandGreen,
+  },
+  substitutionIcon: {
+    fontSize: 18,
+    marginRight: 10,
+  },
+  substitutionTextCol: {
+    flex: 1,
+  },
+  substitutionTitle: {
+    fontSize: TYPOGRAPHY.bodySmall,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  substitutionTitleSelected: {
+    color: COLORS.brandGreenDark,
+    fontWeight: '800',
+  },
+  substitutionSubtitle: {
+    fontSize: 10.5,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
 });
