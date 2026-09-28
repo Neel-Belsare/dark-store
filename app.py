@@ -814,82 +814,114 @@ with tab_summary:
 with tab_map:
     st.markdown("""
     <div class="card" style="margin-bottom: 16px;">
-        <h2 class="card-title">🗺️ Geospatial Coverage & Network Topology</h2>
-        <p class="hint">Toggle between 3D Spatial Deck (PyDeck) and 2D Real-World Service Boundaries (Leaflet).</p>
+        <h2 class="card-title">🗺️ Dark Store Service Polygons & Delivery Catchment Radii</h2>
+        <p class="hint">Real-world Blinkit and Zepto service boundary polygons mapped alongside dark store locations and fulfillment buffer circles.</p>
     </div>
     """, unsafe_allow_html=True)
 
     map_view_mode = st.radio(
-        "Select Geospatial Engine:",
-        options=["✨ 3D Spatial Deck (PyDeck)", "🌐 2D Service Polygons & Delivery Buffers (Leaflet / Folium)"],
+        "Select Map Engine:",
+        options=["🌐 Real-World Service Polygons & Delivery Buffers (Interactive Leaflet Map)", "✨ 3D Perspective Polygons & Radii (PyDeck)"],
+        index=0,
         horizontal=True
     )
 
-    if map_view_mode == "✨ 3D Spatial Deck (PyDeck)":
-        deck_demographics = filtered_df.copy()
-        if not deck_demographics.empty:
-            deck_demographics['elevation_val'] = deck_demographics['Predicted Online Order Volume (Monthly)'].astype(float)
-            deck_demographics['tooltip_html'] = (
-                "<b>📍 " + deck_demographics['Neighborhood'].astype(str) + "</b><br/>"
-                "Monthly Demand: <b>" + deck_demographics['Predicted Online Order Volume (Monthly)'].apply(lambda x: f"{x:,}") + " orders</b><br/>"
-                "Population Density: <b>" + deck_demographics['Population Density (per sq km)'].apply(lambda x: f"{x:,}") + " /km²</b><br/>"
-                "Shoppers: <b>" + deck_demographics['Estimated Online Shoppers'].apply(lambda x: f"{x:,}") + "</b>"
-            )
-        else:
-            deck_demographics['elevation_val'] = 0.0
-            deck_demographics['tooltip_html'] = ""
-
+    if map_view_mode == "✨ 3D Perspective Polygons & Radii (PyDeck)":
         deck_stores = filtered_stores.copy()
         if not deck_stores.empty:
-            # Theme accents: Active = Emerald, Proposed = Amber
-            deck_stores['color_r'] = deck_stores['Status'].apply(lambda s: 16 if s == 'Active' else 245)
-            deck_stores['color_g'] = deck_stores['Status'].apply(lambda s: 185 if s == 'Active' else 158)
-            deck_stores['color_b'] = deck_stores['Status'].apply(lambda s: 129 if s == 'Active' else 11)
-            deck_stores['fill_color'] = deck_stores.apply(lambda r: [r['color_r'], r['color_g'], r['color_b'], 215], axis=1)
+            deck_stores['hub_color'] = deck_stores['Status'].apply(lambda s: [16, 185, 129, 240] if s == 'Active' else [245, 158, 11, 240])
+            deck_stores['buffer_color'] = deck_stores['Status'].apply(lambda s: [99, 102, 241, 40] if s == 'Active' else [245, 158, 11, 40])
+            deck_stores['buffer_stroke'] = deck_stores['Status'].apply(lambda s: [99, 102, 241, 200] if s == 'Active' else [245, 158, 11, 200])
             deck_stores['tooltip_html'] = (
                 "<b>🏪 " + deck_stores['Store Name'].astype(str) + "</b><br/>"
                 "Status: <b>" + deck_stores['Status'].astype(str) + "</b><br/>"
                 "Coverage: " + deck_stores['Coverage Area'].astype(str) + "<br/>"
-                "Delivery Radius: <b>" + deck_stores['Delivery Radius (km)'].astype(str) + " km</b>"
+                "Delivery Radius: <b>" + deck_stores['Delivery Radius (km)'].astype(str) + " km</b> (Buffer: " + str(simulated_radius) + " km)"
             )
         else:
-            deck_stores['fill_color'] = []
+            deck_stores['hub_color'] = []
+            deck_stores['buffer_color'] = []
+            deck_stores['buffer_stroke'] = []
             deck_stores['tooltip_html'] = ""
 
-        column_layer = pdk.Layer(
-            "ColumnLayer",
-            data=deck_demographics,
-            get_position=["Longitude", "Latitude"],
-            get_elevation="elevation_val",
-            elevation_scale=0.06,
-            radius=320,
-            get_fill_color=[99, 102, 241, 185],
-            pickable=True,
-            auto_highlight=True
-        )
-
-        store_layer = pdk.Layer(
+        # Catchment Delivery Radius Circles (Buffer Layer)
+        buffer_layer = pdk.Layer(
             "ScatterplotLayer",
             data=deck_stores,
             get_position=["Longitude", "Latitude"],
-            get_radius=int(simulated_radius * 220),
-            get_fill_color="fill_color",
-            get_line_color=[255, 255, 255],
+            get_radius=int(simulated_radius * 1000),
+            get_fill_color="buffer_color",
+            get_line_color="buffer_stroke",
+            stroked=True,
+            filled=True,
             line_width_min_pixels=2,
             pickable=True,
             auto_highlight=True
         )
 
+        # Dark Store Hub Center Marker Points
+        hub_layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=deck_stores,
+            get_position=["Longitude", "Latitude"],
+            get_radius=220,
+            get_fill_color="hub_color",
+            get_line_color=[255, 255, 255, 255],
+            stroked=True,
+            filled=True,
+            line_width_min_pixels=2,
+            pickable=True,
+            auto_highlight=True
+        )
+
+        deck_layers = [buffer_layer, hub_layer]
+
+        # Load GeoJSON Delivery Polygons into PyDeck
+        geojson_dir = os.path.join(BASE_DIR, "data", "geojson")
+        if os.path.exists(geojson_dir):
+            geo_files = sorted(
+                glob.glob(os.path.join(geojson_dir, "*.json")) +
+                glob.glob(os.path.join(geojson_dir, "*.geojson"))
+            )
+            for g_path in geo_files:
+                if os.path.getsize(g_path) > 0:
+                    try:
+                        with open(g_path, "r", encoding="utf-8") as f:
+                            g_data = json.load(f)
+                        fname = os.path.basename(g_path).lower()
+                        if "blinkit" in fname:
+                            fc = [244, 208, 63, 85]
+                            sc = [183, 149, 11, 230]
+                        elif "zepto" in fname:
+                            fc = [142, 68, 173, 85]
+                            sc = [81, 46, 95, 230]
+                        else:
+                            fc = [99, 102, 241, 85]
+                            sc = [79, 70, 229, 230]
+                        
+                        deck_layers.append(pdk.Layer(
+                            "GeoJsonLayer",
+                            data=g_data,
+                            filled=True,
+                            stroked=True,
+                            get_fill_color=fc,
+                            get_line_color=sc,
+                            line_width_min_pixels=2.5,
+                            pickable=True
+                        ))
+                    except Exception:
+                        pass
+
         view_state = pdk.ViewState(
             latitude=19.8762,
             longitude=75.3433,
-            zoom=11.6,
-            pitch=45,
-            bearing=15
+            zoom=11.8,
+            pitch=35,
+            bearing=10
         )
 
         deck = pdk.Deck(
-            layers=[column_layer, store_layer],
+            layers=deck_layers,
             initial_view_state=view_state,
             map_style=pdk.map_styles.CARTO_LIGHT,
             tooltip={
@@ -908,7 +940,7 @@ with tab_map:
         )
 
         st.pydeck_chart(deck, use_container_width=True)
-        st.caption("💡 **Tip**: Hold **Right Click + Drag** to rotate in 3D, and **Scroll** to zoom. Hover over columns or store hubs for detailed metrics.")
+        st.caption("💡 **Tip**: Showing real-world Blinkit/Zepto delivery polygons and dark store fulfillment buffer circles (3.0 km radius). Hold **Right Click + Drag** to rotate in 3D, and **Scroll** to zoom.")
 
     else:
         st.markdown(
