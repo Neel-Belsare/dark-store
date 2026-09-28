@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { DispatchedOrder } from '../types';
+import { RealDeliveryMap } from './RealDeliveryMap';
 
 const { width, height } = Dimensions.get('window');
 
@@ -375,85 +376,23 @@ export const CelebrationModal: React.FC<CelebrationModalProps> = ({
                 <View style={styles.mapHeaderRow}>
                   <View style={styles.mapPulseDot} />
                   <Text style={styles.mapHeaderText}>Live GPS Delivery Route</Text>
-                  <TouchableOpacity onPress={handleReplay} style={styles.replayButton}>
-                    <Text style={styles.replayText}>🔄 Replay</Text>
-                  </TouchableOpacity>
+                  <View style={styles.liveTagPill}>
+                    <Text style={styles.liveTagText}>REAL-TIME</Text>
+                  </View>
                 </View>
 
-                {/* Stylized Vector City Map Canvas */}
-                <View style={styles.mapCanvas}>
-                  {/* Grid matrix lines */}
-                  <View style={[styles.gridLineH, { top: 40 }]} />
-                  <View style={[styles.gridLineH, { top: 90 }]} />
-                  <View style={[styles.gridLineH, { top: 140 }]} />
-                  <View style={[styles.gridLineV, { left: 80 }]} />
-                  <View style={[styles.gridLineV, { left: 160 }]} />
-                  <View style={[styles.gridLineV, { left: 240 }]} />
-
-                  {/* Waterway / Canal Accent */}
-                  <View style={styles.canalStrip} />
-
-                  {/* City Sector Labels */}
-                  <Text style={[styles.mapSectorLabel, { bottom: 8, left: 12 }]}>
-                    🏬 Dark Store Sector
-                  </Text>
-                  <Text style={[styles.mapSectorLabel, { top: 8, right: 12 }]}>
-                    🏡 Residential Sector
-                  </Text>
-
-                  {/* Road Network Segments */}
-                  {/* Segment 1: (30, 130) -> (95, 130) */}
-                  <View style={[styles.roadH, { left: 30, top: 130, width: 65 }]} />
-                  {/* Segment 2: (95, 80) -> (95, 130) */}
-                  <View style={[styles.roadV, { left: 95, top: 80, height: 50 }]} />
-                  {/* Segment 3: (95, 80) -> (185, 80) */}
-                  <View style={[styles.roadH, { left: 95, top: 80, width: 90 }]} />
-                  {/* Segment 4: (185, 30) -> (185, 80) */}
-                  <View style={[styles.roadV, { left: 185, top: 30, height: 50 }]} />
-                  {/* Segment 5: (185, 30) -> (260, 30) */}
-                  <View style={[styles.roadH, { left: 185, top: 30, width: 75 }]} />
-
-                  {/* Point A: Dark Store Marker */}
-                  <View style={[styles.mapMarker, { left: 15, top: 115 }]}>
-                    <View style={styles.hubBeaconRing} />
-                    <View style={styles.hubMarkerCore}>
-                      <Text style={styles.markerEmoji}>🏬</Text>
-                    </View>
-                    <Text style={styles.markerTagHub} numberOfLines={1}>
-                      HUB
-                    </Text>
-                  </View>
-
-                  {/* Point B: Customer Destination Marker */}
-                  <View style={[styles.mapMarker, { left: 248, top: 15 }]}>
-                    <View style={styles.custBeaconRing} />
-                    <View style={styles.custMarkerCore}>
-                      <Text style={styles.markerEmoji}>🏠</Text>
-                    </View>
-                    <Text style={styles.markerTagCust}>YOU</Text>
-                  </View>
-
-                  {/* ANIMATED DELIVERY RIDER MOVING ALONG ROAD */}
-                  <Animated.View
-                    style={[
-                      styles.riderContainer,
-                      {
-                        left: riderPosX,
-                        top: riderPosY,
-                      },
-                    ]}
-                  >
-                    <View style={styles.riderPulseHalo} />
-                    <View style={styles.riderVehicleCircle}>
-                      <Text style={styles.riderIconEmoji}>🛵</Text>
-                    </View>
-                    <View style={styles.riderTooltipPill}>
-                      <Text style={styles.riderTooltipText}>
-                        {order.rider.split(' ')[0]} • MH 20
-                      </Text>
-                    </View>
-                  </Animated.View>
-                </View>
+                {/* Actual Real Interactive Delivery Map */}
+                <RealDeliveryMap
+                  storeLat={order.store_lat || 19.8680}
+                  storeLon={order.store_lon || 75.3230}
+                  storeName={order.assigned_store}
+                  custLat={order.cust_lat || 19.8665}
+                  custLon={order.cust_lon || 75.3210}
+                  custAddress={order.delivery_address || 'Delivery Address'}
+                  riderName={order.rider}
+                  distanceKm={order.distance_km}
+                  etaMins={order.eta_mins}
+                />
 
                 {/* Live Delivery Telemetry Banner */}
                 <View style={styles.mapTelemetryRow}>
@@ -718,16 +657,19 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     flex: 1,
   },
-  replayButton: {
-    backgroundColor: '#1E293B',
+  liveTagPill: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: BORDER_RADIUS.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
-  replayText: {
+  liveTagText: {
     color: '#34D399',
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 
   /* Vector Map Canvas (300 x 160) */
