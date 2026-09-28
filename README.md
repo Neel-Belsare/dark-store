@@ -144,7 +144,7 @@ pip install -r requirements.txt
 
 Launch the interactive dashboard locally:
 ```bash
-streamlit run app.py
+python -m streamlit run app.py
 ```
 Open **`http://localhost:8501`** in your browser.
 
