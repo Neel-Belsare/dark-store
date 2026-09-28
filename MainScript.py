@@ -47,16 +47,18 @@ footer {visibility: hidden;}
 }
 </style>
 <div class="custom-footer">
-    Made with ❤️ by <a href="https://www.linkedin.com/in/neel-belsare-719b9a314/" target="_blank">Neel Belsare</a>
+    Made with ❤️ by <a href="https://www.linkedin.com/in/neel-belsare-719b9a314/" target="_blank">Neel Belsare</a> & <a href="https://www.linkedin.com/in/mansi-gaike-821260316" target="_blank">Mansi Gaike</a>
 </div>
 """
 st.markdown(custom_footer, unsafe_allow_html=True)
 
 # Sidebar with Developer info
 with st.sidebar:
-    st.markdown("### 👨‍💻 Developer")
+    st.markdown("### 👨‍💻 Developers & Contributors")
     st.markdown("**Neel Belsare**")
-    st.markdown("[🔗 LinkedIn Profile](https://www.linkedin.com/in/neel-belsare-719b9a314/)")
+    st.markdown("[🔗 LinkedIn Profile](https://www.linkedin.com/in/neel-belsare-719b9a314/) • [GitHub](https://github.com/NeelBelsare)")
+    st.markdown("**Mansi Gaike**")
+    st.markdown("[🔗 LinkedIn Profile](https://www.linkedin.com/in/mansi-gaike-821260316) • [GitHub](https://github.com/gaikemansi03-sketch)")
     st.markdown("---")
 
 # Load data

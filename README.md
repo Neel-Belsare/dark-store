@@ -10,7 +10,9 @@
 [![Deployed on Netlify](https://img.shields.io/badge/Live%20Consumer%20Client-Netlify-00C7B7?logo=netlify)](https://blinkit-aurangabad.netlify.app)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Neel%20Belsare-0A66C2?logo=linkedin)](https://www.linkedin.com/in/neel-belsare-719b9a314/)
-[![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare/my-dark-store-app)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Mansi%20Gaike-0A66C2?logo=linkedin)](https://www.linkedin.com/in/mansi-gaike-821260316)
+[![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare)
+[![GitHub](https://img.shields.io/badge/GitHub-gaikemansi03--sketch-181717?logo=github)](https://github.com/gaikemansi03-sketch)
 
 ---
 
@@ -269,17 +271,15 @@ $$\text{ETA (mins)} = \mathrm{round}\left(3.5 + d \times 2.8\right)$$
 
 ---
 
-## 👨‍💻 Author & Maintainer
+## 👨‍💻 Authors & Contributors
 
-**Neel Belsare**  
-- **LinkedIn**: [linkedin.com/in/neel-belsare-719b9a314](https://www.linkedin.com/in/neel-belsare-719b9a314/)  
-- **GitHub**: [github.com/NeelBelsare](https://github.com/NeelBelsare)
-  
-**Mansi gaike**  
-- **LinkedIn**: [linkedin.com/in/mansi-gaike-821260316](https://www.linkedin.com/in/mansi-gaike-821260316)  
-- **GitHub**: [github.com/gaikemansi03-sketch](https://github.com/gaikemansi03-sketch)
+| Contributor | LinkedIn | GitHub |
+|---|---|---|
+| **Neel Belsare** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/neel-belsare-719b9a314/) | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/NeelBelsare) |
+| **Mansi Gaike** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mansi-gaike-821260316) | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/gaikemansi03-sketch) |
 
- **Live Application**: [my-dark-store-app.streamlit.app](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
+- 🌐 **Live Application**: [**my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
+- 📱 **Consumer Web App**: [**blinkit-aurangabad.netlify.app**](https://blinkit-aurangabad.netlify.app)
 
 ---
 

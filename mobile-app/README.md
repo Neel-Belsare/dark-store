@@ -2,6 +2,10 @@
 
 [![Deployed on Netlify](https://img.shields.io/badge/Live%20Web%20App-Netlify-00C7B7?logo=netlify)](https://blinkit-aurangabad.netlify.app)
 [![React Native](https://img.shields.io/badge/React%20Native-Expo%2051-61DAFB?logo=react)](https://reactnative.dev/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Neel%20Belsare-0A66C2?logo=linkedin)](https://www.linkedin.com/in/neel-belsare-719b9a314/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Mansi%20Gaike-0A66C2?logo=linkedin)](https://www.linkedin.com/in/mansi-gaike-821260316)
+[![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare)
+[![GitHub](https://img.shields.io/badge/GitHub-gaikemansi03--sketch-181717?logo=github)](https://github.com/gaikemansi03-sketch)
 
 A high-performance, modern React Native (Expo) web and mobile application replicating the **Blinkit** quick-commerce customer experience for **Chhatrapati Sambhajinagar (Aurangabad)**.
 
@@ -78,3 +82,13 @@ mobile-app/
     └── screens/
         └── CheckoutScreen.tsx   # Complete Blinkit checkout flow
 ```
+
+---
+
+## 👨‍💻 Authors & Contributors
+
+| Contributor | LinkedIn | GitHub |
+|---|---|---|
+| **Neel Belsare** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/neel-belsare-719b9a314/) | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/NeelBelsare) |
+| **Mansi Gaike** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mansi-gaike-821260316) | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/gaikemansi03-sketch) |
+
