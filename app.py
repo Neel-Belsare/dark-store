@@ -3,6 +3,7 @@ import json
 import glob
 import time
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -592,6 +593,459 @@ def check_for_external_order():
             return None
     return None
 
+def render_animated_delivery_tracking_map(cur_ord, df_stores):
+    """Render an interactive Leaflet map featuring real-time animated rider traversal along the delivery route."""
+    other_stores = []
+    if df_stores is not None and not df_stores.empty:
+        for _, row in df_stores.iterrows():
+            if str(row.get('Store Name')) != str(cur_ord['assigned_store']):
+                other_stores.append({
+                    "name": str(row.get('Store Name')),
+                    "lat": float(row.get('Latitude')),
+                    "lon": float(row.get('Longitude'))
+                })
+    other_stores_json = json.dumps(other_stores)
+    rider_short = cur_ord['rider'].split(' ')[0]
+    
+    html_code = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html, body, #map {{ width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }}
+        
+        .hub-marker {{
+            width: 36px;
+            height: 36px;
+            background: rgba(16, 185, 129, 0.25);
+            border: 2px solid #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+            animation: pulse-hub 2s infinite;
+        }}
+        .cust-marker {{
+            width: 36px;
+            height: 36px;
+            background: rgba(6, 182, 212, 0.25);
+            border: 2px solid #06b6d4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            box-shadow: 0 0 16px rgba(6, 182, 212, 0.6);
+            animation: pulse-cust 2s infinite;
+        }}
+        .rider-marker {{
+            width: 44px;
+            height: 44px;
+            background: #0f172a;
+            border: 2.5px solid #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.9);
+            position: relative;
+        }}
+        .rider-label {{
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            background: #0f172a;
+            color: #34d399;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 99px;
+            border: 1px solid #10b981;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }}
+        
+        @keyframes pulse-hub {{
+            0%, 100% {{ transform: scale(1); }}
+            50% {{ transform: scale(1.12); }}
+        }}
+        @keyframes pulse-cust {{
+            0%, 100% {{ transform: scale(1); }}
+            50% {{ transform: scale(1.12); }}
+        }}
+
+        .hud-card {{
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: #f1f5f9;
+            width: 320px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }}
+        .hud-title {{
+            font-size: 10px;
+            font-weight: 800;
+            color: #34d399;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .hud-dot {{
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse-hub 1.5s infinite;
+        }}
+        .hud-rider {{
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 3px;
+        }}
+        .hud-metrics {{
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-top: 1px solid rgba(51, 65, 85, 0.6);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+        }}
+        .hud-metric-label {{
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+        }}
+        .hud-metric-val {{
+            font-size: 15px;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-top: 2px;
+        }}
+        .hud-bar-bg {{
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 99px;
+            overflow: hidden;
+            margin: 6px 0;
+        }}
+        .hud-bar-fill {{
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #06b6d4);
+            border-radius: 99px;
+            transition: width 0.1s linear;
+        }}
+        .hud-controls {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }}
+        .hud-btn {{
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .hud-btn:hover {{
+            background: #334155;
+            color: #ffffff;
+        }}
+        .hud-btn-primary {{
+            background: #10b981;
+            border: none;
+            color: #022c22;
+            font-weight: 800;
+        }}
+        .hud-btn-primary:hover {{
+            background: #34d399;
+        }}
+      </style>
+    </head>
+    <body>
+      <div id="map"></div>
+      
+      <div class="hud-card">
+        <div class="hud-title">
+          <span class="hud-dot"></span>
+          <span>Live Rider Dispatch • Order #{cur_ord['order_id']}</span>
+        </div>
+        <div class="hud-rider">🛵 {cur_ord['rider']}</div>
+        
+        <div class="hud-metrics">
+          <div>
+            <div class="hud-metric-label">Live SLA</div>
+            <div class="hud-metric-val" id="eta-val" style="color: #34d399;">{cur_ord['eta_mins']} mins</div>
+          </div>
+          <div style="text-align: right;">
+            <div class="hud-metric-label">Remaining</div>
+            <div class="hud-metric-val" id="dist-val">{cur_ord['distance_km']:.2f} km</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; font-weight: 600;">
+          <span>Hub Staging</span>
+          <span id="pct-val" style="color: #34d399; font-weight: 700;">0%</span>
+          <span>Customer Gate</span>
+        </div>
+        <div class="hud-bar-bg">
+          <div class="hud-bar-fill" id="progress-bar"></div>
+        </div>
+
+        <div class="hud-controls">
+          <button class="hud-btn" id="pause-btn" onclick="togglePause()">⏸️ Pause</button>
+          <button class="hud-btn hud-btn-primary" onclick="restartTrip()">🔄 Replay Route</button>
+        </div>
+      </div>
+
+      <script>
+        var storeLat = {cur_ord['store_lat']};
+        var storeLon = {cur_ord['store_lon']};
+        var custLat = {cur_ord['cust_lat']};
+        var custLon = {cur_ord['cust_lon']};
+        var totalDistanceKm = {cur_ord['distance_km']:.2f};
+        var initialEtaMins = {cur_ord['eta_mins']};
+        var otherStores = {other_stores_json};
+
+        var map = L.map('map', {{
+          zoomControl: false
+        }}).setView([(storeLat + custLat) / 2, (storeLon + custLon) / 2], 14);
+
+        L.control.zoom({{ position: 'topright' }}).addTo(map);
+
+        L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+          attribution: '&copy; OpenStreetMap &copy; CARTO',
+          maxZoom: 19
+        }}).addTo(map);
+
+        otherStores.forEach(function(s) {{
+          L.circleMarker([s.lat, s.lon], {{
+            radius: 7,
+            fillColor: '#94a3b8',
+            color: '#ffffff',
+            weight: 1.5,
+            fillOpacity: 0.6
+          }}).addTo(map).bindPopup('<b>Dark Store:</b> ' + s.name);
+        }});
+
+        var hubIcon = L.divIcon({{
+          className: '',
+          html: '<div class="hub-marker">🏬</div>',
+          iconSize: [36, 36],
+          iconAnchor: [18, 18]
+        }});
+        L.marker([storeLat, storeLon], {{ icon: hubIcon }})
+          .addTo(map)
+          .bindPopup('<b>Assigned Dark Store</b><br>{cur_ord['assigned_store']}');
+
+        var custIcon = L.divIcon({{
+          className: '',
+          html: '<div class="cust-marker">🏠</div>',
+          iconSize: [36, 36],
+          iconAnchor: [18, 18]
+        }});
+        L.marker([custLat, custLon], {{ icon: custIcon }})
+          .addTo(map)
+          .bindPopup('<b>Customer Destination</b><br>Order #{cur_ord['order_id']}');
+
+        var bounds = L.latLngBounds([[storeLat, storeLon], [custLat, custLon]]);
+        map.fitBounds(bounds, {{ padding: [70, 70] }});
+
+        var riderIcon = L.divIcon({{
+          className: '',
+          html: '<div class="rider-marker"><span class="rider-label">{rider_short}</span>🛵</div>',
+          iconSize: [44, 44],
+          iconAnchor: [22, 22]
+        }});
+        var riderMarker = L.marker([storeLat, storeLon], {{ icon: riderIcon, zIndexOffset: 1000 }}).addTo(map);
+
+        var baseRoutePolyline = null;
+        var traveledPolyline = null;
+        var routeCoordinates = [];
+
+        async function fetchRoute() {{
+          var url = 'https://router.project-osrm.org/route/v1/driving/' + storeLon + ',' + storeLat + ';' + custLon + ',' + custLat + '?overview=full&geometries=geojson';
+          try {{
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function() {{ controller.abort(); }}, 1800);
+            var resp = await fetch(url, {{ signal: controller.signal }});
+            clearTimeout(timeoutId);
+            var data = await resp.json();
+            if (data.routes && data.routes.length > 0 && data.routes[0].geometry.coordinates.length > 1) {{
+              routeCoordinates = data.routes[0].geometry.coordinates.map(function(pt) {{ return [pt[1], pt[0]]; }});
+            }} else {{
+              throw new Error('No OSRM route');
+            }}
+          }} catch (err) {{
+            var midLat = (storeLat + custLat) / 2;
+            var midLon = (storeLon + custLon) / 2;
+            routeCoordinates = [
+              [storeLat, storeLon],
+              [storeLat, midLon],
+              [midLat, midLon],
+              [custLat, midLon],
+              [custLat, custLon]
+            ];
+          }}
+
+          baseRoutePolyline = L.polyline(routeCoordinates, {{
+            color: '#06b6d4',
+            weight: 5,
+            opacity: 0.8,
+            dashArray: '8, 8',
+            lineCap: 'round',
+            lineJoin: 'round'
+          }}).addTo(map);
+
+          traveledPolyline = L.polyline([], {{
+            color: '#10b981',
+            weight: 6,
+            opacity: 0.95,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }}).addTo(map);
+
+          startAnimation();
+        }}
+
+        function calculateCumulativeDistances(pts) {{
+          var dists = [0];
+          var total = 0;
+          for (var i = 0; i < pts.length - 1; i++) {{
+            var d = L.latLng(pts[i]).distanceTo(L.latLng(pts[i + 1]));
+            total += d;
+            dists.push(total);
+          }}
+          return {{ dists: dists, total: total }};
+        }}
+
+        function getPointAtProgress(pts, dists, total, p) {{
+          var targetDist = p * total;
+          for (var i = 0; i < dists.length - 1; i++) {{
+            if (targetDist >= dists[i] && targetDist <= dists[i + 1]) {{
+              var segLen = dists[i + 1] - dists[i];
+              var segProgress = segLen > 0 ? (targetDist - dists[i]) / segLen : 0;
+              var lat = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * segProgress;
+              var lon = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * segProgress;
+              var traveledPts = pts.slice(0, i + 1);
+              traveledPts.push([lat, lon]);
+              return {{ lat: lat, lon: lon, traveledPts: traveledPts }};
+            }}
+          }}
+          return {{ lat: pts[pts.length - 1][0], lon: pts[pts.length - 1][1], traveledPts: pts }};
+        }}
+
+        var DURATION_MS = 12000;
+        var animFrameId = null;
+        var startTime = null;
+        var isPaused = false;
+        var pausedProgress = 0;
+        var currentProgress = 0;
+
+        function animate(timestamp) {{
+          if (isPaused) {{
+            animFrameId = requestAnimationFrame(animate);
+            return;
+          }}
+
+          if (!startTime) startTime = timestamp;
+          var elapsed = timestamp - startTime;
+          currentProgress = Math.min(1, pausedProgress + elapsed / DURATION_MS);
+
+          var distData = calculateCumulativeDistances(routeCoordinates);
+          var ptData = getPointAtProgress(routeCoordinates, distData.dists, distData.total, currentProgress);
+
+          riderMarker.setLatLng([ptData.lat, ptData.lon]);
+          traveledPolyline.setLatLngs(ptData.traveledPts);
+
+          var remDist = Math.max(0, (1 - currentProgress) * totalDistanceKm).toFixed(2);
+          document.getElementById('dist-val').innerText = remDist + ' km';
+          
+          var pct = Math.round(currentProgress * 100);
+          document.getElementById('pct-val').innerText = pct + '%';
+          document.getElementById('progress-bar').style.width = Math.max(4, pct) + '%';
+
+          var etaVal = document.getElementById('eta-val');
+          if (currentProgress >= 0.98) {{
+            etaVal.innerText = 'Arrived! 🎉';
+            etaVal.style.color = '#38bdf8';
+          }} else if (currentProgress > 0.8) {{
+            etaVal.innerText = '< 1 min (At Gate)';
+            etaVal.style.color = '#34d399';
+          }} else if (currentProgress > 0.5) {{
+            etaVal.innerText = '2 mins (Nearby)';
+          }} else {{
+            etaVal.innerText = Math.max(1, Math.ceil((1 - currentProgress) * initialEtaMins)) + ' mins';
+          }}
+
+          if (currentProgress < 1) {{
+            animFrameId = requestAnimationFrame(animate);
+          }}
+        }}
+
+        function startAnimation() {{
+          if (animFrameId) cancelAnimationFrame(animFrameId);
+          startTime = null;
+          pausedProgress = 0;
+          isPaused = false;
+          currentProgress = 0;
+          document.getElementById('pause-btn').innerText = '⏸️ Pause';
+          animFrameId = requestAnimationFrame(animate);
+        }}
+
+        function restartTrip() {{
+          startAnimation();
+        }}
+
+        function togglePause() {{
+          if (currentProgress >= 1) {{
+            restartTrip();
+            return;
+          }}
+          isPaused = !isPaused;
+          var pauseBtn = document.getElementById('pause-btn');
+          if (isPaused) {{
+            pausedProgress = currentProgress;
+            pauseBtn.innerText = '▶️ Resume';
+          }} else {{
+            startTime = null;
+            pauseBtn.innerText = '⏸️ Pause';
+          }}
+        }}
+
+        fetchRoute();
+      </script>
+    </body>
+    </html>
+    """
+    components.html(html_code, height=580)
+
+
 # Check if an external mobile order arrived via FastAPI
 external_order = check_for_external_order()
 if external_order:
@@ -1019,182 +1473,196 @@ with tab_sim:
         </div>
         """, unsafe_allow_html=True)
 
-        # PyDeck Animated Visualizer
-        st.markdown("### 🗺️ Live Dispatch Telemetry Visualizer")
-        
-        # 1. Assigned Dark Store Highlight Layer (Outer glow ring + center pin)
-        store_glow = pd.DataFrame([{
-            "Latitude": cur_ord['store_lat'],
-            "Longitude": cur_ord['store_lon'],
-            "tooltip_html": f"<b>Assigned Hub:</b> {cur_ord['assigned_store']}<br/><b>Coverage:</b> {cur_ord['coverage_area']}"
-        }])
-        assigned_glow_layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=store_glow,
-            get_position=["Longitude", "Latitude"],
-            get_radius=580,
-            get_fill_color=[16, 185, 129, 60],
-            get_line_color=[16, 185, 129, 255],
-            stroked=True,
-            filled=True,
-            line_width_min_pixels=3,
-            pickable=True
-        )
-        assigned_pin_layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=store_glow,
-            get_position=["Longitude", "Latitude"],
-            get_radius=200,
-            get_fill_color=[16, 185, 129, 255],
-            get_line_color=[255, 255, 255, 255],
-            stroked=True,
-            filled=True,
-            line_width_min_pixels=2.5,
-            pickable=True
-        )
+        # Dispatch Telemetry Visualizer
+        col_viz_h1, col_viz_h2 = st.columns([1.6, 1.4])
+        with col_viz_h1:
+            st.markdown("### 🗺️ Live Dispatch Telemetry Visualizer")
+        with col_viz_h2:
+            viz_mode = st.radio(
+                "Map Engine:",
+                ["🛵 Live Animated Rider & Route", "🌐 3D PyDeck Vector Arc"],
+                horizontal=True,
+                label_visibility="collapsed",
+                key="telemetry_viz_mode"
+            )
 
-        # 2. Other Dark Stores (Muted grey to keep visual focus on active order)
-        other_stores = df_stores[df_stores['Store Name'] != cur_ord['assigned_store']].copy()
-        other_stores['tooltip_html'] = "<b>Hub:</b> " + other_stores['Store Name'].astype(str) + "<br/><b>Status:</b> " + other_stores['Status'].astype(str)
-        other_stores_layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=other_stores,
-            get_position=["Longitude", "Latitude"],
-            get_radius=170,
-            get_fill_color=[148, 163, 184, 160],
-            get_line_color=[255, 255, 255, 200],
-            stroked=True,
-            filled=True,
-            line_width_min_pixels=1.5,
-            pickable=True
-        )
+        if viz_mode == "🛵 Live Animated Rider & Route":
+            render_animated_delivery_tracking_map(cur_ord, df_stores)
+            st.caption("🛵 **Live Rider GPS Tracking**: Real-time road navigation from assigned hub to customer with simulated telemetry.")
+        else:
+            # 1. Assigned Dark Store Highlight Layer (Outer glow ring + center pin)
+            store_glow = pd.DataFrame([{
+                "Latitude": cur_ord['store_lat'],
+                "Longitude": cur_ord['store_lon'],
+                "tooltip_html": f"<b>Assigned Hub:</b> {cur_ord['assigned_store']}<br/><b>Coverage:</b> {cur_ord['coverage_area']}"
+            }])
+            assigned_glow_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=store_glow,
+                get_position=["Longitude", "Latitude"],
+                get_radius=580,
+                get_fill_color=[16, 185, 129, 60],
+                get_line_color=[16, 185, 129, 255],
+                stroked=True,
+                filled=True,
+                line_width_min_pixels=3,
+                pickable=True
+            )
+            assigned_pin_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=store_glow,
+                get_position=["Longitude", "Latitude"],
+                get_radius=200,
+                get_fill_color=[16, 185, 129, 255],
+                get_line_color=[255, 255, 255, 255],
+                stroked=True,
+                filled=True,
+                line_width_min_pixels=2.5,
+                pickable=True
+            )
 
-        # 3. Customer Location Ping (Concentric pulse rings + Cyan center)
-        cust_df = pd.DataFrame([{
-            "Latitude": cur_ord['cust_lat'],
-            "Longitude": cur_ord['cust_lon'],
-            "tooltip_html": f"<b>📍 Customer Location</b><br/>Order #{cur_ord['order_id']}<br/>ETA: {cur_ord['eta_mins']} mins"
-        }])
-        cust_pulse_layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=cust_df,
-            get_position=["Longitude", "Latitude"],
-            get_radius=380,
-            get_fill_color=[6, 182, 212, 50],
-            get_line_color=[6, 182, 212, 255],
-            stroked=True,
-            filled=True,
-            line_width_min_pixels=2.5,
-            pickable=True
-        )
-        cust_pin_layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=cust_df,
-            get_position=["Longitude", "Latitude"],
-            get_radius=110,
-            get_fill_color=[6, 182, 212, 255],
-            get_line_color=[255, 255, 255, 255],
-            stroked=True,
-            filled=True,
-            line_width_min_pixels=2,
-            pickable=True
-        )
+            # 2. Other Dark Stores (Muted grey to keep visual focus on active order)
+            other_stores = df_stores[df_stores['Store Name'] != cur_ord['assigned_store']].copy()
+            other_stores['tooltip_html'] = "<b>Hub:</b> " + other_stores['Store Name'].astype(str) + "<br/><b>Status:</b> " + other_stores['Status'].astype(str)
+            other_stores_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=other_stores,
+                get_position=["Longitude", "Latitude"],
+                get_radius=170,
+                get_fill_color=[148, 163, 184, 160],
+                get_line_color=[255, 255, 255, 200],
+                stroked=True,
+                filled=True,
+                line_width_min_pixels=1.5,
+                pickable=True
+            )
 
-        # 4. Animated 3D Curved Arc Layer (Assigned Store -> Customer)
-        arc_df = pd.DataFrame([{
-            "from_lon": cur_ord['store_lon'],
-            "from_lat": cur_ord['store_lat'],
-            "to_lon": cur_ord['cust_lon'],
-            "to_lat": cur_ord['cust_lat'],
-            "tooltip_html": f"<b>Delivery Flight Vector</b><br/>Distance: {cur_ord['distance_km']:.2f} km<br/>ETA: {cur_ord['eta_mins']} mins"
-        }])
-        arc_layer = pdk.Layer(
-            "ArcLayer",
-            data=arc_df,
-            get_source_position=["from_lon", "from_lat"],
-            get_target_position=["to_lon", "to_lat"],
-            get_source_color=[16, 185, 129, 255],
-            get_target_color=[6, 182, 212, 255],
-            get_width=5,
-            pickable=True
-        )
+            # 3. Customer Location Ping (Concentric pulse rings + Cyan center)
+            cust_df = pd.DataFrame([{
+                "Latitude": cur_ord['cust_lat'],
+                "Longitude": cur_ord['cust_lon'],
+                "tooltip_html": f"<b>📍 Customer Location</b><br/>Order #{cur_ord['order_id']}<br/>ETA: {cur_ord['eta_mins']} mins"
+            }])
+            cust_pulse_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=cust_df,
+                get_position=["Longitude", "Latitude"],
+                get_radius=380,
+                get_fill_color=[6, 182, 212, 50],
+                get_line_color=[6, 182, 212, 255],
+                stroked=True,
+                filled=True,
+                line_width_min_pixels=2.5,
+                pickable=True
+            )
+            cust_pin_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=cust_df,
+                get_position=["Longitude", "Latitude"],
+                get_radius=110,
+                get_fill_color=[6, 182, 212, 255],
+                get_line_color=[255, 255, 255, 255],
+                stroked=True,
+                filled=True,
+                line_width_min_pixels=2,
+                pickable=True
+            )
 
-        # 5. Delivery Line Layer (Ground Route Vector)
-        line_layer = pdk.Layer(
-            "LineLayer",
-            data=arc_df,
-            get_source_position=["from_lon", "from_lat"],
-            get_target_position=["to_lon", "to_lat"],
-            get_color=[99, 102, 241, 180],
-            get_width=3,
-            pickable=True
-        )
+            # 4. Animated 3D Curved Arc Layer (Assigned Store -> Customer)
+            arc_df = pd.DataFrame([{
+                "from_lon": cur_ord['store_lon'],
+                "from_lat": cur_ord['store_lat'],
+                "to_lon": cur_ord['cust_lon'],
+                "to_lat": cur_ord['cust_lat'],
+                "tooltip_html": f"<b>Delivery Flight Vector</b><br/>Distance: {cur_ord['distance_km']:.2f} km<br/>ETA: {cur_ord['eta_mins']} mins"
+            }])
+            arc_layer = pdk.Layer(
+                "ArcLayer",
+                data=arc_df,
+                get_source_position=["from_lon", "from_lat"],
+                get_target_position=["to_lon", "to_lat"],
+                get_source_color=[16, 185, 129, 255],
+                get_target_color=[6, 182, 212, 255],
+                get_width=5,
+                pickable=True
+            )
 
-        # 6. Moving Rider Marker
-        rider_progress = 0.65
-        rider_lat = (1 - rider_progress) * cur_ord['store_lat'] + rider_progress * cur_ord['cust_lat']
-        rider_lon = (1 - rider_progress) * cur_ord['store_lon'] + rider_progress * cur_ord['cust_lon']
-        rider_df = pd.DataFrame([{
-            "Latitude": rider_lat,
-            "Longitude": rider_lon,
-            "tooltip_html": f"<b>🛵 {cur_ord['rider']}</b><br/>Status: In Transit (65% completed)<br/>Speed: ~28 km/h"
-        }])
-        rider_layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=rider_df,
-            get_position=["Longitude", "Latitude"],
-            get_radius=160,
-            get_fill_color=[245, 158, 11, 255],
-            get_line_color=[255, 255, 255, 255],
-            stroked=True,
-            filled=True,
-            line_width_min_pixels=2.5,
-            pickable=True
-        )
+            # 5. Delivery Line Layer (Ground Route Vector)
+            line_layer = pdk.Layer(
+                "LineLayer",
+                data=arc_df,
+                get_source_position=["from_lon", "from_lat"],
+                get_target_position=["to_lon", "to_lat"],
+                get_color=[99, 102, 241, 180],
+                get_width=3,
+                pickable=True
+            )
 
-        sim_layers = [
-            other_stores_layer,
-            assigned_glow_layer,
-            assigned_pin_layer,
-            cust_pulse_layer,
-            cust_pin_layer,
-            line_layer,
-            arc_layer,
-            rider_layer
-        ]
+            # 6. Moving Rider Marker
+            rider_progress = 0.65
+            rider_lat = (1 - rider_progress) * cur_ord['store_lat'] + rider_progress * cur_ord['cust_lat']
+            rider_lon = (1 - rider_progress) * cur_ord['store_lon'] + rider_progress * cur_ord['cust_lon']
+            rider_df = pd.DataFrame([{
+                "Latitude": rider_lat,
+                "Longitude": rider_lon,
+                "tooltip_html": f"<b>🛵 {cur_ord['rider']}</b><br/>Status: In Transit (65% completed)<br/>Speed: ~28 km/h"
+            }])
+            rider_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=rider_df,
+                get_position=["Longitude", "Latitude"],
+                get_radius=160,
+                get_fill_color=[245, 158, 11, 255],
+                get_line_color=[255, 255, 255, 255],
+                stroked=True,
+                filled=True,
+                line_width_min_pixels=2.5,
+                pickable=True
+            )
 
-        mid_lat = (cur_ord['store_lat'] + cur_ord['cust_lat']) / 2.0
-        mid_lon = (cur_ord['store_lon'] + cur_ord['cust_lon']) / 2.0
+            sim_layers = [
+                other_stores_layer,
+                assigned_glow_layer,
+                assigned_pin_layer,
+                cust_pulse_layer,
+                cust_pin_layer,
+                line_layer,
+                arc_layer,
+                rider_layer
+            ]
 
-        sim_view_state = pdk.ViewState(
-            latitude=mid_lat,
-            longitude=mid_lon,
-            zoom=13.2,
-            pitch=35,
-            bearing=15
-        )
+            mid_lat = (cur_ord['store_lat'] + cur_ord['cust_lat']) / 2.0
+            mid_lon = (cur_ord['store_lon'] + cur_ord['cust_lon']) / 2.0
 
-        sim_deck = pdk.Deck(
-            layers=sim_layers,
-            initial_view_state=sim_view_state,
-            map_style=pdk.map_styles.CARTO_LIGHT,
-            tooltip={
-                "html": "{tooltip_html}",
-                "style": {
-                    "backgroundColor": "#0f1629",
-                    "color": "#e8edf9",
-                    "fontFamily": "Inter, sans-serif",
-                    "fontSize": "13px",
-                    "borderRadius": "10px",
-                    "padding": "10px 14px",
-                    "boxShadow": "0 8px 24px rgba(0, 0, 0, 0.25)",
-                    "border": "1px solid #1e2a47"
+            sim_view_state = pdk.ViewState(
+                latitude=mid_lat,
+                longitude=mid_lon,
+                zoom=13.2,
+                pitch=35,
+                bearing=15
+            )
+
+            sim_deck = pdk.Deck(
+                layers=sim_layers,
+                initial_view_state=sim_view_state,
+                map_style=pdk.map_styles.CARTO_LIGHT,
+                tooltip={
+                    "html": "{tooltip_html}",
+                    "style": {
+                        "backgroundColor": "#0f1629",
+                        "color": "#e8edf9",
+                        "fontFamily": "Inter, sans-serif",
+                        "fontSize": "13px",
+                        "borderRadius": "10px",
+                        "padding": "10px 14px",
+                        "boxShadow": "0 8px 24px rgba(0, 0, 0, 0.25)",
+                        "border": "1px solid #1e2a47"
+                    }
                 }
-            }
-        )
+            )
 
-        st.pydeck_chart(sim_deck, use_container_width=True)
-        st.caption("🟢 **Assigned Hub** (Store) ── 3D Arc Vector ── 🟡 **Rider** In Transit ── 🔵 **Customer** GPS Target")
+            st.pydeck_chart(sim_deck, use_container_width=True)
+            st.caption("🟢 **Assigned Hub** (Store) ── 3D Arc Vector ── 🟡 **Rider** In Transit ── 🔵 **Customer** GPS Target")
 
         col_man1, col_man2 = st.columns([1.1, 1.3])
 
