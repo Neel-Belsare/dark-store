@@ -838,8 +838,8 @@ def render_animated_delivery_tracking_map(cur_ord, df_stores):
 
         L.control.zoom({{ position: 'topright' }}).addTo(map);
 
-        L.tileLayer('https://{{s}}.basemaps.cartocdn.com/rastertiles/voyager/{{z}}/{{x}}/{{y}}{{r}}.png', {{
-          attribution: '&copy; OpenStreetMap &copy; CARTO',
+        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
           maxZoom: 19
         }}).addTo(map);
 
