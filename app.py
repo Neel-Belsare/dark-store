@@ -813,9 +813,9 @@ footer {
 }
 
 .stMainBlockContainer {
-    max-width: 1040px !important;
-    padding-top: 3.5rem !important;
-    padding-bottom: 3.5rem !important;
+    max-width: 980px !important;
+    padding-top: 5vh !important;
+    padding-bottom: 5vh !important;
     padding-left: 1.5rem !important;
     padding-right: 1.5rem !important;
     margin: 0 auto !important;
@@ -836,26 +836,48 @@ div[class*="st-key-inventory_login_card"] > div {
 }
 
 div[class*="st-key-inventory_login_card"] [data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    align-items: stretch !important;
     gap: 0 !important;
     margin: 0 !important;
-    align-items: stretch !important;
+    padding: 0 !important;
 }
 
-/* 3. Left Hero Column */
+/* 3. Left Hero Column - Gradient applied directly on column */
 div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child {
-    padding: 0 !important;
-    background: transparent !important;
+    background: linear-gradient(152deg, #3C1685 0%, #2E1066 48%, #1B0743 100%) !important;
     border-radius: 26px 0 0 26px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
+}
+
+/* Force left column children to fill 100% height */
+div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child > div,
+div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"],
+div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child [data-testid="stElementContainer"],
+div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child [data-testid="stMarkdownContainer"] {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    justify-content: space-between !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* 4. Right Form Column */
 div[class*="st-key-inventory_login_card"] [data-testid="column"]:last-child {
     background: #FFFFFF !important;
     border-radius: 0 26px 26px 0 !important;
-    padding: 38px 46px 32px 46px !important;
+    padding: 40px 48px 34px 48px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
+    flex: 1.15 1 0% !important;
 }
 
 /* 5. Streamlit Form Overrides */
@@ -931,30 +953,12 @@ div[data-testid="stFormSubmitButton"] button:active {
     transform: translateY(0) !important;
 }
 
-/* Demo Helper Buttons */
-div[class*="st-key-autofill_btn"] button,
-div[class*="st-key-clear_btn"] button {
-    height: 32px !important;
-    font-size: 11.5px !important;
-    border-radius: 8px !important;
-    border: 1px solid #E5E7EB !important;
-    background: #F9FAFB !important;
-    color: #4B5563 !important;
-    box-shadow: none !important;
-    padding: 0 10px !important;
-}
-div[class*="st-key-autofill_btn"] button:hover,
-div[class*="st-key-clear_btn"] button:hover {
-    background: #F3F4F6 !important;
-    color: #1F2937 !important;
-}
-
 /* Social Auth Cards */
 .social-auth-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 .social-auth-card {
     height: 44px;
@@ -987,24 +991,20 @@ div[class*="st-key-clear_btn"] button:hover {
         flex-direction: column !important;
     }
     div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child {
-        border-radius: 24px 24px 0 0 !important;
+        border-radius: 26px 26px 0 0 !important;
         padding: 0 !important;
-        min-height: auto !important;
-    }
-    div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child > div > div {
-        border-radius: 24px 24px 0 0 !important;
     }
     div[class*="st-key-inventory_login_card"] [data-testid="column"]:last-child {
-        border-radius: 0 0 24px 24px !important;
+        border-radius: 0 0 26px 26px !important;
         padding: 30px 22px !important;
     }
 }
 </style>"""
 
-LOGIN_HERO_HTML = """<div style="background: linear-gradient(152deg, #3C1685 0%, #2E1066 48%, #1B0743 100%); border-radius: 26px 0 0 26px; padding: 46px 40px 42px 42px; min-height: 560px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; box-sizing: border-box; color: #FFFFFF;">
-<div style="position: absolute; top: -50px; right: -60px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(147, 51, 234, 0) 70%); pointer-events: none;"></div>
-<div style="position: absolute; bottom: 20px; left: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(45, 212, 191, 0.22) 0%, rgba(45, 212, 191, 0) 70%); pointer-events: none;"></div>
-<div style="position: absolute; top: 220px; right: 30px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, rgba(124, 58, 237, 0) 70%); pointer-events: none;"></div>
+LOGIN_HERO_HTML = """<div style="height: 100%; min-height: 520px; padding: 44px 38px 36px 38px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF;">
+<div style="position: absolute; top: -50px; right: -60px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(147, 51, 234, 0) 70%); pointer-events: none; z-index: 1;"></div>
+<div style="position: absolute; bottom: 20px; left: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(45, 212, 191, 0.22) 0%, rgba(45, 212, 191, 0) 70%); pointer-events: none; z-index: 1;"></div>
+<div style="position: absolute; top: 220px; right: 30px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, rgba(124, 58, 237, 0) 70%); pointer-events: none; z-index: 1;"></div>
 
 <div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 12px;">
 <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); border: 1.2px solid rgba(255, 255, 255, 0.22); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
@@ -1019,8 +1019,8 @@ InventoryPro
 </span>
 </div>
 
-<div style="position: relative; z-index: 2; margin: 44px 0 36px 0;">
-<h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 33px; font-weight: 800; line-height: 1.2; letter-spacing: -0.025em; margin-bottom: 16px; color: #FFFFFF;">
+<div style="position: relative; z-index: 2; margin: 40px 0 32px 0;">
+<h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; line-height: 1.2; letter-spacing: -0.025em; margin-bottom: 16px; color: #FFFFFF;">
 Smart Inventory<br>
 Management<br>
 <span style="color: #2ED4E5;">Made Simple</span>
@@ -1030,7 +1030,7 @@ Track, analyze, and optimize your inventory with real-time insights and powerful
 </p>
 </div>
 
-<div style="position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.14);">
+<div style="position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, 0.14);">
 <div>
 <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; color: #FFFFFF; letter-spacing: -0.01em;">500+</div>
 <div style="font-size: 11px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); margin-top: 4px; font-weight: 400;">Companies<br>Trust Us</div>
@@ -1046,8 +1046,8 @@ Track, analyze, and optimize your inventory with real-time insights and powerful
 </div>
 </div>"""
 
-LOGIN_FORM_HEADER_HTML = """<div style="margin-bottom: 22px;">
-<h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.025em; color: #111827; margin: 0 0 6px 0;">
+LOGIN_FORM_HEADER_HTML = """<div style="margin-bottom: 20px;">
+<h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 27px; font-weight: 800; letter-spacing: -0.025em; color: #111827; margin: 0 0 6px 0;">
 Welcome Back
 </h2>
 <p style="font-size: 13.5px; color: #6B7280; margin: 0; font-weight: 400;">
@@ -1055,7 +1055,7 @@ Login to access your inventory dashboard
 </p>
 </div>"""
 
-LOGIN_SOCIAL_DIVIDER_HTML = """<div style="display: flex; align-items: center; margin: 22px 0 18px 0; color: #9CA3AF; font-size: 12px; font-weight: 500;">
+LOGIN_SOCIAL_DIVIDER_HTML = """<div style="display: flex; align-items: center; margin: 20px 0 16px 0; color: #9CA3AF; font-size: 12px; font-weight: 500;">
 <div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
 <span style="padding: 0 14px;">Or continue with</span>
 <div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
@@ -1079,12 +1079,12 @@ LOGIN_SOCIAL_DIVIDER_HTML = """<div style="display: flex; align-items: center; m
 </div>
 </div>
 
-<div style="text-align: center; font-size: 13px; color: #6B7280; margin-bottom: 18px;">
+<div style="text-align: center; font-size: 13px; color: #6B7280; margin-bottom: 14px;">
 Don't have an account? <a href="#" style="color: #431A8B; font-weight: 700; text-decoration: none;">Sign Up</a>
 </div>
 
-<div style="padding: 10px 14px; background: #F8F7FF; border: 1px dashed #D0C9FF; border-radius: 10px; font-size: 11.5px; color: #4B4673; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-<span>⚡ <b>Demo Account:</b> <code style="background: #EBE7FF; color: #2D1460; padding: 2px 6px; border-radius: 4px; font-weight: 700;">sample_username</code> / <code style="background: #EBE7FF; color: #2D1460; padding: 2px 6px; border-radius: 4px; font-weight: 700;">password@123</code></span>
+<div style="text-align: center; padding: 8px 12px; background: #F8F7FF; border: 1px dashed #D0C9FF; border-radius: 8px; font-size: 11px; color: #5B527E;">
+⚡ <b>Demo Account:</b> <code style="background: #EBE7FF; color: #2D1460; padding: 2px 5px; border-radius: 4px; font-weight: 700;">sample_username</code> / <code style="background: #EBE7FF; color: #2D1460; padding: 2px 5px; border-radius: 4px; font-weight: 700;">password@123</code>
 </div>"""
 
 def render_login_screen():
@@ -1095,14 +1095,11 @@ def render_login_screen():
     """
     st.markdown(LOGIN_CSS, unsafe_allow_html=True)
 
-    if "autofilled" not in st.session_state:
-        st.session_state["autofilled"] = False
-
-    default_user = "sample_username" if st.session_state.get("autofilled") else ""
-    default_pass = "password@123" if st.session_state.get("autofilled") else ""
+    default_user = "sample_username"
+    default_pass = "password@123"
 
     with st.container(key="inventory_login_card"):
-        col_left, col_right = st.columns([1.05, 1.15], gap=0)
+        col_left, col_right = st.columns([1, 1.15], gap=0)
 
         # ----------------------------------------------------------------------
         # Left Hero Panel: InventoryPro Branding & Statistics
@@ -1139,18 +1136,8 @@ def render_login_screen():
 
                 submit_btn = st.form_submit_button("Sign In", use_container_width=True)
 
-            # Social Sign-In & Divider
+            # Social Sign-In, Footer, and Demo Credentials Note
             st.markdown(LOGIN_SOCIAL_DIVIDER_HTML, unsafe_allow_html=True)
-
-            col_btn1, col_btn2 = st.columns([1.4, 1])
-            with col_btn1:
-                if st.button("⚡ Fill Demo Credentials", key="autofill_btn", use_container_width=True):
-                    st.session_state["autofilled"] = True
-                    st.rerun()
-            with col_btn2:
-                if st.button("🔄 Clear", key="clear_btn", use_container_width=True):
-                    st.session_state["autofilled"] = False
-                    st.rerun()
 
             # Submission Processing
             if submit_btn:
