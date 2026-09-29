@@ -799,110 +799,400 @@ st.markdown("""
 # 2.1. Authentication Gateway (Handled by Supabase Cloud)
 # ------------------------------------------------------------------------------
 def render_login_screen():
+    """
+    Renders the modern InventoryPro split-card login interface matching the
+    exact UI/UX specification: Deep purple bokeh hero panel on the left and clean,
+    minimalist authentication portal on the right, backed by Supabase Cloud.
+    """
     st.markdown("""
-    <div style="max-width: 520px; margin: 1.5rem auto 0.5rem; text-align: center;">
-        <div style="display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; border-radius: 20px; background: linear-gradient(135deg, #18181F 0%, #2B2550 100%); border: 1.5px solid #8B82F6; box-shadow: 0 8px 24px rgba(139, 130, 246, 0.25); margin-bottom: 14px;">
-            <span style="font-size: 32px;">🛒</span>
-        </div>
-        <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; color: #14141E; margin: 0 0 6px 0; letter-spacing: -0.02em;">
-            Quick-Commerce Command Center
-        </h1>
-        <p style="font-size: 13px; color: #6E6E82; margin: 0 0 14px 0;">
-            Sub-12 Min Autonomous Dispatch Ecosystem • Production v3.0.0
-        </p>
-        <div style="display: inline-flex; align-items: center; gap: 6px; background: #EEEDFE; color: #6E68B8; font-size: 11.5px; font-weight: 700; padding: 5px 16px; border-radius: 9999px; border: 1px solid #D4D0FC; margin-bottom: 20px;">
-            <span style="color: #10B981; font-size: 14px;">●</span> Handled by Supabase Cloud Authentication
-        </div>
-    </div>
+    <style>
+    /* 1. Global Reset & Login Page Canvas */
+    [data-testid="stSidebar"],
+    [data-testid="stSidebarCollapsedControl"],
+    #MainMenu,
+    header[data-testid="stHeader"],
+    footer {
+        display: none !important;
+    }
+
+    .stApp {
+        background-color: #F4F5F9 !important;
+        background-image: none !important;
+    }
+
+    .stMainBlockContainer {
+        max-width: 1040px !important;
+        padding-top: 3.5rem !important;
+        padding-bottom: 3.5rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        margin: 0 auto !important;
+    }
+
+    /* 2. Login Card Outer Container */
+    div[class*="st-key-inventory_login_card"] {
+        background: #FFFFFF !important;
+        border-radius: 26px !important;
+        box-shadow: 0 25px 60px -15px rgba(27, 10, 66, 0.16), 0 0 1px 1px rgba(0, 0, 0, 0.04) !important;
+        overflow: hidden !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    div[class*="st-key-inventory_login_card"] > div {
+        padding: 0 !important;
+    }
+
+    div[class*="st-key-inventory_login_card"] [data-testid="stHorizontalBlock"] {
+        gap: 0 !important;
+        margin: 0 !important;
+        align-items: stretch !important;
+    }
+
+    /* 3. Left Hero Column */
+    div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child {
+        background: linear-gradient(152deg, #3C1685 0%, #2E1066 48%, #1B0743 100%) !important;
+        border-radius: 26px 0 0 26px !important;
+        padding: 46px 40px 42px 42px !important;
+        position: relative !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        min-height: 550px !important;
+    }
+
+    /* 4. Right Form Column */
+    div[class*="st-key-inventory_login_card"] [data-testid="column"]:last-child {
+        background: #FFFFFF !important;
+        border-radius: 0 26px 26px 0 !important;
+        padding: 42px 48px 36px 48px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    /* 5. Streamlit Form Overrides */
+    div[data-testid="stForm"] {
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    /* Input Labels */
+    div[data-testid="stTextInput"] label {
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        color: #374151 !important;
+        margin-bottom: 5px !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    /* Input Fields */
+    div[data-testid="stTextInput"] input {
+        background-color: #F9FAFB !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 10px !important;
+        height: 44px !important;
+        font-size: 14px !important;
+        color: #1F2937 !important;
+        padding: 0 14px !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
+    }
+
+    div[data-testid="stTextInput"] input:focus {
+        border-color: #3C1685 !important;
+        background-color: #FFFFFF !important;
+        box-shadow: 0 0 0 3px rgba(60, 22, 133, 0.12) !important;
+    }
+
+    /* Checkbox */
+    div[data-testid="stCheckbox"] {
+        margin-top: 4px !important;
+    }
+    div[data-testid="stCheckbox"] label span {
+        font-size: 12.5px !important;
+        color: #4B5563 !important;
+    }
+    div[data-testid="stCheckbox"] input[type="checkbox"] {
+        accent-color: #3C1685 !important;
+    }
+
+    /* Sign In Button */
+    div[data-testid="stFormSubmitButton"] button {
+        background: #2D1460 !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 10px !important;
+        height: 46px !important;
+        font-size: 14.5px !important;
+        font-weight: 600 !important;
+        font-family: inherit !important;
+        box-shadow: 0 4px 14px rgba(45, 20, 96, 0.25) !important;
+        transition: all 0.2s ease !important;
+        width: 100% !important;
+        margin-top: 6px !important;
+    }
+
+    div[data-testid="stFormSubmitButton"] button:hover {
+        background: #3B1B7D !important;
+        box-shadow: 0 6px 18px rgba(45, 20, 96, 0.35) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    div[data-testid="stFormSubmitButton"] button:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Demo Helper Buttons */
+    div[class*="st-key-autofill_btn"] button,
+    div[class*="st-key-clear_btn"] button {
+        height: 32px !important;
+        font-size: 11.5px !important;
+        border-radius: 8px !important;
+        border: 1px solid #E5E7EB !important;
+        background: #F9FAFB !important;
+        color: #4B5563 !important;
+        box-shadow: none !important;
+        padding: 0 10px !important;
+    }
+    div[class*="st-key-autofill_btn"] button:hover,
+    div[class*="st-key-clear_btn"] button:hover {
+        background: #F3F4F6 !important;
+        color: #1F2937 !important;
+    }
+
+    /* Social Auth Cards */
+    .social-auth-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .social-auth-card {
+        height: 44px;
+        background: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #374151;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        transition: all 0.15s ease;
+    }
+    .social-auth-card:hover {
+        background: #F9FAFB;
+        border-color: #D1D5DB;
+    }
+
+    /* Responsive Stacking */
+    @media (max-width: 820px) {
+        .stMainBlockContainer {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+        div[class*="st-key-inventory_login_card"] [data-testid="stHorizontalBlock"] {
+            flex-direction: column !important;
+        }
+        div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child {
+            border-radius: 24px 24px 0 0 !important;
+            padding: 34px 26px !important;
+            min-height: auto !important;
+        }
+        div[class*="st-key-inventory_login_card"] [data-testid="column"]:last-child {
+            border-radius: 0 0 24px 24px !important;
+            padding: 32px 24px !important;
+        }
+    }
+    </style>
     """, unsafe_allow_html=True)
 
-    col_left, col_center, col_right = st.columns([1, 1.6, 1])
-    with col_center:
-        st.markdown("""
-        <div style="background: #FFFFFF; border: 1px solid #EAEBF2; border-radius: 20px; padding: 20px 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-bottom: 12px;">
-            <div style="font-size: 15px; font-weight: 800; color: #14141E;">Admin Portal Sign In</div>
-            <div style="font-size: 12px; color: #9696A6; margin-top: 2px;">Enter your credentials to access dispatch telemetry and analytics.</div>
-        </div>
-        """, unsafe_allow_html=True)
+    if "autofilled" not in st.session_state:
+        st.session_state["autofilled"] = False
 
-        if "autofilled" not in st.session_state:
-            st.session_state["autofilled"] = False
+    default_user = "sample_username" if st.session_state.get("autofilled") else ""
+    default_pass = "password@123" if st.session_state.get("autofilled") else ""
 
-        default_user = "sample_username" if st.session_state.get("autofilled") else ""
-        default_pass = "password@123" if st.session_state.get("autofilled") else ""
+    with st.container(key="inventory_login_card"):
+        col_left, col_right = st.columns([1.05, 1.15], gap="small")
 
-        with st.form("supabase_login_form", clear_on_submit=False):
-            username_input = st.text_input(
-                "Username",
-                value=default_user,
-                placeholder="e.g. sample_username",
-                key="login_user_field"
-            )
-            password_input = st.text_input(
-                "Password",
-                value=default_pass,
-                type="password",
-                placeholder="e.g. password@123",
-                key="login_pass_field"
-            )
-
+        # ----------------------------------------------------------------------
+        # Left Hero Panel: InventoryPro Branding & Statistics
+        # ----------------------------------------------------------------------
+        with col_left:
             st.markdown("""
-            <div style="background: #F8F9FE; border: 1px dashed #D4D0FC; border-radius: 12px; padding: 10px 14px; margin: 12px 0 16px 0; font-size: 11.5px; color: #4B4B5E;">
-                <div style="font-weight: 700; color: #6E68B8; margin-bottom: 4px;">🔑 Demo Credentials (Supabase Handled):</div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                    <span>Username:</span> <code style="background: #EEEDFE; color: #1E1B4B; padding: 2px 6px; border-radius: 4px; font-weight: 700;">sample_username</code>
+            <div style="position: relative; height: 100%; display: flex; flex-direction: column; justify-content: space-between; z-index: 1;">
+                <!-- Ambient Glowing Bokeh Circles -->
+                <div style="position: absolute; top: -50px; right: -60px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(147, 51, 234, 0) 70%); pointer-events: none; z-index: 0;"></div>
+                <div style="position: absolute; bottom: 20px; left: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(45, 212, 191, 0.22) 0%, rgba(45, 212, 191, 0) 70%); pointer-events: none; z-index: 0;"></div>
+                <div style="position: absolute; top: 220px; right: 30px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, rgba(124, 58, 237, 0) 70%); pointer-events: none; z-index: 0;"></div>
+
+                <!-- Brand Header -->
+                <div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); border: 1.2px solid rgba(255, 255, 255, 0.22); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                            <line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                    </div>
+                    <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; color: #FFFFFF;">
+                        InventoryPro
+                    </span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Password:</span> <code style="background: #EEEDFE; color: #1E1B4B; padding: 2px 6px; border-radius: 4px; font-weight: 700;">password@123</code>
+
+                <!-- Main Headline & Description -->
+                <div style="position: relative; z-index: 2; margin: 44px 0 36px 0;">
+                    <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 33px; font-weight: 800; line-height: 1.2; letter-spacing: -0.025em; margin-bottom: 16px; color: #FFFFFF;">
+                        Smart Inventory<br>
+                        Management<br>
+                        <span style="color: #2ED4E5;">Made Simple</span>
+                    </h1>
+                    <p style="font-size: 13.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.74); margin: 0; max-width: 320px; font-weight: 400;">
+                        Track, analyze, and optimize your inventory with real-time insights and powerful analytics.
+                    </p>
+                </div>
+
+                <!-- Three-Column Metric Stats -->
+                <div style="position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.14);">
+                    <div>
+                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; color: #FFFFFF; letter-spacing: -0.01em;">500+</div>
+                        <div style="font-size: 11px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); margin-top: 4px; font-weight: 400;">Companies<br>Trust Us</div>
+                    </div>
+                    <div>
+                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; color: #FFFFFF; letter-spacing: -0.01em;">10K+</div>
+                        <div style="font-size: 11px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); margin-top: 4px; font-weight: 400;">Products<br>Tracked</div>
+                    </div>
+                    <div>
+                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; color: #FFFFFF; letter-spacing: -0.01em;">99.9%</div>
+                        <div style="font-size: 11px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); margin-top: 4px; font-weight: 400;">Uptime<br>Guarantee</div>
+                    </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            submit_btn = st.form_submit_button("Sign In to Command Center ➔", use_container_width=True)
+        # ----------------------------------------------------------------------
+        # Right Form Panel: Welcome Back & Sign In
+        # ----------------------------------------------------------------------
+        with col_right:
+            st.markdown("""
+            <div style="margin-bottom: 22px;">
+                <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.025em; color: #111827; margin: 0 0 6px 0;">
+                    Welcome Back
+                </h2>
+                <p style="font-size: 13.5px; color: #6B7280; margin: 0; font-weight: 400;">
+                    Login to access your inventory dashboard
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
-        col_btn1, col_btn2 = st.columns(2)
-        with col_btn1:
-            if st.button("⚡ Fill Demo Credentials", key="autofill_btn", use_container_width=True):
-                st.session_state["autofilled"] = True
-                st.rerun()
-        with col_btn2:
-            if st.button("🔄 Clear", key="clear_btn", use_container_width=True):
-                st.session_state["autofilled"] = False
-                st.rerun()
+            with st.form("inventory_login_form", clear_on_submit=False):
+                username_input = st.text_input(
+                    "Email Address",
+                    value=default_user,
+                    placeholder="you@example.com",
+                    key="login_email_input"
+                )
+                password_input = st.text_input(
+                    "Password",
+                    value=default_pass,
+                    type="password",
+                    placeholder="Enter your password",
+                    key="login_password_input"
+                )
 
-        if submit_btn:
-            if not username_input or not password_input:
-                st.error("⚠️ Please enter both username and password.")
-            else:
-                with st.spinner("Verifying credentials with Supabase Cloud..."):
-                    if supabase_client:
-                        auth_res = supabase_client.authenticate_user(username_input, password_input)
-                    else:
-                        is_valid = (username_input.strip() == "sample_username") and (password_input.strip() == "password@123")
-                        auth_res = {
-                            "authenticated": is_valid,
-                            "username": username_input.strip(),
-                            "full_name": "Operations Admin",
-                            "role": "Lead Administrator",
-                            "source": "Supabase Local Verified",
-                            "error": "Invalid username or password."
-                        }
+                col_rem, col_forgot = st.columns([1, 1])
+                with col_rem:
+                    remember_me = st.checkbox("Remember me", value=True, key="login_remember_me")
+                with col_forgot:
+                    st.markdown("""
+                    <div style="text-align: right; margin-top: 4px;">
+                        <a href="mailto:admin@inventorypro.com?subject=Password%20Reset%20Request" style="font-size: 12.5px; font-weight: 600; color: #431A8B; text-decoration: none;">
+                            Forgot password?
+                        </a>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                    if auth_res.get("authenticated"):
-                        st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')} ({auth_res.get('source')}).")
-                        st.session_state["authenticated"] = True
-                        st.session_state["user_info"] = auth_res
-                        time.sleep(0.4)
-                        st.rerun()
-                    else:
-                        st.error(f"❌ {auth_res.get('error', 'Invalid username or password. Access denied.')}")
+                submit_btn = st.form_submit_button("Sign In", use_container_width=True)
 
-        st.markdown("""
-        <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #9696A6;">
-            Protected by Supabase Cloud Row-Level Security & PostgreSQL<br/>
-            Engineered by <a href="https://www.linkedin.com/in/neel-belsare-719b9a314/" target="_blank" style="color: #8B82F6; text-decoration: none; font-weight: 600;">Neel Belsare</a> & <a href="https://www.linkedin.com/in/mansi-gaike-821260316" target="_blank" style="color: #8B82F6; text-decoration: none; font-weight: 600;">Mansi Gaike</a>
-        </div>
-        """, unsafe_allow_html=True)
+            # Social Sign-In & Divider
+            st.markdown("""
+            <div style="display: flex; align-items: center; margin: 22px 0 18px 0; color: #9CA3AF; font-size: 12px; font-weight: 500;">
+                <div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
+                <span style="padding: 0 14px;">Or continue with</span>
+                <div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
+            </div>
+
+            <div class="social-auth-grid">
+                <div class="social-auth-card">
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.39 7.33 24 12 24Z"/>
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.61 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+                    </svg>
+                    <span>Google</span>
+                </div>
+                <div class="social-auth-card">
+                    <svg width="17" height="17" viewBox="0 0 170 170" fill="#111827">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.7-7.85-12.03-14.31-6.19-9.25-11.04-19.68-14.55-31.29-3.51-11.61-5.26-22.75-5.26-33.42 0-14.42 3.6-26.44 10.8-36.05 7.2-9.61 16.29-14.51 27.27-14.7 4.58 0 9.87 1.25 15.86 3.76 5.99 2.5 10.02 3.82 12.09 3.94 1.8 0 6.01-1.38 12.63-4.14 6.62-2.76 12.28-4.01 16.98-3.76 12.77.64 22.82 5.34 30.15 14.1-11.13 6.74-16.57 15.95-16.32 27.63.25 9.17 3.8 16.89 10.66 23.16 6.86 6.26 14.99 9.82 24.39 10.67-2.13 6.61-4.75 13.56-7.86 20.85zM119.22 31.84c0-7.39 2.65-14.19 7.96-20.4 5.31-6.21 11.89-10.15 19.74-11.82.85 7.52-1.39 14.37-6.72 20.55-5.33 6.18-12.33 9.94-20.98 11.67z"/>
+                    </svg>
+                    <span>Apple</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; font-size: 13px; color: #6B7280; margin-bottom: 18px;">
+                Don't have an account? <a href="#" style="color: #431A8B; font-weight: 700; text-decoration: none;">Sign Up</a>
+            </div>
+
+            <div style="padding: 10px 14px; background: #F8F7FF; border: 1px dashed #D0C9FF; border-radius: 10px; font-size: 11.5px; color: #4B4673; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                <span>⚡ <b>Demo Account:</b> <code style="background: #EBE7FF; color: #2D1460; padding: 2px 6px; border-radius: 4px; font-weight: 700;">sample_username</code> / <code style="background: #EBE7FF; color: #2D1460; padding: 2px 6px; border-radius: 4px; font-weight: 700;">password@123</code></span>
+            </div>
+            """, unsafe_allow_html=True)
+
+            col_btn1, col_btn2 = st.columns([1.4, 1])
+            with col_btn1:
+                if st.button("⚡ Fill Demo Credentials", key="autofill_btn", use_container_width=True):
+                    st.session_state["autofilled"] = True
+                    st.rerun()
+            with col_btn2:
+                if st.button("🔄 Clear", key="clear_btn", use_container_width=True):
+                    st.session_state["autofilled"] = False
+                    st.rerun()
+
+            # Submission Processing
+            if submit_btn:
+                if not username_input or not password_input:
+                    st.error("⚠️ Please enter your email/username and password.")
+                else:
+                    with st.spinner("Authenticating with Supabase Cloud..."):
+                        if supabase_client:
+                            auth_res = supabase_client.authenticate_user(username_input, password_input)
+                        else:
+                            is_valid = (username_input.strip() in ["sample_username", "you@example.com", "sample_username@inventorypro.com"]) and (password_input.strip() == "password@123")
+                            auth_res = {
+                                "authenticated": is_valid,
+                                "username": username_input.strip(),
+                                "full_name": "Operations Admin (Neel Belsare)",
+                                "role": "Lead Administrator",
+                                "source": "Supabase Local Verified",
+                                "error": "Invalid email/username or password. Access denied."
+                            }
+
+                        if auth_res.get("authenticated"):
+                            st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')}.")
+                            st.session_state["authenticated"] = True
+                            st.session_state["user_info"] = auth_res
+                            time.sleep(0.35)
+                            st.rerun()
+                        else:
+                            st.error(f"❌ {auth_res.get('error', 'Invalid email or password. Access denied.')}")
 
 
 # ------------------------------------------------------------------------------
