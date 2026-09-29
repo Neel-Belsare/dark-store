@@ -48,7 +48,7 @@ except ImportError:
 app = FastAPI(
     title="Aurangabad Quick-Commerce Autonomous Dispatch API",
     description="Full-stack logistics bridge connecting Expo mobile client and Streamlit Command Center",
-    version="2.0.0"
+    version="3.0.0"
 )
 
 # Enable CORS for React Native (Expo) web, mobile, and emulator access

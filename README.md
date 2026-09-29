@@ -1,6 +1,7 @@
-# 🛒 Aurangabad (Chhatrapati Sambhajinagar) Quick-Commerce Ecosystem 📊
+# 🛒 Aurangabad (Chhatrapati Sambhajinagar) Quick-Commerce Ecosystem (v3.0 Production) 📊
 **An AI-Powered Dark Store Command Center & Real-Time Blinkit Clone Mobile App**
 
+[![Release](https://img.shields.io/badge/Release-v3.0.0-0C831F?logo=github)](https://github.com/NeelBelsare/my-dark-store-app/releases/tag/v3.0.0)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-ff4b4b?logo=streamlit)](https://streamlit.io/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com/)

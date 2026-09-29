@@ -31,7 +31,7 @@ except ImportError:
 # 1. Page Configuration
 # ------------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Aurangabad Dark Store Command Center",
+    page_title="Aurangabad Dark Store Command Center v3.0",
     page_icon="🛒",
     layout="wide",
     initial_sidebar_state="expanded"
