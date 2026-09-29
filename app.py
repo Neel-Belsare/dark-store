@@ -817,7 +817,8 @@ LOGIN_CSS = """<style>
 [data-testid="stSidebarCollapsedControl"],
 #MainMenu,
 header[data-testid="stHeader"],
-footer {
+footer,
+.custom-footer {
     display: none !important;
 }
 
@@ -840,7 +841,7 @@ section[data-testid="stMain"],
     padding: 5vh 1.5rem !important;
     margin: 0 auto !important;
     position: relative !important;
-    z-index: 10 !important;
+    z-index: 50 !important;
     background: transparent !important;
 }
 
@@ -854,15 +855,15 @@ div[data-testid="stElementContainer"]:has(.live-bg-container) {
 
 /* Live Animated Mesh Background Spheres */
 .live-bg-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background: #0f0c20;
-    z-index: 0;
-    pointer-events: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
 }
 
 .live-orb {
@@ -936,8 +937,16 @@ div[data-testid="stElementContainer"]:has(.live-bg-container) {
 }
 
 /* 2. Login Card Outer Container: Scoped exclusively to authentication container */
+.st-key-inventory_login_auth_box {
+    position: relative !important;
+    z-index: 50 !important;
+    width: 100% !important;
+}
+
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"],
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) {
+    position: relative !important;
+    z-index: 50 !important;
     width: 100% !important;
     max-width: 1020px !important;
     min-height: 580px !important;
@@ -956,8 +965,10 @@ div[data-testid="stElementContainer"]:has(.live-bg-container) {
 }
 
 /* 3. Left Hero Column: Supports both data-testid="column" and data-testid="stColumn" */
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child,
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child,
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:first-child,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:first-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:first-child {
     background: linear-gradient(155deg, #2E0854 0%, #4E2298 50%, #1E40AF 100%) !important;
@@ -967,7 +978,8 @@ div[data-testid="stElementContainer"]:has(.live-bg-container) {
     padding: 0 !important;
     display: flex !important;
     flex-direction: column !important;
-    flex: 1 1 0% !important;
+    flex: 1 1 45% !important;
+    width: 45% !important;
 }
 
 /* Force left column children to fill 100% height */
@@ -989,8 +1001,10 @@ div[data-testid="stElementContainer"]:has(.live-bg-container) {
 }
 
 /* 4. Right Form Column: Supports both data-testid="column" and data-testid="stColumn" */
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:last-child,
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:last-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:last-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:last-child {
     background: transparent !important;
@@ -1000,7 +1014,8 @@ div[data-testid="stElementContainer"]:has(.live-bg-container) {
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
-    flex: 1.22 1 0% !important;
+    flex: 1 1 55% !important;
+    width: 55% !important;
 }
 
 /* Right Inner Form Content Centering */
@@ -1106,22 +1121,33 @@ div[data-testid="stFormSubmitButton"] button:active {
 /* Responsive Stacking */
 @media (max-width: 820px) {
     .stMainBlockContainer {
-        padding-top: 1.5rem !important;
-        padding-bottom: 1.5rem !important;
+        padding: 24px 1rem !important;
     }
     .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"],
     [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) {
+        max-width: 440px !important;
+        min-height: auto !important;
         flex-direction: column !important;
+        border-radius: 24px !important;
     }
     .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child,
-    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child {
-        border-radius: 24px 24px 0 0 !important;
-        padding: 0 !important;
+    .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child,
+    .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:first-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:first-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:first-child,
+    .left-side-hero {
+        display: none !important;
     }
     .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:last-child,
-    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:last-child {
-        border-radius: 0 0 24px 24px !important;
-        padding: 30px 22px !important;
+    .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
+    .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:last-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:last-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:last-child {
+        width: 100% !important;
+        border-radius: 24px !important;
+        padding: 32px 24px !important;
     }
 }
 </style>"""
@@ -1133,7 +1159,7 @@ LOGIN_BG_MESH_HTML = """<div class="live-bg-container">
 <div class="live-orb orb-4"></div>
 </div>"""
 
-LOGIN_HERO_HTML = """<div style="height: 100%; min-height: 520px; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF;">
+LOGIN_HERO_HTML = """<div class="left-side-hero" style="height: 100%; min-height: 520px; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF;">
 <div>
 <div style="display: flex; align-items: center; gap: 10px;">
 <div style="width: 38px; height: 38px; background-color: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
