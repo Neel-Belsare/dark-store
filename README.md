@@ -25,22 +25,57 @@
 
 ---
 
+## 📸 Application Screenshots & Live Visual Showcase
+
+Experience the full-stack quick-commerce workflow from customer cart placement to autonomous dispatch, courier street navigation, and command center analytics.
+
+### 📱 1. React Native Consumer Mobile App & Live Road Tracking
+*Direct Supabase cloud synchronization, live street routing, and real-time courier milestone status.*
+
+<p align="center">
+  <img src="./docs/screenshots/01_mobile_app_live_dispatch.png" width="360" alt="Blinkit Mobile App Live GPS Dispatch" />
+</p>
+<p align="center"><i>Figure 1: React Native (Expo) consumer mobile client with live road dispatch, rider status stepper, and 0.34 km courier proximity tracking.</i></p>
+
+---
+
+### 🖥️ 2. Streamlit Dark Store Command Center & 3D Spatial Telemetry
+*High-precision urban logistics monitoring with 3D PyDeck ArcLayers, dynamic multi-variable cross-filters, and macro KPI modeling.*
+
+| 🛰️ 3D PyDeck Live Dispatch Telemetry | ⚙️ Dynamic Cross-Filters & Executive KPIs |
+| :---: | :---: |
+| <img src="./docs/screenshots/02_command_center_telemetry.png" width="480" alt="3D PyDeck Live Dispatch Telemetry" /> | <img src="./docs/screenshots/03_command_center_kpis_filters.png" width="400" alt="Executive KPIs and Cross-Filters" /> |
+| *Figure 2: Real-time order dispatch visualizer showing 3D vector arcs, store assignment (Store 10 - Railway Station), and courier routing.* | *Figure 3: Command Center control panel with demand sliders, weather impact scale, and citywide macro KPIs (1.91M population, 1.35M monthly orders).* |
+
+---
+
+### 🗺️ 3. Geographic Hub Catchment & Delivery Polygons
+*Comprehensive spatial coverage across Chhatrapati Sambhajinagar with 12 dark store hubs holding a sub-12 minute delivery promise.*
+
+<p align="center">
+  <img src="./docs/screenshots/04_dark_store_network_geospatial.png" width="620" alt="12-Hub Dark Store Geographic Coverage" />
+</p>
+<p align="center"><i>Figure 4: 12-Hub Dark Store fulfillment network with 3.0 km circular delivery radii and service boundaries across CIDCO, Kranti Chowk, Beed Bypass, and Waluj MIDC.</i></p>
+
+---
+
 ## 💡 Project Architecture & Overview
 
 This project provides an end-to-end **Quick-Commerce Dark Store Management & Consumer Ecosystem** designed for **Chhatrapati Sambhajinagar (Aurangabad)**. 
 
 It connects four synchronized tiers:
-1. **Frontend Mobile App (`mobile-app/`)**: A high-performance **React Native (Expo)** mobile application (Blinkit clone) featuring device GPS location locking, cart management, free delivery tier, celebratory micro-animations, instant checkout, and direct Supabase synchronization.
-2. **Autonomous Dispatch Bridge (`api.py`)**: A **FastAPI** backend that receives live GPS coordinates from the mobile app, enforces GeoJSON serviceability catchments, runs Haversine nearest-hub routing against 12 Aurangabad dark stores, assigns delivery riders, computes predictive weather/traffic SLAs, and syncs order payloads.
-3. **Cloud Database & Realtime Layer (Supabase PostgreSQL)**: A cloud database providing persistent storage for `stores`, `riders`, `users`, `orders`, and `order_items` with native PostGIS geospatial support, Row Level Security, and Realtime WebSocket event broadcasting.
-4. **Analytics & Command Center (`app.py`)**: A modern **Streamlit** dashboard featuring 3D PyDeck telemetry (flight arcs, concentric pulse rings, moving riders), Leaflet vector GeoJSON delivery zones, ML demand forecasting, climate friction simulations, and unit economics.
+1. **Frontend Mobile App (`mobile-app/`)**: A high-performance **React Native (Expo)** mobile application (Blinkit clone) featuring device GPS location locking, cart management, free delivery tier, celebratory micro-animations, instant checkout, and direct Supabase synchronization. Includes dedicated **Rider Partner Mode** with turn-by-turn road route tracking.
+2. **Autonomous Dispatch Bridge (`api.py`)**: A **FastAPI** backend that receives live GPS coordinates from the mobile app, enforces GeoJSON serviceability catchments, runs Haversine nearest-hub routing against 12 Aurangabad dark stores, assigns delivery riders, computes predictive weather/traffic SLAs, manages live inventory decrement, and syncs order payloads.
+3. **Cloud Database & Realtime Layer (Supabase PostgreSQL)**: A cloud database providing persistent storage for `stores`, `riders`, `users`, `orders`, `order_items`, and `store_inventory` with native PostGIS geospatial support, Row Level Security, and Realtime WebSocket event broadcasting.
+4. **Analytics & Command Center (`app.py`)**: A modern **Streamlit** dashboard featuring 3D PyDeck telemetry (flight arcs, concentric pulse rings, moving riders), Leaflet vector GeoJSON delivery zones, ML demand forecasting, climate friction simulations, unit economics, and Smart Inventory Management.
 
 ```
 ┌──────────────────────────────────────────────┐       ┌──────────────────────────────────────────────┐
 │   📱 Mobile App (React Native Expo)          │       │   🖥️ Streamlit Command Center (app.py)       │
 │   - useCurrentLocation (GPS Lock via expo)   │       │   - 3D PyDeck ArcLayer Vector Flight Path    │
 │   - CheckoutScreen (Blinkit UI, Cart, Bill)  │       │   - Real-World GeoJSON Service Polygons      │
-│   - CelebrationModal (Confetti & Animation)  │       │   - In-Transit Rider Marker & Telemetry      │
+│   - RiderScreen (Courier Partner Stepper)    │       │   - Tab 7: Smart Inventory & Stockouts       │
+│   - RealDeliveryMap (OSRM Road Navigation)   │       │   - In-Transit Rider Marker & Telemetry      │
 │   - Direct Supabase REST Cloud Sync          │       │   - Real-Time Supabase Order Stream & Reset  │
 └──────────────────────┬───────────────────────┘       └──────────────────────┬───────────────────────┘
                        │                                                      │
@@ -51,6 +86,7 @@ It connects four synchronized tiers:
        │                 ⚡ Supabase Cloud Database (PostgreSQL + Realtime)           │
        │   - stores: 12 Pre-seeded Aurangabad fulfillment hubs & coordinates          │
        │   - riders: 12 Couriers with live GPS telemetry, vehicles & ratings          │
+       │   - store_inventory: SKU stock tracking, thresholds & inter-hub sync         │
        │   - users: Registered consumers, addresses & loyalty tiers                   │
        │   - orders & order_items: Single-active dispatch pipeline & line items       │
        │   - supabase_realtime: Instant WebSocket event broadcast                     │
@@ -63,6 +99,7 @@ It connects four synchronized tiers:
                        │   - Haversine Nearest Dark Store Routing     │
                        │   - ETA, SLA & Rider Assignment Engine       │
                        │   - Serpentine S-Shape Warehouse Pick Path   │
+                       │   - Smart Inventory Auto-Decrement Engine    │
                        │   - Multi-Order Courier Route Batching       │
                        │   - Atomic Cloud Sync + Local Fallback       │
                        └──────────────────────────────────────────────┘
@@ -76,10 +113,11 @@ Below is the complete file and folder breakdown of the repository:
 
 ```
 📦 Dark-Store-Feasibility-Analysis
-├── 📄 app.py                             # Main Streamlit Command Center web application (UI, 3D maps, ML, KPIs)
+├── 📄 app.py                             # Main Streamlit Command Center web application (UI, 3D maps, ML, KPIs, Inventory)
 ├── 📄 api.py                             # FastAPI REST bridge connecting mobile orders to the Streamlit visualizer
+├── 📄 inventory_manager.py               # Smart Inventory engine (SKU catalog, auto-decrement, stockout alerts, transfers)
 ├── 📄 supabase_client.py                 # Supabase Python client (orders, riders, stores with zero-downtime fallback)
-├── 📄 supabase_schema.sql                # Complete SQL migration script (stores, riders, users, orders, RLS, realtime)
+├── 📄 supabase_schema.sql                # Complete SQL migration script (stores, riders, users, orders, store_inventory, RLS)
 ├── 📄 MainScript.py                      # Core Python data modeling and analytics pipeline
 ├── 📄 requirements.txt                   # Python dependencies (Streamlit, FastAPI, Supabase, PyDeck, Folium, Plotly, etc.)
 ├── 📄 Dockerfile                         # Production containerization configuration
@@ -90,6 +128,13 @@ Below is the complete file and folder breakdown of the repository:
 ├── 📄 LICENSE                            # MIT License
 ├── 📄 README.md                          # Full system documentation, folder structure, and usage guide
 │
+├── 📂 docs/
+│   └── 📂 screenshots/                   # High-resolution application screenshots and visual assets
+│       ├── 📄 01_mobile_app_live_dispatch.png       # Mobile app live order celebration & road route
+│       ├── 📄 02_command_center_telemetry.png       # 3D PyDeck spatial telemetry visualizer
+│       ├── 📄 03_command_center_kpis_filters.png    # Dynamic cross-filters and macro KPIs
+│       └── 📄 04_dark_store_network_geospatial.png  # 12 Dark Store geographic coverage map
+│
 ├── 📂 mobile-app/                        # React Native (Expo) Blinkit Clone Mobile Application
 │   ├── 📄 App.tsx                        # App entry point with SafeAreaProvider & Status Bar configuration
 │   ├── 📄 app.json                       # Expo configuration (app metadata, GPS permissions for iOS/Android)
@@ -98,7 +143,7 @@ Below is the complete file and folder breakdown of the repository:
 │   ├── 📄 .env.example                   # Mobile app public Supabase environment template
 │   ├── 📄 README.md                      # Dedicated mobile app setup and run guide
 │   └── 📂 src/
-│       ├── 📄 types.ts                   # TypeScript interfaces (GPSLocation, CartItem, OrderPayload, etc.)
+│       ├── 📄 types.ts                   # TypeScript interfaces (GPSLocation, CartItem, OrderPayload, RiderShiftStats)
 │       ├── 📂 constants/
 │       │   └── 📄 theme.ts               # Blinkit brand tokens (Signature Yellow, Quick-Commerce Green)
 │       ├── 📂 hooks/
@@ -110,9 +155,14 @@ Below is the complete file and folder breakdown of the repository:
 │       │   ├── 📄 LocationBar.tsx        # Top GPS delivery bar with live indicator & Aurangabad hub switcher
 │       │   ├── 📄 CartItemRow.tsx        # Grocery items with dynamic +/- quantity steppers
 │       │   ├── 📄 BillSummary.tsx        # Item total, free delivery waiver, and grand total calculations
-│       │   └── 📄 CelebrationModal.tsx   # Confetti explosion micro-animations & live order dispatch summary
+│       │   ├── 📄 CelebrationModal.tsx   # Confetti explosion micro-animations & live order dispatch summary
+│       │   └── 📄 RealDeliveryMap.tsx    # OSRM road geometry, turn-by-turn HUD, and rider rotation
 │       └── 📂 screens/
-│           └── 📄 CheckoutScreen.tsx     # Full checkout screen with delivery notes and instant order CTA
+│           ├── 📄 HomeScreen.tsx         # Product catalog, categories, search, and store info
+│           ├── 📄 CartScreen.tsx         # Cart items, substitutions, and delivery instructions
+│           ├── 📄 CheckoutScreen.tsx     # Full checkout screen with instant order CTA
+│           ├── 📄 RiderScreen.tsx        # Courier Partner Mode (Accept, At Hub, Picked, Delivered stepper)
+│           └── 📄 ProfileScreen.tsx      # User profile, VIP tier, default address, and telemetry links
 │
 ├── 📂 data/                              # Datasets and Spatial Geometries
 │   ├── 📂 geojson/                       # Real-world delivery service polygons (Chhatrapati Sambhajinagar)
@@ -125,6 +175,7 @@ Below is the complete file and folder breakdown of the repository:
 │   │
 │   ├── 📂 processed/                     # Cleaned, structured datasets used for dashboard & routing
 │   │   ├── 📄 aurangabad_dark_stores.csv             # 12 Dark Store coordinates, radii, and operational status
+│   │   ├── 📄 inventory_state.json                   # Real-time SKU stock levels across all 12 dark stores
 │   │   ├── 📄 Merged_Aurangabad_Dark_Store_Data.csv  # Micro-market demographics and demand forecasts
 │   │   ├── 📄 Aurangabad_Climate_Delivery_Impact.csv # Monthly temperatures, monsoon rainfall & impact scores
 │   │   └── 📄 ... (Legacy Pune benchmark comparison datasets)
@@ -167,18 +218,18 @@ Open **`http://localhost:8501`** in your browser.
 
 #### Dashboard Navigation & Tabs:
 - **📊 Executive Summary**: High-level KPIs, serviceable population metrics, and top micro-market demand rankings.
-- **🗺️ Geospatial Coverage View**: Interactive Leaflet & 3D PyDeck maps showing:
-  - Real-world GeoJSON delivery boundary polygons for **Blinkit** (Yellow) and **Zepto** (Purple).
-  - Dark store center pins and adjustable catchment delivery buffers (radii).
 - **⚡ Live Order Simulation**:
   - `🚀 Simulate New Customer Order`: Generates realistic customer GPS coordinates within Aurangabad.
   - `📱 Sync Live Mobile Order`: Seamlessly loads real-time orders triggered from the React Native mobile app.
   - **3D Animated Telemetry**: Displays curved 3D `ArcLayer` vectors, customer pulsing rings, store glow highlights, and moving in-transit courier markers.
   - **Sidebar Dispatch Pipeline**: Real-time `st.status` widget updating step-by-step from order placement to courier dispatch.
+- **🗺️ Geospatial Coverage View**: Interactive Leaflet & 3D PyDeck maps showing:
+  - Real-world GeoJSON delivery boundary polygons for **Blinkit** (Yellow) and **Zepto** (Purple).
+  - Dark store center pins and adjustable catchment delivery buffers (radii).
 - **👥 Demographic Heatmaps**: Scatter plots, population density correlations, and predictive demand distributions.
-- **🌦️ Weather & Monsoon Impact**: Monsoon delivery friction scales, heatwave impacts, and rider safety adjustments.
-- **💰 Financials & Unit Economics**: ROI, capital expenditure, rider payouts, and profit margins.
-- **📋 Dark Store Directory**: Searchable, filterable directory of all 12 operational and proposed dark stores.
+- **📈 Demand Forecasting**: Machine learning regression models predicting order frequency based on population density and income.
+- **🌦️ Climate & Monsoon Impact**: Monsoon delivery friction scales, heatwave impacts, and rider safety adjustments.
+- **📦 Smart Inventory & Stockouts**: Real-time SKU tracking across all 12 dark stores, critical stockout (<10 units) and low stock warnings, interactive Plotly inventory health charts, and an autonomous inter-hub replenishment simulator.
 
 ---
 
@@ -196,9 +247,14 @@ python3 api.py
 #### Available Endpoints:
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| **`POST`** | `/api/order` | Receives GPS coordinates, routes to nearest dark store, computes buffered ETA, and syncs to Supabase |
+| **`POST`** | `/api/order` | Receives GPS coordinates, routes to nearest dark store, computes buffered ETA, decrements stock, and syncs to Supabase |
 | **`POST`** | `/api/order/reset` | Resets active order pipeline in Supabase and local cache when "Done" is triggered |
 | **`GET`** | `/api/latest-order` | Returns the single active order payload for real-time mobile and dashboard synchronization |
+| **`POST`** | `/api/order/rider-status` | Updates courier fulfillment lifecycle (`accepted`, `arrived_hub`, `picked_up`, `delivered`) |
+| **`GET`** | `/api/inventory` | Returns complete real-time inventory state across all 12 dark stores and 8 core SKUs |
+| **`GET`** | `/api/inventory/alerts` | Scans and returns active critical stockout warnings (<10 units) and low stock advisories |
+| **`POST`** | `/api/inventory/replenish` | Restocks SKU inventory at a designated dark store from central FMCG depot |
+| **`POST`** | `/api/inventory/transfer` | Rebalances stock between dark stores (surplus $\to$ deficit) to prevent localized stockouts |
 | **`GET`** | `/api/orders` | Retrieves recent order history from Supabase (or local cache) |
 | **`GET`** | `/api/stores` | Returns the list of all 12 dark store hubs with coordinates, radii, and operational status |
 | **`GET`** | `/api/riders` | Returns delivery couriers, vehicle types, speed, ratings, and live availability |
