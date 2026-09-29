@@ -47,6 +47,7 @@ st.markdown("""
         --bg: #F4F5F9;
         --card: #FFFFFF;
         --card-border: #EAEBF2;
+        --line: var(--card-border);
         --sidebar-bg: #16161D;
         --sidebar-card: #20202A;
         --sidebar-border: #2C2C39;
@@ -236,19 +237,23 @@ st.markdown("""
         font-size: 12px;
         font-weight: 700;
     }
-    .live-badge-pill {
-        display: flex;
+    .live-badge-pill,
+    .live {
+        display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-size: 12px;
+        font-size: 11px;
         color: #065F46;
         background: #DCFCE7;
-        padding: 6px 14px;
+        padding: 4px 10px;
         border-radius: 9999px;
         font-weight: 700;
         letter-spacing: 0.01em;
+        line-height: 1.3;
     }
-    .live-badge-pill i {
+    .live-badge-pill i,
+    .live i {
+        display: inline-block;
         width: 7px;
         height: 7px;
         border-radius: 50%;
@@ -258,6 +263,15 @@ st.markdown("""
     }
     @keyframes pulse-dot {
         70% { box-shadow: 0 0 0 6px transparent; }
+    }
+
+    /* Native Streamlit Bordered Container as Dashboard Card */
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        background: var(--card) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 22px !important;
+        padding: 20px 22px !important;
+        box-shadow: 0 4px 20px rgba(20, 20, 35, 0.03) !important;
     }
 
     /* 4 Distinctive Signature KPI Metric Cards */
@@ -818,8 +832,9 @@ footer {
     margin: 0 auto !important;
 }
 
-/* 2. Login Card Outer Container: Target the single horizontal block directly */
-[data-testid="stHorizontalBlock"] {
+/* 2. Login Card Outer Container: Scoped exclusively to authentication container */
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"],
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) {
     background: #FFFFFF !important;
     border-radius: 26px !important;
     box-shadow: 0 25px 60px -15px rgba(27, 10, 66, 0.18), 0 0 1px 1px rgba(0, 0, 0, 0.05) !important;
@@ -832,8 +847,11 @@ footer {
     padding: 0 !important;
 }
 
-/* 3. Left Hero Column */
-[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
+/* 3. Left Hero Column: Supports both data-testid="column" and data-testid="stColumn" */
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child,
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:first-child,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:first-child,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:first-child {
     background: linear-gradient(152deg, #3C1685 0%, #2E1066 48%, #1B0743 100%) !important;
     border-radius: 26px 0 0 26px !important;
     position: relative !important;
@@ -845,10 +863,14 @@ footer {
 }
 
 /* Force left column children to fill 100% height */
-[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child > div,
-[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child [data-testid="stVerticalBlock"],
-[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child [data-testid="stElementContainer"],
-[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child [data-testid="stMarkdownContainer"] {
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child > div,
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child [data-testid="stVerticalBlock"],
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child [data-testid="stElementContainer"],
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child [data-testid="stMarkdownContainer"],
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child > div,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child [data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child [data-testid="stElementContainer"],
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child [data-testid="stMarkdownContainer"] {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
@@ -858,8 +880,11 @@ footer {
     padding: 0 !important;
 }
 
-/* 4. Right Form Column */
-[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
+/* 4. Right Form Column: Supports both data-testid="column" and data-testid="stColumn" */
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:last-child,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:last-child {
     background: #FFFFFF !important;
     border-radius: 0 26px 26px 0 !important;
     padding: 40px 48px 34px 48px !important;
@@ -964,14 +989,17 @@ div[data-testid="stFormSubmitButton"] button:active {
         padding-top: 1.5rem !important;
         padding-bottom: 1.5rem !important;
     }
-    [data-testid="stHorizontalBlock"] {
+    .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"],
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) {
         flex-direction: column !important;
     }
-    [data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
+    .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child {
         border-radius: 26px 26px 0 0 !important;
         padding: 0 !important;
     }
-    [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
+    .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:last-child,
+    [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:last-child {
         border-radius: 0 0 26px 26px !important;
         padding: 30px 22px !important;
     }
@@ -1072,40 +1100,38 @@ def render_login_screen():
     """
     st.markdown(LOGIN_CSS, unsafe_allow_html=True)
 
-    default_user = "sample_username"
-    default_pass = "password@123"
+    with st.container(key="inventory_login_auth_box"):
+        col_left, col_right = st.columns([1, 1.15], gap=0)
 
-    col_left, col_right = st.columns([1, 1.15], gap=0)
+        # ----------------------------------------------------------------------
+        # Left Hero Panel: InventoryPro Branding & Statistics
+        # ----------------------------------------------------------------------
+        with col_left:
+            st.markdown(LOGIN_HERO_HTML, unsafe_allow_html=True)
 
-    # ----------------------------------------------------------------------
-    # Left Hero Panel: InventoryPro Branding & Statistics
-    # ----------------------------------------------------------------------
-    with col_left:
-        st.markdown(LOGIN_HERO_HTML, unsafe_allow_html=True)
+        # ----------------------------------------------------------------------
+        # Right Form Panel: Welcome Back & Sign In
+        # ----------------------------------------------------------------------
+        with col_right:
+            st.markdown(LOGIN_FORM_HEADER_HTML, unsafe_allow_html=True)
 
-    # ----------------------------------------------------------------------
-    # Right Form Panel: Welcome Back & Sign In
-    # ----------------------------------------------------------------------
-    with col_right:
-        st.markdown(LOGIN_FORM_HEADER_HTML, unsafe_allow_html=True)
+            with st.form("inventory_login_form", clear_on_submit=False):
+                username_input = st.text_input(
+                    "Email Address",
+                    value="",
+                    placeholder="you@example.com or sample_username",
+                    key="login_email_input"
+                )
+                password_input = st.text_input(
+                    "Password",
+                    value="",
+                    type="password",
+                    placeholder="Enter your password",
+                    key="login_password_input"
+                )
 
-        with st.form("inventory_login_form", clear_on_submit=False):
-            username_input = st.text_input(
-                "Email Address",
-                value=default_user,
-                placeholder="you@example.com",
-                key="login_email_input"
-            )
-            password_input = st.text_input(
-                "Password",
-                value=default_pass,
-                type="password",
-                placeholder="Enter your password",
-                key="login_password_input"
-            )
-
-            # Clean inline Remember Me & Forgot Password without nested columns
-            st.markdown("""<div style="display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px 0;">
+                # Clean inline Remember Me & Forgot Password without nested columns
+                st.markdown("""<div style="display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px 0;">
 <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4B5563; cursor: pointer; user-select: none;">
 <input type="checkbox" checked style="accent-color: #3C1685; width: 16px; height: 16px; cursor: pointer;">
 <span>Remember me</span>
@@ -1113,38 +1139,45 @@ def render_login_screen():
 <a href="mailto:admin@inventorypro.com?subject=Password%20Reset" style="font-size: 12.5px; font-weight: 600; color: #431A8B; text-decoration: none;">Forgot password?</a>
 </div>""", unsafe_allow_html=True)
 
-            submit_btn = st.form_submit_button("Sign In", use_container_width=True)
+                submit_btn = st.form_submit_button("Sign In", use_container_width=True)
 
-        # Social Sign-In, Footer, and Demo Credentials Note
-        st.markdown(LOGIN_SOCIAL_DIVIDER_HTML, unsafe_allow_html=True)
+            # Social Sign-In, Footer, and Demo Credentials Note
+            st.markdown(LOGIN_SOCIAL_DIVIDER_HTML, unsafe_allow_html=True)
 
-        # Submission Processing
-        if submit_btn:
-            if not username_input or not password_input:
-                st.error("⚠️ Please enter your email/username and password.")
-            else:
-                with st.spinner("Authenticating with Supabase Cloud..."):
-                    if supabase_client:
-                        auth_res = supabase_client.authenticate_user(username_input, password_input)
-                    else:
-                        is_valid = (username_input.strip() in ["sample_username", "you@example.com", "sample_username@inventorypro.com"]) and (password_input.strip() == "password@123")
-                        auth_res = {
-                            "authenticated": is_valid,
-                            "username": username_input.strip(),
-                            "full_name": "Operations Admin (Neel Belsare)",
-                            "role": "Lead Administrator",
-                            "source": "Supabase Local Verified",
-                            "error": "Invalid email/username or password. Access denied."
-                        }
+            # Submission Processing
+            if submit_btn:
+                if not username_input or not password_input:
+                    st.error("⚠️ Please enter your email/username and password.")
+                else:
+                    with st.spinner("Authenticating with Supabase Cloud..."):
+                        if supabase_client:
+                            auth_res = supabase_client.authenticate_user(username_input, password_input)
+                        else:
+                            # Production guard: Demo fallback only allowed when explicitly enabled
+                            allow_demo = os.environ.get("ALLOW_DEMO_LOGIN", "true").lower() in ["1", "true", "yes"]
+                            if allow_demo and (username_input.strip() in ["sample_username", "you@example.com", "sample_username@inventorypro.com"]) and (password_input.strip() == "password@123"):
+                                auth_res = {
+                                    "authenticated": True,
+                                    "username": username_input.strip(),
+                                    "full_name": "Operations Admin (Neel Belsare)",
+                                    "role": "Lead Administrator",
+                                    "source": "Demo Fallback Mode",
+                                    "error": None
+                                }
+                            else:
+                                auth_res = {
+                                    "authenticated": False,
+                                    "error": "Supabase client unconfigured. For production, configure SUPABASE_URL and SUPABASE_KEY in environment or Streamlit secrets."
+                                }
 
-                    if auth_res.get("authenticated"):
-                        st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')}.")
-                        st.session_state["authenticated"] = True
-                        st.session_state["user_info"] = auth_res
-                        time.sleep(0.35)
-                        st.rerun()
-                    else:
-                        st.error(f"❌ {auth_res.get('error', 'Invalid email or password. Access denied.')}")
+                        if auth_res.get("authenticated"):
+                            st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')}.")
+                            st.session_state["authenticated"] = True
+                            st.session_state["user_info"] = auth_res
+                            time.sleep(0.35)
+                            st.rerun()
+                        else:
+                            st.error(f"❌ {auth_res.get('error', 'Invalid email or password. Access denied.')}")
 
 
 # ------------------------------------------------------------------------------
@@ -1246,15 +1279,23 @@ def load_climate_impact_data():
 
 @st.cache_data
 def get_forecasting_engine():
-    """Train linear regression demand forecasting model on Aurangabad key localities."""
+    """
+    Train Linear Regression demand forecasting benchmark model on a synthetic simulation baseline.
+    Features: Harmonic cyclical annual seasonality (sin/cos of DayOfYear), weekend surge,
+    day-of-week index, and locality one-hot indicators.
+    """
     np.random.seed(42)
     dates = pd.date_range(start='2024-01-01', periods=365, freq='D')
     
-    demand = (
-        np.random.randint(60, 480, size=len(dates))
-        + np.sin(np.linspace(0, 12, len(dates))) * 45
-        + (dates.dayofweek >= 5) * 35
-    )
+    doy = dates.dayofyear
+    # Calibrated synthetic demand pattern:
+    # Baseline + annual seasonal harmonics + weekend demand surge + Gaussian noise
+    annual_cycle = np.sin(2 * np.pi * doy / 365.25) * 60 + np.cos(4 * np.pi * doy / 365.25) * 20
+    weekend_lift = (dates.dayofweek >= 5) * 45
+    baseline = 240 + annual_cycle + weekend_lift
+    noise = np.random.normal(0, 30, size=len(dates))
+    demand = np.maximum(50, baseline + noise)
+
     localities = np.random.choice(
         ['CIDCO', 'Garkheda', 'Nirala Bazar', 'Waluj', 'Chikalthana', 'Beed Bypass', 'Osmanpura'],
         len(dates)
@@ -1262,8 +1303,11 @@ def get_forecasting_engine():
     df_raw = pd.DataFrame({'Date': dates, 'Locality': localities, 'Demand': demand})
 
     df_encoded = df_raw.copy()
-    df_encoded['DayOfYear'] = df_encoded['Date'].dt.dayofyear
+    # Harmonic cyclical features that wrap smoothly across year boundaries
+    df_encoded['Sin_DayOfYear'] = np.sin(2 * np.pi * doy / 365.25)
+    df_encoded['Cos_DayOfYear'] = np.cos(2 * np.pi * doy / 365.25)
     df_encoded['IsWeekend'] = (df_encoded['Date'].dt.dayofweek >= 5).astype(int)
+    df_encoded['DayOfWeek'] = df_encoded['Date'].dt.dayofweek
     df_encoded = pd.get_dummies(df_encoded, columns=['Locality'], drop_first=True)
     df_encoded.set_index('Date', inplace=True)
 
@@ -2422,12 +2466,6 @@ with tab_summary:
     col_l, col_r = st.columns([1.25, 1])
 
     with col_l:
-        st.markdown("""
-        <div class="card" style="margin-bottom: 16px;">
-            <h2 class="card-title">🚨 High-volume micro-markets needing 2+ stores</h2>
-            <p class="hint">Clusters above 80,000 monthly orders need dual hubs to hold a sub-12 minute SLA.</p>
-        """, unsafe_allow_html=True)
-
         high_demand_df = filtered_df[filtered_df['Predicted Online Order Volume (Monthly)'] > 80000].sort_values(
             'Predicted Online Order Volume (Monthly)', ascending=False
         )
@@ -2449,14 +2487,21 @@ with tab_summary:
                   <span class="tag">Add hub</span>
                 </div>
                 """
-            st.markdown(rows_html + "</div>", unsafe_allow_html=True)
         else:
-            st.markdown("""
-                <div style="padding: 12px 0; color: var(--ok); font-size: 13.5px; font-weight: 500;">
-                    ✅ All micro-markets in current selection operate within single-store capacity limits.
-                </div>
+            rows_html = """
+            <div style="padding: 12px 0; color: var(--ok); font-size: 13.5px; font-weight: 500;">
+                ✅ All micro-markets in current selection operate within single-store capacity limits.
             </div>
-            """, unsafe_allow_html=True)
+            """
+
+        high_volume_card_html = f"""
+        <div class="card" style="margin-bottom: 16px;">
+            <h2 class="card-title">🚨 High-volume micro-markets needing 2+ stores</h2>
+            <p class="hint">Clusters above 80,000 monthly orders need dual hubs to hold a sub-12 minute SLA.</p>
+            {rows_html}
+        </div>
+        """
+        st.markdown(high_volume_card_html, unsafe_allow_html=True)
 
     with col_r:
         # Donut Chart SVG Card
@@ -2486,72 +2531,54 @@ with tab_summary:
         """
         st.markdown(donut_html, unsafe_allow_html=True)
 
-        # SLA vs Delivery Radius Card
-        st.markdown("""
-        <div class="card">
-          <h2 class="card-title">⏱️ SLA vs delivery radius</h2>
-          <p class="hint">Estimated delivery time by catchment radius</p>
-        """, unsafe_allow_html=True)
+        # SLA vs Delivery Radius Card (Native Bordered Container to cleanly enclose Plotly Chart)
+        with st.container(border=True):
+            st.markdown("""
+            <h2 class="card-title">⏱️ SLA vs delivery radius</h2>
+            <p class="hint" style="margin-bottom: 8px;">Estimated delivery time by catchment radius</p>
+            """, unsafe_allow_html=True)
 
-        radius_steps = np.arange(1.5, 6.5, 0.5)
-        sla_steps = [round(9.0 + (r * 1.4), 1) for r in radius_steps]
-        
-        fig_sla = go.Figure()
-        fig_sla.add_trace(go.Scatter(
-            x=radius_steps,
-            y=sla_steps,
-            mode='lines',
-            line=dict(color='#8B82F6', width=3),
-            fill='tozeroy',
-            fillcolor='rgba(139, 130, 246, 0.12)',
-            hoverinfo='x+y',
-            name='Delivery SLA'
-        ))
-        fig_sla.add_vline(
-            x=simulated_radius,
-            line_dash="dash",
-            line_color="#18181F",
-            annotation_text=f"Selected: {simulated_radius}km · {est_delivery_sla:.0f} min",
-            annotation_font=dict(color="#18181F", size=11, family="Inter")
-        )
-        fig_sla.add_trace(go.Scatter(
-            x=[simulated_radius],
-            y=[est_delivery_sla],
-            mode='markers',
-            marker=dict(size=10, color='#18181F'),
-            showlegend=False
-        ))
-        fig_sla.update_layout(
-            template="plotly_white",
-            height=180,
-            margin=dict(l=10, r=10, t=20, b=25),
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(title=dict(text="Radius (km)", font=dict(family="Inter", size=11, color="#6E6E82")), tickfont=dict(family="Inter", size=10, color="#6E6E82")),
-            yaxis=dict(title=dict(text="Minutes", font=dict(family="Inter", size=11, color="#6E6E82")), tickfont=dict(family="Inter", size=10, color="#6E6E82")),
-            font=dict(family="Inter", color="#14141E")
-        )
-        st.plotly_chart(fig_sla, use_container_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+            radius_steps = np.arange(1.5, 6.5, 0.5)
+            sla_steps = [round(9.0 + (r * 1.4), 1) for r in radius_steps]
+            
+            fig_sla = go.Figure()
+            fig_sla.add_trace(go.Scatter(
+                x=radius_steps,
+                y=sla_steps,
+                mode='lines',
+                line=dict(color='#8B82F6', width=3),
+                fill='tozeroy',
+                fillcolor='rgba(139, 130, 246, 0.12)',
+                hoverinfo='x+y',
+                name='Delivery SLA'
+            ))
+            fig_sla.add_vline(
+                x=simulated_radius,
+                line_dash="dash",
+                line_color="#18181F",
+                annotation_text=f"Selected: {simulated_radius}km · {est_delivery_sla:.0f} min",
+                annotation_font=dict(color="#18181F", size=11, family="Inter")
+            )
+            fig_sla.add_trace(go.Scatter(
+                x=[simulated_radius],
+                y=[est_delivery_sla],
+                mode='markers',
+                marker=dict(size=10, color='#18181F'),
+                showlegend=False
+            ))
+            fig_sla.update_layout(
+                template="plotly_white",
+                height=180,
+                margin=dict(l=10, r=10, t=20, b=25),
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(title=dict(text="Radius (km)", font=dict(family="Inter", size=11, color="#6E6E82")), tickfont=dict(family="Inter", size=10, color="#6E6E82")),
+                yaxis=dict(title=dict(text="Minutes", font=dict(family="Inter", size=11, color="#6E6E82")), tickfont=dict(family="Inter", size=10, color="#6E6E82")),
+                font=dict(family="Inter", color="#14141E")
+            )
+            st.plotly_chart(fig_sla, use_container_width=True)
 
-    # Top 5 Priority Expansion Zones Table
-    st.markdown("""
-    <div class="card" style="margin-top: 16px;">
-      <h2 class="card-title">🏆 Top 5 priority expansion zones</h2>
-      <p class="hint">Ranked by estimated monthly online orders and shopper density.</p>
-      <div class="tbl">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Neighborhood</th>
-              <th class="r">Online shoppers</th>
-              <th class="r">Orders / month</th>
-              <th class="r">Density /km²</th>
-            </tr>
-          </thead>
-          <tbody>
-    """, unsafe_allow_html=True)
-
+    # Top 5 Priority Expansion Zones Table (Built as single contiguous HTML block)
     if not filtered_df.empty:
         top_exp = filtered_df.nlargest(5, 'Predicted Online Order Volume (Monthly)')
         table_rows = ""
@@ -2567,9 +2594,31 @@ with tab_summary:
               <td class="r">{density}</td>
             </tr>
             """
-        st.markdown(table_rows + "</tbody></table></div></div>", unsafe_allow_html=True)
     else:
-        st.markdown("<tr><td colspan='4'>No micro-markets meet current filter criteria.</td></tr></tbody></table></div></div>", unsafe_allow_html=True)
+        table_rows = "<tr><td colspan='4' style='text-align: center; padding: 14px;'>No micro-markets meet current filter criteria.</td></tr>"
+
+    top_exp_card_html = f"""
+    <div class="card" style="margin-top: 16px;">
+      <h2 class="card-title">🏆 Top 5 priority expansion zones</h2>
+      <p class="hint">Ranked by estimated monthly online orders and shopper density.</p>
+      <div class="tbl">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Neighborhood</th>
+              <th class="r">Online shoppers</th>
+              <th class="r">Orders / month</th>
+              <th class="r">Density /km²</th>
+            </tr>
+          </thead>
+          <tbody>
+            {table_rows}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    """
+    st.markdown(top_exp_card_html, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
 # TAB 2: Live Order Simulation & Geospatial Dispatch
@@ -2603,9 +2652,9 @@ with tab_sim:
                 st.session_state["active_order"] = ext_ord
                 st.session_state["just_simulated"] = True
                 st.toast(f"✅ Loaded Mobile Order #{ext_ord['order_id']}", icon="📱")
+                st.rerun()
             else:
                 st.info("No mobile orders detected yet. Place an order via mobile app or call POST /api/order.")
-            st.rerun()
 
     with col_action3:
         if st.button("🔄 Done / Reset", use_container_width=True):
@@ -2642,7 +2691,7 @@ with tab_sim:
             <span style="font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 99px; background: {badge_bg}; color: {badge_tx}; border: 1px solid {badge_border};">
                 {'📱 Live GPS Order from Mobile App (Expo Blinkit)' if is_mobile else '🧪 Synthetic Order Simulation Engine'} • #{cur_ord['order_id']}
             </span>
-            <span style="font-size: 11.5px; color: var(--mut); background: var(--card); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line);">
+            <span style="font-size: 11.5px; color: var(--mut); background: var(--card); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--card-border);">
                 FastAPI Bridge: <code style="color: var(--acc);">POST /api/order</code> (Port 8000)
             </span>
         </div>
@@ -2852,20 +2901,17 @@ with tab_sim:
         col_man1, col_man2 = st.columns([1.1, 1.3])
 
         with col_man1:
-            st.markdown("""
-            <div class="card">
-              <h2 class="card-title">📦 Customer Order Manifest</h2>
-              <p class="hint">Items picked & packed at dark store fulfillment staging</p>
-            """, unsafe_allow_html=True)
-
             items_pills = "".join([
-                f'<div style="padding: 7px 12px; background: rgba(99, 102, 241, 0.08); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--tx);">🛒 {it}</div>'
+                f'<div style="padding: 7px 12px; background: rgba(99, 102, 241, 0.08); border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--tx);">🛒 {it}</div>'
                 for it in cur_ord['items']
             ])
 
-            manifest_html = f"""
+            manifest_card_html = f"""
+            <div class="card">
+              <h2 class="card-title">📦 Customer Order Manifest</h2>
+              <p class="hint">Items picked & packed at dark store fulfillment staging</p>
               <div style="margin-bottom: 12px;">{items_pills}</div>
-              <div style="display: flex; justify-content: space-between; padding: 10px 0 4px; border-top: 1px solid var(--line); font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; padding: 10px 0 4px; border-top: 1px solid var(--card-border); font-size: 13px;">
                 <span style="color: var(--mut);">Estimated Basket Value</span>
                 <span style="font-weight: 700; color: var(--tx);">₹{cur_ord['order_val']}</span>
               </div>
@@ -2875,15 +2921,9 @@ with tab_sim:
               </div>
             </div>
             """
-            st.markdown(manifest_html, unsafe_allow_html=True)
+            st.markdown(manifest_card_html, unsafe_allow_html=True)
 
         with col_man2:
-            st.markdown("""
-            <div class="card">
-              <h2 class="card-title">🧠 Geospatial Proximity Matrix (Haversine)</h2>
-              <p class="hint">Real-time distance ranking of all operational dark store hubs to customer coordinates</p>
-            """, unsafe_allow_html=True)
-
             prox_df = df_stores[df_stores['Status'] == 'Active'].copy()
             prox_df['Distance_km'] = prox_df.apply(
                 lambda row: haversine_distance(cur_ord['cust_lat'], cur_ord['cust_lon'], row['Latitude'], row['Longitude']),
@@ -2905,35 +2945,32 @@ with tab_sim:
                 </tr>
                 """
 
-            matrix_table = f"""
-            <div class="tbl">
-              <table class="custom-table">
-                <thead>
-                  <tr>
-                    <th>Store Hub</th>
-                    <th class="r">Distance</th>
-                    <th class="r">Radius</th>
-                    <th class="r">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {matrix_rows}
-                </tbody>
-              </table>
-            </div>
+            matrix_card_html = f"""
+            <div class="card">
+              <h2 class="card-title">🧠 Geospatial Proximity Matrix (Haversine)</h2>
+              <p class="hint">Real-time distance ranking of all operational dark store hubs to customer coordinates</p>
+              <div class="tbl">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Store Hub</th>
+                      <th class="r">Distance</th>
+                      <th class="r">Radius</th>
+                      <th class="r">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matrix_rows}
+                  </tbody>
+                </table>
+              </div>
             </div>
             """
-            st.markdown(matrix_table, unsafe_allow_html=True)
+            st.markdown(matrix_card_html, unsafe_allow_html=True)
 
             # If warehouse pick plan exists, render warehouse Serpentine pick path
             if cur_ord.get("warehouse_pick_plan"):
                 pick_plan = cur_ord["warehouse_pick_plan"]
-                st.markdown("""
-                <div class="card" style="margin-top: 14px;">
-                  <h2 class="card-title">🏭 Warehouse Serpentine (S-Shape) Pick Sequence</h2>
-                  <p class="hint">Physical item pick path optimized to minimize picker walking time (0 backtracks)</p>
-                """, unsafe_allow_html=True)
-                
                 pick_rows = ""
                 for step in pick_plan.get("pick_sequence", []):
                     pick_rows += f"""
@@ -2944,29 +2981,32 @@ with tab_sim:
                       <td class="r"><span class="tag">{step.get('zone')}</span></td>
                     </tr>
                     """
-                pick_table_html = f"""
-                <div class="tbl">
-                  <table class="custom-table">
-                    <thead>
-                      <tr>
-                        <th>Item</th>
-                        <th class="r">Aisle</th>
-                        <th class="r">Location</th>
-                        <th class="r">Zone</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pick_rows}
-                    </tbody>
-                  </table>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--mut);">
-                  <span>Strategy: <b>{pick_plan.get('pick_path_strategy', 'Serpentine S-Shape')}</b></span>
-                  <span>Est. Pick Time: <b>{pick_plan.get('estimated_pick_time_seconds', 75)}s</b></span>
-                </div>
+                pick_card_html = f"""
+                <div class="card" style="margin-top: 14px;">
+                  <h2 class="card-title">🏭 Warehouse Serpentine (S-Shape) Pick Sequence</h2>
+                  <p class="hint">Physical item pick path optimized to minimize picker walking time (0 backtracks)</p>
+                  <div class="tbl">
+                    <table class="custom-table">
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th class="r">Aisle</th>
+                          <th class="r">Location</th>
+                          <th class="r">Zone</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pick_rows}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--mut);">
+                    <span>Strategy: <b>{pick_plan.get('pick_path_strategy', 'Serpentine S-Shape')}</b></span>
+                    <span>Est. Pick Time: <b>{pick_plan.get('estimated_pick_time_seconds', 75)}s</b></span>
+                  </div>
                 </div>
                 """
-                st.markdown(pick_table_html, unsafe_allow_html=True)
+                st.markdown(pick_card_html, unsafe_allow_html=True)
     else:
         # Standby Mode Display
         st.markdown("""
@@ -3004,9 +3044,9 @@ with tab_map:
     if map_view_mode == "✨ 3D Perspective Polygons & Radii (PyDeck)":
         deck_stores = filtered_stores.copy()
         if not deck_stores.empty:
-            deck_stores['hub_color'] = deck_stores['Status'].apply(lambda s: [16, 185, 129, 240] if s == 'Active' else [245, 158, 11, 240])
-            deck_stores['buffer_color'] = deck_stores['Status'].apply(lambda s: [99, 102, 241, 40] if s == 'Active' else [245, 158, 11, 40])
-            deck_stores['buffer_stroke'] = deck_stores['Status'].apply(lambda s: [99, 102, 241, 200] if s == 'Active' else [245, 158, 11, 200])
+            deck_stores['hub_color'] = deck_stores['Status'].map(lambda s: [16, 185, 129, 240] if s == 'Active' else [245, 158, 11, 240])
+            deck_stores['buffer_color'] = deck_stores['Status'].map(lambda s: [99, 102, 241, 40] if s == 'Active' else [245, 158, 11, 40])
+            deck_stores['buffer_stroke'] = deck_stores['Status'].map(lambda s: [99, 102, 241, 200] if s == 'Active' else [245, 158, 11, 200])
             deck_stores['tooltip_html'] = (
                 "<b>🏪 " + deck_stores['Store Name'].astype(str) + "</b><br/>"
                 "Status: <b>" + deck_stores['Status'].astype(str) + "</b><br/>"
@@ -3014,10 +3054,10 @@ with tab_map:
                 "Delivery Radius: <b>" + deck_stores['Delivery Radius (km)'].astype(str) + " km</b> (Buffer: " + str(simulated_radius) + " km)"
             )
         else:
-            deck_stores['hub_color'] = []
-            deck_stores['buffer_color'] = []
-            deck_stores['buffer_stroke'] = []
-            deck_stores['tooltip_html'] = ""
+            deck_stores = pd.DataFrame(columns=[
+                'Store Name', 'Status', 'Coverage Area', 'Delivery Radius (km)',
+                'Latitude', 'Longitude', 'hub_color', 'buffer_color', 'buffer_stroke', 'tooltip_html'
+            ])
 
         # Catchment Delivery Radius Circles (Buffer Layer)
         buffer_layer = pdk.Layer(
@@ -3274,7 +3314,7 @@ with tab_map:
     )
 
 # ------------------------------------------------------------------------------
-# TAB 3: Demographic Heatmaps
+# TAB 4: Demographic Heatmaps
 # ------------------------------------------------------------------------------
 with tab_demographics:
     st.markdown("""
@@ -3396,29 +3436,39 @@ with tab_demographics:
         )
 
 # ------------------------------------------------------------------------------
-# TAB 4: Demand Forecasting Engine
+# TAB 5: Demand Forecasting Engine
 # ------------------------------------------------------------------------------
 with tab_forecast:
     st.markdown("""
     <div class="card" style="margin-bottom: 16px;">
-        <h2 class="card-title">📈 Machine Learning Demand Forecasting Engine</h2>
-        <p class="hint">Predictive order volumes modeled for Aurangabad micro-markets with temporal seasonality.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+                <h2 class="card-title">📈 Machine Learning Demand Forecasting Engine</h2>
+                <p class="hint" style="margin: 4px 0 0 0;">Predictive order volumes modeled for Aurangabad micro-markets with temporal seasonality.</p>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; color: #4338CA; background: #EEEDFE; padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(99, 102, 241, 0.25);">
+                🧪 Synthetic Benchmark Simulation
+            </span>
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: var(--mut); background: #FAF5FF; padding: 8px 12px; border-radius: 8px; border: 1px solid #E9D5FF;">
+            ℹ️ <b>Model Baseline Notice:</b> This engine is trained on a synthetic simulation baseline (annual harmonic sine wave + weekend uplift + stochastic noise) to demonstrate end-to-end ML inference. For commercial dark store deployment, connect directly to enterprise POS/ERP order streams.
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
     raw_df, df_model, model, X_train, y_test, y_pred, mae, rmse, r2 = get_forecasting_engine()
 
     m_col1, m_col2, m_col3 = st.columns(3)
-    m_col1.metric("Mean Absolute Error (MAE)", f"{mae:.2f}", delta="Orders Deviation", delta_color="inverse")
-    m_col2.metric("Root Mean Squared Error (RMSE)", f"{rmse:.2f}", delta="Variance", delta_color="inverse")
-    m_col3.metric("Model R² Score", f"{r2:.3f}", delta="Goodness of Fit")
+    m_col1.metric("Mean Absolute Error (MAE)", f"{mae:.2f}", delta="Synthetic Orders Error", delta_color="inverse")
+    m_col2.metric("Root Mean Squared Error (RMSE)", f"{rmse:.2f}", delta="Synthetic Variance", delta_color="inverse")
+    m_col3.metric("Model R² Score", f"{r2:.3f}", delta="Synthetic Fit (Harmonic)")
 
     fig_eval = go.Figure()
     fig_eval.add_trace(go.Scatter(
         x=y_test.index,
         y=y_test,
         mode='markers',
-        name='Actual Orders',
+        name='Synthetic Baseline Orders',
         marker=dict(color='#18181F', size=7, opacity=0.75)
     ))
     fig_eval.add_trace(go.Scatter(
@@ -3429,7 +3479,7 @@ with tab_forecast:
         marker=dict(color='#8B82F6', size=7, symbol='x')
     ))
     fig_eval.update_layout(
-        title="Actual vs Predicted Demand on Validation Set",
+        title="Actual vs Predicted Demand on Synthetic Validation Set",
         xaxis_title="Date",
         yaxis_title="Daily Orders per Hub",
         hovermode="x unified",
@@ -3445,18 +3495,26 @@ with tab_forecast:
     st.markdown(f"### 🔮 Forward Demand Forecast ({forecast_days} Days)")
     last_date = df_model.index.max()
     future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=forecast_days, freq='D')
-    future_days = np.arange(df_model['DayOfYear'].max() + 1, df_model['DayOfYear'].max() + 1 + forecast_days)
+    
+    # Harmonic cyclical wrapping across year boundary
+    future_doy = future_dates.dayofyear
+    future_sin_doy = np.sin(2 * np.pi * future_doy / 365.25)
+    future_cos_doy = np.cos(2 * np.pi * future_doy / 365.25)
     future_weekends = (future_dates.dayofweek >= 5).astype(int)
+    future_dow = future_dates.dayofweek
 
-    future_X = pd.DataFrame({
-        'DayOfYear': future_days,
-        'IsWeekend': future_weekends
-    })
+    future_X = pd.DataFrame(index=range(len(future_dates)))
+    future_X['Sin_DayOfYear'] = future_sin_doy
+    future_X['Cos_DayOfYear'] = future_cos_doy
+    future_X['IsWeekend'] = future_weekends
+    future_X['DayOfWeek'] = future_dow
+
     for col in X_train.columns:
         if col not in future_X.columns:
             future_X[col] = 0
+    future_X = future_X[X_train.columns]
 
-    future_pred = model.predict(future_X)
+    future_pred = np.maximum(20.0, model.predict(future_X))
     future_df = pd.DataFrame({
         'Date': future_dates.strftime('%Y-%m-%d (%a)'),
         'Predicted Daily Demand': np.round(future_pred, 1),
@@ -3511,7 +3569,7 @@ with tab_forecast:
         )
 
 # ------------------------------------------------------------------------------
-# TAB 5: Climate & Monsoon Delivery Impact
+# TAB 6: Climate & Monsoon Delivery Impact
 # ------------------------------------------------------------------------------
 with tab_climate:
     st.markdown("""
