@@ -12,7 +12,7 @@ Hi **[Founder / Engineering Lead Name]**,
 
 I’ve been following **[Company Name]**’s journey in scaling quick delivery across **[City / Region or specific vertical, e.g. Tier-2 cities / specialized groceries]**. Scaling sub-15 minute fulfillment while keeping route efficiency high and stockouts low is a fascinating engineering challenge.
 
-I am reaching out because I recently engineered and open-sourced **Dark Store Command Center & Dispatch Ecosystem (v3.0.0)**—a full-stack, production-grade quick-commerce platform designed from the ground up to solve these exact operational bottlenecks.
+I am reaching out because I recently engineered and open-sourced **Dark Store Command Center & Dispatch Ecosystem (v4.0.0)**—a full-stack, production-grade quick-commerce platform designed from the ground up to solve these exact operational bottlenecks.
 
 ### What I built across the stack:
 * **Mobile Client (React Native + Expo)**: Consumer cart & checkout with high-precision GPS lock, dedicated **Rider Partner Mode** (courier lifecycle stepper), and **OSRM turn-by-turn road navigation** with real-time courier bearing rotation.

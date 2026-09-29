@@ -36,7 +36,7 @@ class BlinkitQuickCommerceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Blinkit Quick-Commerce (v3.0.0)',
+      title: 'Blinkit Quick-Commerce (v4.0.0)',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const HomeCatalogScreen(),

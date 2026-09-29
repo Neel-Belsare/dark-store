@@ -31,7 +31,7 @@ except ImportError:
 # 1. Page Configuration
 # ------------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Aurangabad Dark Store Command Center v3.0",
+    page_title="Aurangabad Dark Store Command Center v4.0",
     page_icon="🛒",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -2471,7 +2471,7 @@ with st.sidebar:
     st.markdown("[🔗 LinkedIn](https://www.linkedin.com/in/neel-belsare-719b9a314/) • [GitHub](https://github.com/NeelBelsare)")
     st.markdown("**Mansi Gaike**")
     st.markdown("[🔗 LinkedIn](https://www.linkedin.com/in/mansi-gaike-821260316) • [GitHub](https://github.com/gaikemansi03-sketch)")
-    st.caption("Quick-Commerce Analytics v3.0 • Command Center")
+    st.caption("Quick-Commerce Analytics v4.0 • Command Center")
 
     st.markdown("---")
     st.markdown("### ⚡ Live Dispatch Telemetry")

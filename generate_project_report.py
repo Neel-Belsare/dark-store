@@ -49,7 +49,7 @@ class NumberedCanvas(canvas.Canvas):
 
             # Running Footer
             self.line(54, 44, letter[0] - 54, 44)
-            self.drawString(54, 32, "Confidential • Prepared by Neel Belsare • Quick-Commerce Analytics v3.0")
+            self.drawString(54, 32, "Confidential • Prepared by Neel Belsare • Quick-Commerce Analytics v4.0")
             page_text = f"Page {self._pageNumber} of {page_count}"
             self.drawRightString(letter[0] - 54, 32, page_text)
 
@@ -175,7 +175,7 @@ def build_pdf_report(filename="Dark_Store_Feasibility_Project_Report.pdf"):
         ],
         [
             Paragraph("<b>Role:</b> AI &amp; Full-Stack Quick-Commerce Architect", meta_style),
-            Paragraph("<b>Status:</b> Production Verified (v3.0)", meta_style),
+            Paragraph("<b>Status:</b> Production Verified (v4.0)", meta_style),
         ],
         [
             Paragraph("<b>Live Dashboard:</b> my-dark-store-app.streamlit.app", meta_style),

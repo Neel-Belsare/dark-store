@@ -44,7 +44,7 @@ class NumberedCanvas(canvas.Canvas):
             # Header
             self.drawString(
                 54, letter[1] - 34,
-                "Quick-Commerce Made Simple • Non-Tech Visual Guide & How-To Handbook (v3.0.0)"
+                "Quick-Commerce Made Simple • Non-Tech Visual Guide & How-To Handbook (v4.0.0)"
             )
             self.setStrokeColor(colors.HexColor("#CBD5E1"))
             self.setLineWidth(0.5)
@@ -168,7 +168,7 @@ def build_pdf(filename):
     # ==========================================
     banner_data = [
         [
-            Paragraph("<b>QUICK-COMMERCE MADE SIMPLE</b><br/><font size='9.5' color='#4338CA'>Visual Non-Tech Handbook & How-To Guide (v3.0.0)</font>", title_style),
+            Paragraph("<b>QUICK-COMMERCE MADE SIMPLE</b><br/><font size='9.5' color='#4338CA'>Visual Non-Tech Handbook & How-To Guide (v4.0.0)</font>", title_style),
             Paragraph("<b>Stack:</b> React Native • FastAPI • Supabase<br/><b>Live Repo:</b> <font color='#0A66C2'><u><a href='https://github.com/NeelBelsare/my-dark-store-app'>github.com/NeelBelsare</a></u></font><br/><b>Delivery SLA:</b> Sub-12 Min Guaranteed", ParagraphStyle('Meta', parent=body_style, fontSize=8, leading=11, textColor=TEXT_MUTED))
         ]
     ]

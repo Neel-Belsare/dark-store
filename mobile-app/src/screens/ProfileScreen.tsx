@@ -124,7 +124,7 @@ export const ProfileScreen: React.FC = () => {
 
       {/* App Version Info */}
       <View style={styles.footerNote}>
-        <Text style={styles.footerText}>Blinkit Dark Store Mobile • v3.0 Production</Text>
+        <Text style={styles.footerText}>Blinkit Dark Store Mobile • v4.0 Production</Text>
         <Text style={styles.footerSub}>Architected for Chhatrapati Sambhajinagar</Text>
       </View>
     </ScrollView>
