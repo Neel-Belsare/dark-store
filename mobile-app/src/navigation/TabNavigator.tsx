@@ -5,6 +5,7 @@ import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { RiderScreen } from '../screens/RiderScreen';
 import { useCart } from '../context/CartContext';
 import { TabName } from '../types';
 
@@ -20,6 +21,8 @@ export const TabNavigator: React.FC = () => {
         return <CartScreen onNavigateToHome={() => setActiveTab('Home')} />;
       case 'Profile':
         return <ProfileScreen />;
+      case 'Rider':
+        return <RiderScreen />;
       default:
         return <HomeScreen onNavigateToCart={() => setActiveTab('Cart')} />;
     }
@@ -76,6 +79,21 @@ export const TabNavigator: React.FC = () => {
           </View>
           <Text style={[styles.tabLabel, activeTab === 'Profile' && styles.tabLabelActive]}>
             Profile
+          </Text>
+        </TouchableOpacity>
+
+        {/* Tab 4: Rider Partner Mode */}
+        <TouchableOpacity
+          style={styles.tabBtn}
+          onPress={() => setActiveTab('Rider')}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.iconWrapper, activeTab === 'Rider' && styles.iconWrapperActive]}>
+            <Text style={[styles.tabIcon, activeTab === 'Rider' && styles.tabIconActive]}>🛵</Text>
+            <View style={styles.riderLiveDot} />
+          </View>
+          <Text style={[styles.tabLabel, activeTab === 'Rider' && styles.tabLabelActive]}>
+            Rider
           </Text>
         </TouchableOpacity>
       </View>
@@ -143,6 +161,17 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 9,
     fontWeight: '900',
+  },
+  riderLiveDot: {
+    position: 'absolute',
+    top: 2,
+    right: 3,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#10B981',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
   },
   tabLabel: {
     fontSize: 11,

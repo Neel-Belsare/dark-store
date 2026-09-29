@@ -39,6 +39,12 @@ try:
 except ImportError:
     supabase_client = None
 
+# Smart Inventory & Stockout Prediction Engine
+try:
+    import inventory_manager
+except ImportError:
+    inventory_manager = None
+
 app = FastAPI(
     title="Aurangabad Quick-Commerce Autonomous Dispatch API",
     description="Full-stack logistics bridge connecting Expo mobile client and Streamlit Command Center",
@@ -76,6 +82,23 @@ class OrderCreateRequest(BaseModel):
 class LogisticsConditionUpdate(BaseModel):
     weather: Optional[str] = "Clear"       # Clear, Light Rain, Heavy Monsoon Rain, Thunderstorm
     traffic: Optional[str] = "Moderate"    # Low, Moderate, Peak Rush Hour, Severe Congestion
+
+class InventoryReplenishRequest(BaseModel):
+    store_name: str
+    sku_id: str
+    quantity: int = 50
+
+class InventoryTransferRequest(BaseModel):
+    from_store: str
+    to_store: str
+    sku_id: str
+    quantity: int = 20
+
+class RiderStatusUpdateRequest(BaseModel):
+    order_id: str
+    status: str  # 'accepted' | 'arrived_hub' | 'picked_up' | 'delivered'
+    rider_name: Optional[str] = "Rahul S. (Rider #18)"
+    notes: Optional[str] = None
 
 # ------------------------------------------------------------------------------
 # Predictive Logistics: Weather & Traffic Condition State
@@ -539,6 +562,46 @@ def get_users():
         {"user_id": "user-003", "full_name": "Rohan Sharma", "loyalty_tier": "Silver", "total_orders": 22}
     ]
 
+# ------------------------------------------------------------------------------
+# Smart Inventory & Stockout Prediction Endpoints
+# ------------------------------------------------------------------------------
+@app.get("/api/inventory")
+def get_inventory():
+    """Returns current SKU stock levels across all 12 dark stores and catalog metadata."""
+    if not inventory_manager:
+        raise HTTPException(status_code=500, detail="Inventory manager not available")
+    state = inventory_manager.load_inventory_state()
+    alerts = inventory_manager.get_stockout_alerts()
+    return {
+        "catalog": inventory_manager.CATALOG_SKUS,
+        "stores": inventory_manager.AURANGABAD_STORES,
+        "inventory": state,
+        "total_alerts": len(alerts),
+        "critical_alerts": sum(1 for a in alerts if a["severity"] == "CRITICAL"),
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/api/inventory/alerts")
+def get_inventory_alerts():
+    """Returns active critical stockouts and low stock warnings."""
+    if not inventory_manager:
+        return []
+    return inventory_manager.get_stockout_alerts()
+
+@app.post("/api/inventory/replenish")
+def replenish_inventory(req: InventoryReplenishRequest):
+    """Restocks a specific SKU at a designated dark store."""
+    if not inventory_manager:
+        raise HTTPException(status_code=500, detail="Inventory manager not available")
+    return inventory_manager.replenish_sku(req.store_name, req.sku_id, req.quantity)
+
+@app.post("/api/inventory/transfer")
+def transfer_inventory(req: InventoryTransferRequest):
+    """Transfers stock between stores to rebalance inventory."""
+    if not inventory_manager:
+        raise HTTPException(status_code=500, detail="Inventory manager not available")
+    return inventory_manager.transfer_inter_hub_stock(req.from_store, req.to_store, req.sku_id, req.quantity)
+
 @app.get("/api/serviceability")
 @app.get("/api/serviceability/check")
 def check_serviceability(latitude: float = Query(...), longitude: float = Query(...)):
@@ -570,6 +633,7 @@ def update_logistics_conditions(update: LogisticsConditionUpdate):
         "conditions": LIVE_LOGISTICS_STATE
     }
 
+@app.get("/api/order/active")
 @app.get("/api/latest-order")
 def get_latest_order():
     """
@@ -625,6 +689,49 @@ def reset_active_order():
         "success": True,
         "message": "Active order pipeline reset successfully.",
         "order": reset_payload
+    }
+
+@app.post("/api/order/rider-status")
+def update_rider_order_status(req: RiderStatusUpdateRequest):
+    """
+    Allows courier partner in Rider Mode to transition order fulfillment:
+    'accepted' -> 'arrived_hub' -> 'picked_up' -> 'delivered'.
+    """
+    updated_order = None
+    if os.path.exists(LATEST_ORDER_FILE):
+        try:
+            with open(LATEST_ORDER_FILE, "r") as f:
+                data = json.load(f)
+            data["rider_status"] = req.status
+            data["rider_name"] = req.rider_name or data.get("rider", "Rahul S. (Rider #18)")
+            if req.status == "delivered":
+                data["status"] = "delivered"
+                data["active"] = False
+                data["delivered_at"] = datetime.now().isoformat()
+            elif req.status == "picked_up":
+                data["status"] = "in_transit"
+            elif req.status == "arrived_hub":
+                data["status"] = "at_dark_store"
+            elif req.status == "accepted":
+                data["status"] = "rider_assigned"
+
+            with open(LATEST_ORDER_FILE, "w") as f:
+                json.dump(data, f, indent=2)
+            updated_order = data
+        except Exception as e:
+            print(f"[Rider API Warning] Error updating latest order: {e}")
+
+    # Also sync to Supabase if enabled
+    if supabase_client and supabase_client.is_supabase_enabled() and updated_order:
+        try:
+            supabase_client.create_order(updated_order)
+        except Exception as sb_e:
+            print(f"[Supabase Warning] Could not update rider status: {sb_e}")
+
+    return {
+        "success": True,
+        "message": f"Order {req.order_id} fulfillment status updated to {req.status}",
+        "order": updated_order or {"order_id": req.order_id, "rider_status": req.status}
     }
 
 @app.get("/api/orders")
@@ -738,6 +845,16 @@ def place_order(order: OrderCreateRequest):
             supabase_client.create_order(order_payload)
         except Exception as sb_err:
             print(f"[Supabase Warning] Could not persist order to Supabase: {sb_err}")
+
+    # 4.1 Auto-decrement inventory stock at assigned dark store
+    if inventory_manager:
+        try:
+            inventory_manager.decrement_inventory_for_order(
+                str(assigned_store['Store Name']),
+                order.items or item_names
+            )
+        except Exception as inv_err:
+            print(f"[Inventory Warning] Stock auto-decrement failed: {inv_err}")
 
     # 5. Atomically persist active order for local fallback / Streamlit pickup
     try:

@@ -199,35 +199,71 @@ export const RealDeliveryMap: React.FC<RealDeliveryMapProps> = ({
       100% { transform: scale(1.6); opacity: 0; }
     }
 
-    /* Live Watermark / Controls */
-    .map-badge-overlay {
+    /* Live Turn-by-Turn Street HUD Overlay */
+    .turn-hud {
       position: absolute;
       top: 10px;
       left: 10px;
+      right: 10px;
       z-index: 1000;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.92);
       backdrop-filter: blur(8px);
-      padding: 5px 10px;
-      border-radius: 20px;
-      color: #FFFFFF;
-      font-size: 11px;
-      font-weight: 700;
+      border-radius: 12px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      border: 1px solid rgba(255,255,255,0.15);
+      justify-content: space-between;
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #22C55E;
-      animation: blink 1.2s infinite;
+    .turn-left-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      overflow: hidden;
     }
-    @keyframes blink {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
+    .turn-icon-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #0C831F;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .turn-text-col {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .turn-main {
+      font-size: 11px;
+      font-weight: 700;
+      color: #F8FAFC;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .turn-sub {
+      font-size: 9.5px;
+      color: #94A3B8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .speed-badge {
+      background: rgba(245, 158, 11, 0.2);
+      color: #FBBF24;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      flex-shrink: 0;
     }
 
     .recenter-btn {
@@ -256,9 +292,19 @@ export const RealDeliveryMap: React.FC<RealDeliveryMapProps> = ({
 <body>
   <div id="map"></div>
 
-  <div class="map-badge-overlay">
-    <div class="live-dot"></div>
-    <span>GPS Live Tracking</span>
+  <!-- Turn-by-Turn Live Navigation HUD -->
+  <div class="turn-hud" id="turnHud">
+    <div class="turn-left-box">
+      <div class="turn-icon-box" id="turnIcon">🛵</div>
+      <div class="turn-text-col">
+        <div class="turn-main" id="turnInstruction">Navigating via Aurangabad Road Network...</div>
+        <div class="turn-sub">
+          <span style="color:#22C55E;">● OSRM Live</span>
+          <span id="turnDistance">Calculating street trajectory...</span>
+        </div>
+      </div>
+    </div>
+    <div class="speed-badge" id="speedBadge">28 km/h</div>
   </div>
 
   <button class="recenter-btn" onclick="fitRouteBounds()">
@@ -398,15 +444,48 @@ export const RealDeliveryMap: React.FC<RealDeliveryMapProps> = ({
       startRiderTraversal(coords);
     }
 
+    let roadSteps = [
+      { text: "Head out from dark store hub", icon: "🏬", dist: "150m" },
+      { text: "Turn right onto Jalna Road corridor", icon: "➡️", dist: "850m" },
+      { text: "Continue straight past Seven Hills Flyover", icon: "⬆️", dist: "1.2 km" },
+      { text: "Turn left towards customer doorstep", icon: "⬅️", dist: "200m" },
+      { text: "Arriving at delivery address doorstep!", icon: "🏁", dist: "25m" }
+    ];
+
     // Try fetching actual turn-by-turn road geometry from Open Source Routing Machine (OSRM)
     async function fetchRealRoadRoute() {
       try {
-        const url = \`https://router.project-osrm.org/route/v1/driving/\${storeCoord[1]},\${storeCoord[0]};\${custCoord[1]},\${custCoord[0]}?overview=full&geometries=geojson\`;
+        const url = \`https://router.project-osrm.org/route/v1/driving/\${storeCoord[1]},\${storeCoord[0]};\${custCoord[1]},\${custCoord[0]}?overview=full&geometries=geojson&steps=true\`;
         const res = await fetch(url);
         const data = await res.json();
         if (data.routes && data.routes.length > 0 && data.routes[0].geometry) {
+          const route = data.routes[0];
           // OSRM returns [lon, lat], Leaflet needs [lat, lon]
-          const osrmCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          const osrmCoords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+          if (route.legs && route.legs[0] && route.legs[0].steps && route.legs[0].steps.length > 0) {
+            const parsedSteps = route.legs[0].steps
+              .filter(s => s.name || (s.maneuver && s.maneuver.type))
+              .map(s => {
+                const mType = s.maneuver ? s.maneuver.type : 'turn';
+                const mMod = s.maneuver && s.maneuver.modifier ? s.maneuver.modifier : '';
+                let ic = '⬆️';
+                if (mMod.includes('right')) ic = '➡️';
+                else if (mMod.includes('left')) ic = '⬅️';
+                else if (mType === 'arrive') ic = '🏁';
+                else if (mType === 'depart') ic = '🏬';
+
+                const roadTitle = s.name ? ((mMod ? mMod.toUpperCase() + ' on ' : '') + s.name) : (s.maneuver ? s.maneuver.type : 'Continue on street');
+                return {
+                  text: roadTitle,
+                  icon: ic,
+                  dist: Math.round(s.distance || 100) + 'm'
+                };
+              });
+            if (parsedSteps.length > 0) {
+              roadSteps = parsedSteps;
+            }
+          }
+
           if (osrmCoords.length > 1) {
             routeCoordinates = osrmCoords;
             drawRoute(routeCoordinates);
@@ -447,6 +526,36 @@ export const RealDeliveryMap: React.FC<RealDeliveryMapProps> = ({
         const curLon = p1[1] + (p2[1] - p1[1]) * fraction;
 
         riderMarker.setLatLng([curLat, curLon]);
+
+        // Calculate heading angle for bike rotation
+        const dy = (p2[0] - p1[0]);
+        const dx = (p2[1] - p1[1]) * Math.cos((p1[0] * Math.PI) / 180);
+        const angleDeg = Math.atan2(dx, dy) * (180 / Math.PI);
+
+        const riderEl = riderMarker.getElement();
+        if (riderEl) {
+          const circleEl = riderEl.querySelector('.rider-circle');
+          if (circleEl) {
+            circleEl.style.transform = \`rotate(\${Math.round(angleDeg)}deg)\`;
+          }
+        }
+
+        // Update Turn-by-Turn HUD
+        const stepIdx = Math.min(Math.floor(progress * roadSteps.length), roadSteps.length - 1);
+        const currentStep = roadSteps[stepIdx];
+        if (currentStep) {
+          const instructionEl = document.getElementById('turnInstruction');
+          const distEl = document.getElementById('turnDistance');
+          const iconEl = document.getElementById('turnIcon');
+          const speedEl = document.getElementById('speedBadge');
+          if (instructionEl) instructionEl.innerText = currentStep.text;
+          if (distEl) distEl.innerText = \`● \${currentStep.dist} remaining\`;
+          if (iconEl) iconEl.innerText = currentStep.icon;
+          if (speedEl) {
+            const simulatedSpeed = Math.round(26 + Math.sin(progress * 12) * 5);
+            speedEl.innerText = \`\${simulatedSpeed} km/h\`;
+          }
+        }
 
         // Update completed path
         const covered = coords.slice(0, segmentIndex + 1);

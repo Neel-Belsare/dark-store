@@ -1,0 +1,122 @@
+{
+  "Store 1 - CIDCO Hub": {
+    "SKU-MILK-500": 73,
+    "SKU-BREAD-400": 59,
+    "SKU-ATTA-5KG": 50,
+    "SKU-TEA-500": 55,
+    "SKU-CHIPS-50": 95,
+    "SKU-OIL-1L": 65,
+    "SKU-EGGS-6": 60,
+    "SKU-COLA-750": 85
+  },
+  "Store 2 - Garkheda Point": {
+    "SKU-MILK-500": 58,
+    "SKU-BREAD-400": 43,
+    "SKU-ATTA-5KG": 33,
+    "SKU-TEA-500": 38,
+    "SKU-CHIPS-50": 78,
+    "SKU-OIL-1L": 48,
+    "SKU-EGGS-6": 43,
+    "SKU-COLA-750": 68
+  },
+  "Store 3 - Nirala Central": {
+    "SKU-MILK-500": 4,
+    "SKU-BREAD-400": 41,
+    "SKU-ATTA-5KG": 31,
+    "SKU-TEA-500": 36,
+    "SKU-CHIPS-50": 76,
+    "SKU-OIL-1L": 46,
+    "SKU-EGGS-6": 41,
+    "SKU-COLA-750": 66
+  },
+  "Store 4 - Waluj Industrial": {
+    "SKU-MILK-500": 54,
+    "SKU-BREAD-400": 39,
+    "SKU-ATTA-5KG": 11,
+    "SKU-TEA-500": 34,
+    "SKU-CHIPS-50": 74,
+    "SKU-OIL-1L": 44,
+    "SKU-EGGS-6": 39,
+    "SKU-COLA-750": 64
+  },
+  "Store 5 - Chikalthana Express": {
+    "SKU-MILK-500": 52,
+    "SKU-BREAD-400": 37,
+    "SKU-ATTA-5KG": 27,
+    "SKU-TEA-500": 32,
+    "SKU-CHIPS-50": 72,
+    "SKU-OIL-1L": 42,
+    "SKU-EGGS-6": 37,
+    "SKU-COLA-750": 62
+  },
+  "Store 6 - Beed Bypass Corridor": {
+    "SKU-MILK-500": 50,
+    "SKU-BREAD-400": 35,
+    "SKU-ATTA-5KG": 25,
+    "SKU-TEA-500": 30,
+    "SKU-CHIPS-50": 70,
+    "SKU-OIL-1L": 40,
+    "SKU-EGGS-6": 35,
+    "SKU-COLA-750": 60
+  },
+  "Store 7 - Osmanpura Hub": {
+    "SKU-MILK-500": 48,
+    "SKU-BREAD-400": 33,
+    "SKU-ATTA-5KG": 23,
+    "SKU-TEA-500": 28,
+    "SKU-CHIPS-50": 68,
+    "SKU-OIL-1L": 38,
+    "SKU-EGGS-6": 33,
+    "SKU-COLA-750": 58
+  },
+  "Store 8 - Seven Hills Junction": {
+    "SKU-MILK-500": 46,
+    "SKU-BREAD-400": 6,
+    "SKU-ATTA-5KG": 21,
+    "SKU-TEA-500": 26,
+    "SKU-CHIPS-50": 66,
+    "SKU-OIL-1L": 36,
+    "SKU-EGGS-6": 31,
+    "SKU-COLA-750": 56
+  },
+  "Store 9 - HUDCO North": {
+    "SKU-MILK-500": 59,
+    "SKU-BREAD-400": 44,
+    "SKU-ATTA-5KG": 34,
+    "SKU-TEA-500": 39,
+    "SKU-CHIPS-50": 79,
+    "SKU-OIL-1L": 49,
+    "SKU-EGGS-6": 44,
+    "SKU-COLA-750": 69
+  },
+  "Store 10 - Railway Station / Vedant": {
+    "SKU-MILK-500": 57,
+    "SKU-BREAD-400": 42,
+    "SKU-ATTA-5KG": 32,
+    "SKU-TEA-500": 37,
+    "SKU-CHIPS-50": 77,
+    "SKU-OIL-1L": 47,
+    "SKU-EGGS-6": 42,
+    "SKU-COLA-750": 67
+  },
+  "Store 11 - Shahgunj Old City": {
+    "SKU-MILK-500": 55,
+    "SKU-BREAD-400": 40,
+    "SKU-ATTA-5KG": 30,
+    "SKU-TEA-500": 35,
+    "SKU-CHIPS-50": 75,
+    "SKU-OIL-1L": 45,
+    "SKU-EGGS-6": 40,
+    "SKU-COLA-750": 65
+  },
+  "Store 12 - Shendra DMIC (AURIC)": {
+    "SKU-MILK-500": 53,
+    "SKU-BREAD-400": 38,
+    "SKU-ATTA-5KG": 28,
+    "SKU-TEA-500": 33,
+    "SKU-CHIPS-50": 73,
+    "SKU-OIL-1L": 43,
+    "SKU-EGGS-6": 38,
+    "SKU-COLA-750": 63
+  }
+}

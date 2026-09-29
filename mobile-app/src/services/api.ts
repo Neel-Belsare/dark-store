@@ -177,6 +177,36 @@ export async function getLatestOrder(): Promise<DispatchedOrder | null> {
 }
 
 /**
+ * Updates the rider delivery lifecycle milestone on FastAPI backend and Supabase.
+ */
+export async function updateRiderStatus(
+  orderId: string,
+  status: 'accepted' | 'arrived_hub' | 'picked_up' | 'delivered',
+  riderName: string = 'Rahul S. (Rider #18)'
+): Promise<boolean> {
+  const baseUrl = getApiBaseUrl();
+  try {
+    const res = await fetch(`${baseUrl}/api/order/rider-status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        order_id: orderId,
+        status,
+        rider_name: riderName,
+      }),
+    });
+    if (res.ok) {
+      return true;
+    }
+  } catch (err) {
+    console.warn('[Rider API] Failed to update rider status remotely:', err);
+  }
+  return false;
+}
+
+/**
  * Local Haversine routing fallback matching app.py dataset for offline development
  */
 function simulateLocalDarkStoreDispatch(payload: OrderPayload): OrderApiResponse {

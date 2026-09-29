@@ -21,6 +21,12 @@ try:
 except ImportError:
     supabase_client = None
 
+# Smart Inventory & Stockout Prediction Engine
+try:
+    import inventory_manager
+except ImportError:
+    inventory_manager = None
+
 # ------------------------------------------------------------------------------
 # 1. Page Configuration
 # ------------------------------------------------------------------------------
@@ -1532,13 +1538,14 @@ st.markdown(kpis_html, unsafe_allow_html=True)
 # ------------------------------------------------------------------------------
 # 7. Dashboard Layout: Modern Structured Tabs
 # ------------------------------------------------------------------------------
-tab_summary, tab_sim, tab_map, tab_demographics, tab_forecast, tab_climate = st.tabs([
+tab_summary, tab_sim, tab_map, tab_demographics, tab_forecast, tab_climate, tab_inventory = st.tabs([
     "📊 Executive Summary",
     "⚡ Live Order Simulation",
     "🗺️ Geospatial View",
     "👥 Demographic Heatmaps",
     "📈 Demand Forecasting",
-    "🌦️ Climate & Monsoon"
+    "🌦️ Climate & Monsoon",
+    "📦 Smart Inventory & Stockouts"
 ])
 
 # ------------------------------------------------------------------------------
@@ -2700,3 +2707,215 @@ with tab_climate:
 
     with st.expander("📋 View Monthly Climate & Impact Table"):
         st.dataframe(filtered_climate, use_container_width=True)
+
+# ------------------------------------------------------------------------------
+# TAB 7: Smart Inventory & Stockout Alerts
+# ------------------------------------------------------------------------------
+with tab_inventory:
+    st.markdown("""
+    <div class="card" style="margin-bottom: 20px;">
+        <h2 class="card-title">📦 Smart Inventory & Real-Time Stockout Detection</h2>
+        <p class="hint">Live SKU tracking across all 12 Aurangabad dark stores, predictive buffer depletion alerts, and one-click inter-hub transfer rebalancing.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if inventory_manager is None:
+        st.error("Inventory management engine is currently unavailable.")
+    else:
+        inv_state = inventory_manager.load_inventory_state()
+        alerts = inventory_manager.get_stockout_alerts()
+        catalog = inventory_manager.CATALOG_SKUS
+        stores = inventory_manager.AURANGABAD_STORES
+
+        # 1. Top KPI Summary Cards
+        critical_count = sum(1 for a in alerts if a["severity"] == "CRITICAL")
+        warning_count = sum(1 for a in alerts if a["severity"] == "WARNING")
+        total_units = sum(sum(stock.values()) for stock in inv_state.values())
+        total_skus = len(catalog) * len(stores)
+
+        col_kpi1, col_kpi2, col_kpi3, col_kpi4 = st.columns(4)
+        with col_kpi1:
+            st.metric(
+                label="🏢 Monitored Dark Stores",
+                value=f"{len(stores)} Hubs",
+                delta="100% Online"
+            )
+        with col_kpi2:
+            st.metric(
+                label="📦 Total Stock in Network",
+                value=f"{total_units:,} units",
+                delta=f"{len(catalog)} Core SKUs"
+            )
+        with col_kpi3:
+            st.metric(
+                label="🚨 Critical Stockouts (<10 units)",
+                value=critical_count,
+                delta="Immediate Action" if critical_count > 0 else "All Clear",
+                delta_color="inverse" if critical_count > 0 else "normal"
+            )
+        with col_kpi4:
+            st.metric(
+                label="⚠️ Low Stock Warnings",
+                value=warning_count,
+                delta="Replenishment Due" if warning_count > 0 else "Nominal",
+                delta_color="inverse" if warning_count > 0 else "normal"
+            )
+
+        # 2. Stockout Alerts Warning Banners
+        if alerts:
+            st.markdown("### 🔔 Active Operational Inventory Alerts")
+            for alert in alerts[:5]:  # Show top 5 urgent alerts
+                if alert["severity"] == "CRITICAL":
+                    st.error(
+                        f"**{alert['message']}**\n\n"
+                        f"• Category: {alert['category']} | Current Stock: **{alert['current_stock']}** units "
+                        f"(Threshold: {alert['threshold']} units) | Suggested Reorder: **+{alert['suggested_reorder']} units**"
+                    )
+                else:
+                    st.warning(
+                        f"**{alert['message']}**\n\n"
+                        f"• Category: {alert['category']} | Current Stock: **{alert['current_stock']}** units "
+                        f"(Threshold: {alert['threshold']} units) | Suggested Reorder: **+{alert['suggested_reorder']} units**"
+                    )
+        else:
+            st.success("✅ All 12 dark stores have healthy buffer inventory across all catalog SKUs.")
+
+        st.markdown("---")
+
+        # 3. Store-Specific Inventory Level Inspection & Visualization
+        inv_col1, inv_col2 = st.columns([1.1, 1])
+
+        with inv_col1:
+            st.markdown("### 🏪 Store SKU Inventory Explorer")
+            selected_store = st.selectbox(
+                "Select Aurangabad Dark Store to Inspect:",
+                stores,
+                index=0
+            )
+
+            store_stock = inv_state.get(selected_store, {})
+            table_rows = []
+            for sku in catalog:
+                qty = store_stock.get(sku["sku_id"], sku["default_stock"])
+                status = "🟢 Healthy"
+                if qty <= sku["critical_threshold"]:
+                    status = "🚨 Critical Stockout"
+                elif qty <= sku["low_stock_threshold"]:
+                    status = "⚠️ Low Stock"
+
+                table_rows.append({
+                    "SKU Name": sku["name"],
+                    "Category": sku["category"],
+                    "Unit": sku["unit"],
+                    "Stock Qty": qty,
+                    "Health Status": status,
+                    "Unit Price (₹)": sku["unit_price"],
+                    "Total Val (₹)": round(qty * sku["unit_price"], 2)
+                })
+
+            store_df = pd.DataFrame(table_rows)
+            st.dataframe(store_df, use_container_width=True, height=310)
+
+        with inv_col2:
+            st.markdown(f"### 📊 Inventory vs Thresholds ({selected_store})")
+            fig_inv = go.Figure()
+            sku_names_short = [sku["name"].split()[0] + " " + sku["name"].split()[1] for sku in catalog]
+            current_stocks = [store_stock.get(sku["sku_id"], sku["default_stock"]) for sku in catalog]
+            critical_bars = [sku["critical_threshold"] for sku in catalog]
+
+            fig_inv.add_trace(go.Bar(
+                x=sku_names_short,
+                y=current_stocks,
+                name="Current Stock",
+                marker_color=["#ef4444" if q <= c else "#f59e0b" if q <= l else "#10b981"
+                              for q, c, l in zip(current_stocks, [s["critical_threshold"] for s in catalog], [s["low_stock_threshold"] for s in catalog])]
+            ))
+            fig_inv.add_trace(go.Scatter(
+                x=sku_names_short,
+                y=critical_bars,
+                name="Critical Threshold",
+                mode="lines+markers",
+                line=dict(color="#b91c1c", width=2, dash="dash")
+            ))
+
+            fig_inv.update_layout(
+                xaxis_title="SKU",
+                yaxis_title="Units in Stock",
+                template="plotly_white",
+                legend=dict(x=0.01, y=0.99),
+                height=310,
+                margin=dict(l=10, r=10, t=30, b=30)
+            )
+            st.plotly_chart(fig_inv, use_container_width=True)
+
+        st.markdown("---")
+
+        # 4. Inter-Hub Inventory Rebalance & Wholesaler Restock Simulator
+        st.markdown("### 🔄 Autonomous Inter-Hub Stock Replenishment Simulator")
+        st.caption("When micro-market demand spikes, shift excess inventory between neighboring dark stores to avoid stockouts without waiting for central warehouse shipments.")
+
+        col_trans1, col_trans2, col_trans3, col_trans4, col_trans5 = st.columns([1.5, 1.5, 1.5, 1, 1.2])
+
+        with col_trans1:
+            from_hub = st.selectbox(
+                "Source Store (Surplus)",
+                stores,
+                index=0,
+                key="source_hub"
+            )
+
+        with col_trans2:
+            dest_stores = [s for s in stores if s != from_hub]
+            to_hub = st.selectbox(
+                "Destination Store (Deficit)",
+                dest_stores,
+                index=0,
+                key="dest_hub"
+            )
+
+        with col_trans3:
+            sku_options = {sku["sku_id"]: sku["name"] for sku in catalog}
+            selected_sku_id = st.selectbox(
+                "SKU to Transfer",
+                list(sku_options.keys()),
+                format_func=lambda x: sku_options[x],
+                key="transfer_sku"
+            )
+
+        with col_trans4:
+            transfer_qty = st.number_input("Qty Units", min_value=5, max_value=100, value=20, step=5)
+
+        with col_trans5:
+            st.write("")
+            st.write("")
+            if st.button("🚀 Transfer Stock", use_container_width=True):
+                result = inventory_manager.transfer_inter_hub_stock(
+                    from_hub, to_hub, selected_sku_id, transfer_qty
+                )
+                if result.get("success"):
+                    st.success(result["message"])
+                    time.sleep(1)
+                    st.rerun()
+                else:
+                    st.error(result.get("error", "Transfer failed"))
+
+        # 5. Direct Wholesaler Restock Card
+        with st.expander("🏭 Restock Dark Store from Central FMCG Depot / Wholesaler"):
+            r_col1, r_col2, r_col3, r_col4 = st.columns([2, 2, 1, 1])
+            with r_col1:
+                restock_store = st.selectbox("Dark Store to Restock", stores, key="restock_store_select")
+            with r_col2:
+                restock_sku = st.selectbox("SKU", list(sku_options.keys()), format_func=lambda x: sku_options[x], key="restock_sku_select")
+            with r_col3:
+                restock_qty = st.number_input("Add Units", min_value=10, max_value=500, value=50, step=10)
+            with r_col4:
+                st.write("")
+                st.write("")
+                if st.button("📥 Restock Depot", use_container_width=True):
+                    res = inventory_manager.replenish_sku(restock_store, restock_sku, restock_qty)
+                    if res.get("success"):
+                        st.success(res["message"])
+                        time.sleep(1)
+                        st.rerun()
+                    else:
+                        st.error(res.get("error", "Restock failed"))

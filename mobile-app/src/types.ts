@@ -1,4 +1,14 @@
-export type TabName = 'Home' | 'Cart' | 'Profile';
+export type TabName = 'Home' | 'Cart' | 'Profile' | 'Rider';
+
+export type RiderOrderStatus = 'incoming' | 'accepted' | 'arrived_hub' | 'picked_up' | 'delivered';
+
+export interface RiderShiftStats {
+  ordersDelivered: number;
+  earningsToday: number;
+  tipsEarned: number;
+  onlineHours: number;
+  rating: number;
+}
 
 export interface Product {
   id: string;

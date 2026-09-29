@@ -303,3 +303,54 @@ CREATE POLICY "Anon Full Access Users" ON public.users FOR ALL USING (true) WITH
 CREATE POLICY "Anon Full Access Riders" ON public.riders FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service Role Full Access Stores" ON public.stores FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Service Role Full Access Dark Stores" ON public.dark_stores FOR ALL USING (true) WITH CHECK (true);
+
+-- ------------------------------------------------------------------------------
+-- 10. SMART INVENTORY & STOCKOUT ALERTS TABLE
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.store_inventory (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    store_id TEXT,
+    store_name TEXT NOT NULL,
+    sku_id TEXT NOT NULL,
+    sku_name TEXT NOT NULL,
+    category TEXT,
+    unit TEXT,
+    unit_price NUMERIC(10, 2) DEFAULT 0.00,
+    current_stock INT NOT NULL DEFAULT 50,
+    critical_threshold INT NOT NULL DEFAULT 10,
+    low_stock_threshold INT NOT NULL DEFAULT 20,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT unique_store_sku UNIQUE (store_name, sku_id)
+);
+
+-- Seed initial inventory for CIDCO Hub & core stores
+INSERT INTO public.store_inventory (store_name, sku_id, sku_name, category, unit, unit_price, current_stock, critical_threshold, low_stock_threshold)
+VALUES
+    ('Store 1 - CIDCO Hub', 'SKU-MILK-500', 'Amul Taaza Toned Fresh Milk', 'Dairy & Breakfast', '500ml', 27.00, 60, 12, 25),
+    ('Store 1 - CIDCO Hub', 'SKU-BREAD-400', 'Britannia 100% Whole Wheat Bread', 'Bakery', '400g', 45.00, 45, 10, 20),
+    ('Store 1 - CIDCO Hub', 'SKU-ATTA-5KG', 'Aashirvaad Superior MP Sharbati Atta', 'Staples & Grains', '5kg', 260.00, 35, 8, 16),
+    ('Store 1 - CIDCO Hub', 'SKU-TEA-500', 'Tata Tea Gold Leaf Tea', 'Beverages', '500g', 310.00, 40, 10, 20),
+    ('Store 1 - CIDCO Hub', 'SKU-CHIPS-50', 'Lay''s India''s Magic Masala Chips', 'Snacks & Munchies', '50g', 20.00, 80, 18, 35),
+    ('Store 1 - CIDCO Hub', 'SKU-OIL-1L', 'Fortune Sunlite Refined Sunflower Oil', 'Cooking Oils', '1L', 145.00, 50, 10, 22),
+    ('Store 1 - CIDCO Hub', 'SKU-EGGS-6', 'Eggoz Farm Fresh White Eggs', 'Dairy & Breakfast', '6 pcs', 75.00, 45, 10, 20),
+    ('Store 1 - CIDCO Hub', 'SKU-COLA-750', 'Coca-Cola Original Taste', 'Beverages & Cold Drinks', '750ml', 40.00, 70, 15, 30)
+ON CONFLICT (store_name, sku_id) DO UPDATE
+SET 
+    current_stock = EXCLUDED.current_stock,
+    updated_at = NOW();
+
+-- Enable RLS and add public access policies for store_inventory
+ALTER TABLE public.store_inventory ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public Read Store Inventory" ON public.store_inventory FOR SELECT USING (true);
+CREATE POLICY "Anon Full Access Store Inventory" ON public.store_inventory FOR ALL USING (true) WITH CHECK (true);
+
+-- Enable Realtime publication for store_inventory
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' AND tablename = 'store_inventory'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.store_inventory;
+    END IF;
+END $$;
