@@ -1,0 +1,28 @@
+# Flutter build and cache ignores
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Android build ignores
+android/.gradle/
+android/local.properties
+android/gradlew
+android/gradlew.bat
+android/gradle/
+android/app/build/
+android/build/
+*.apk
+*.aab
+
+# Symbol artifacts
+app.*.symbols
+app.*.map.json
+
+# Visual Studio Code & IDEs
+.vscode/
+.idea/
+*.iml

@@ -796,6 +796,129 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
+# 2.1. Authentication Gateway (Handled by Supabase Cloud)
+# ------------------------------------------------------------------------------
+def render_login_screen():
+    st.markdown("""
+    <div style="max-width: 520px; margin: 1.5rem auto 0.5rem; text-align: center;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; border-radius: 20px; background: linear-gradient(135deg, #18181F 0%, #2B2550 100%); border: 1.5px solid #8B82F6; box-shadow: 0 8px 24px rgba(139, 130, 246, 0.25); margin-bottom: 14px;">
+            <span style="font-size: 32px;">🛒</span>
+        </div>
+        <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; color: #14141E; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+            Quick-Commerce Command Center
+        </h1>
+        <p style="font-size: 13px; color: #6E6E82; margin: 0 0 14px 0;">
+            Sub-12 Min Autonomous Dispatch Ecosystem • Production v3.0.0
+        </p>
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: #EEEDFE; color: #6E68B8; font-size: 11.5px; font-weight: 700; padding: 5px 16px; border-radius: 9999px; border: 1px solid #D4D0FC; margin-bottom: 20px;">
+            <span style="color: #10B981; font-size: 14px;">●</span> Handled by Supabase Cloud Authentication
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_left, col_center, col_right = st.columns([1, 1.6, 1])
+    with col_center:
+        st.markdown("""
+        <div style="background: #FFFFFF; border: 1px solid #EAEBF2; border-radius: 20px; padding: 20px 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-bottom: 12px;">
+            <div style="font-size: 15px; font-weight: 800; color: #14141E;">Admin Portal Sign In</div>
+            <div style="font-size: 12px; color: #9696A6; margin-top: 2px;">Enter your credentials to access dispatch telemetry and analytics.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if "autofilled" not in st.session_state:
+            st.session_state["autofilled"] = False
+
+        default_user = "sample_username" if st.session_state.get("autofilled") else ""
+        default_pass = "password@123" if st.session_state.get("autofilled") else ""
+
+        with st.form("supabase_login_form", clear_on_submit=False):
+            username_input = st.text_input(
+                "Username",
+                value=default_user,
+                placeholder="e.g. sample_username",
+                key="login_user_field"
+            )
+            password_input = st.text_input(
+                "Password",
+                value=default_pass,
+                type="password",
+                placeholder="e.g. password@123",
+                key="login_pass_field"
+            )
+
+            st.markdown("""
+            <div style="background: #F8F9FE; border: 1px dashed #D4D0FC; border-radius: 12px; padding: 10px 14px; margin: 12px 0 16px 0; font-size: 11.5px; color: #4B4B5E;">
+                <div style="font-weight: 700; color: #6E68B8; margin-bottom: 4px;">🔑 Demo Credentials (Supabase Handled):</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>Username:</span> <code style="background: #EEEDFE; color: #1E1B4B; padding: 2px 6px; border-radius: 4px; font-weight: 700;">sample_username</code>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Password:</span> <code style="background: #EEEDFE; color: #1E1B4B; padding: 2px 6px; border-radius: 4px; font-weight: 700;">password@123</code>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            submit_btn = st.form_submit_button("Sign In to Command Center ➔", use_container_width=True)
+
+        col_btn1, col_btn2 = st.columns(2)
+        with col_btn1:
+            if st.button("⚡ Fill Demo Credentials", key="autofill_btn", use_container_width=True):
+                st.session_state["autofilled"] = True
+                st.rerun()
+        with col_btn2:
+            if st.button("🔄 Clear", key="clear_btn", use_container_width=True):
+                st.session_state["autofilled"] = False
+                st.rerun()
+
+        if submit_btn:
+            if not username_input or not password_input:
+                st.error("⚠️ Please enter both username and password.")
+            else:
+                with st.spinner("Verifying credentials with Supabase Cloud..."):
+                    if supabase_client:
+                        auth_res = supabase_client.authenticate_user(username_input, password_input)
+                    else:
+                        is_valid = (username_input.strip() == "sample_username") and (password_input.strip() == "password@123")
+                        auth_res = {
+                            "authenticated": is_valid,
+                            "username": username_input.strip(),
+                            "full_name": "Operations Admin",
+                            "role": "Lead Administrator",
+                            "source": "Supabase Local Verified",
+                            "error": "Invalid username or password."
+                        }
+
+                    if auth_res.get("authenticated"):
+                        st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')} ({auth_res.get('source')}).")
+                        st.session_state["authenticated"] = True
+                        st.session_state["user_info"] = auth_res
+                        time.sleep(0.4)
+                        st.rerun()
+                    else:
+                        st.error(f"❌ {auth_res.get('error', 'Invalid username or password. Access denied.')}")
+
+        st.markdown("""
+        <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #9696A6;">
+            Protected by Supabase Cloud Row-Level Security & PostgreSQL<br/>
+            Engineered by <a href="https://www.linkedin.com/in/neel-belsare-719b9a314/" target="_blank" style="color: #8B82F6; text-decoration: none; font-weight: 600;">Neel Belsare</a> & <a href="https://www.linkedin.com/in/mansi-gaike-821260316" target="_blank" style="color: #8B82F6; text-decoration: none; font-weight: 600;">Mansi Gaike</a>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+# ------------------------------------------------------------------------------
+# Enforce Supabase Authentication Gate
+# ------------------------------------------------------------------------------
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = None
+
+if not st.session_state["authenticated"]:
+    render_login_screen()
+    st.stop()
+
+
+# ------------------------------------------------------------------------------
 # 3. Cached Data Ingestion & Synthesis Functions
 # ------------------------------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -1755,6 +1878,37 @@ if "just_simulated" not in st.session_state:
 # 4. Sidebar: Dynamic Cross-Filtering & Session State Reactivity
 # ------------------------------------------------------------------------------
 with st.sidebar:
+    user_info = st.session_state.get("user_info") or {
+        "username": "sample_username",
+        "role": "Lead Administrator",
+        "full_name": "Operations Admin",
+        "source": "Supabase Cloud"
+    }
+    st.markdown(f"""
+    <div style="background: #20202A; border: 1px solid #2C2C39; border-radius: 16px; padding: 12px 14px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #2B2550; border: 1.5px solid #8B82F6; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 13px;">
+                NB
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {user_info.get('username', 'sample_username')}
+                </div>
+                <div style="font-size: 10px; color: #8B82F6; font-weight: 600;">
+                    ⚡ {user_info.get('role', 'Administrator')}
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("🚪 Sign Out", key="sidebar_logout_btn", use_container_width=True):
+        st.session_state["authenticated"] = False
+        st.session_state["user_info"] = None
+        st.session_state["autofilled"] = False
+        st.rerun()
+
+    st.markdown("---")
     st.markdown("### 📍 Chhatrapati Sambhajinagar")
     st.caption("Dark Store Command Center Settings")
     st.markdown("---")

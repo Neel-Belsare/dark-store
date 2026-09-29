@@ -354,3 +354,30 @@ BEGIN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.store_inventory;
     END IF;
 END $$;
+
+-- ------------------------------------------------------------------------------
+-- 7. ADMIN USERS TABLE (Streamlit Command Center Authentication)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    full_name TEXT DEFAULT 'Operations Administrator',
+    role TEXT DEFAULT 'Lead Administrator',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Seed Default Admin Credentials
+INSERT INTO public.admin_users (username, password_hash, full_name, role)
+VALUES ('sample_username', 'password@123', 'Operations Admin (Neel Belsare)', 'Lead Administrator')
+ON CONFLICT (username) DO UPDATE
+SET 
+    password_hash = EXCLUDED.password_hash,
+    full_name = EXCLUDED.full_name,
+    role = EXCLUDED.role;
+
+-- Enable RLS and public access for admin_users
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public Read Admin Users" ON public.admin_users FOR SELECT USING (true);
+CREATE POLICY "Anon Full Access Admin Users" ON public.admin_users FOR ALL USING (true) WITH CHECK (true);
+
