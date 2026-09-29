@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,17 +6,39 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
+  Alert,
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import { getApiBaseUrl } from '../config/apiConfig';
+import { supabase } from '../supabaseClient';
 
 export const ProfileScreen: React.FC = () => {
   const { address, location } = useCurrentLocation();
   const apiBase = getApiBaseUrl();
+  const [userEmail, setUserEmail] = useState<string>('User');
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    });
+  }, []);
 
   const handleOpenStreamlit = () => {
     Linking.openURL('https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app');
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        Alert.alert('Logout Failed', error.message);
+      }
+    } catch (err: any) {
+      console.error('Logout error:', err.message);
+    }
   };
 
   return (
@@ -24,11 +46,13 @@ export const ProfileScreen: React.FC = () => {
       {/* User Header Card */}
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>NB</Text>
+          <Text style={styles.avatarText}>
+            {userEmail.substring(0, 2).toUpperCase()}
+          </Text>
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.userName}>Neel Belsare</Text>
-          <Text style={styles.userPhone}>+91 98765 43210</Text>
+          <Text style={styles.userName} numberOfLines={1}>{userEmail}</Text>
+          <Text style={styles.userPhone}>Quick Commerce Customer</Text>
           <View style={styles.membershipPill}>
             <Text style={styles.membershipText}>⚡ BLINKIT VIP • FREE DELIVERY</Text>
           </View>
@@ -90,10 +114,18 @@ export const ProfileScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      {/* Account Actions / Logout */}
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Account Actions</Text>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.85}>
+          <Text style={styles.logoutBtnText}>🚪 Log Out</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* App Version Info */}
       <View style={styles.footerNote}>
         <Text style={styles.footerText}>Blinkit Dark Store Mobile • v3.0 Production</Text>
-        <Text style={styles.footerSub}>Architected by Neel Belsare • Chhatrapati Sambhajinagar</Text>
+        <Text style={styles.footerSub}>Architected for Chhatrapati Sambhajinagar</Text>
       </View>
     </ScrollView>
   );
@@ -135,14 +167,14 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: '#FFF',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '900',
   },
   profileInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '900',
     color: COLORS.textPrimary,
   },
@@ -265,6 +297,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     color: COLORS.accentIndigo,
+  },
+  logoutBtn: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+  },
+  logoutBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#DC2626',
   },
   footerNote: {
     alignItems: 'center',
