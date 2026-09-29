@@ -822,28 +822,136 @@ footer {
 }
 
 .stApp {
-    background-color: #F4F5F9 !important;
+    background-color: #0f0c20 !important;
     background-image: none !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+}
+
+.stAppViewContainer,
+section[data-testid="stMain"],
+.main,
+.block-container {
+    background: transparent !important;
 }
 
 .stMainBlockContainer {
-    max-width: 980px !important;
-    padding: 6vh 1.5rem !important;
+    max-width: 1040px !important;
+    padding: 5vh 1.5rem !important;
     margin: 0 auto !important;
+    position: relative !important;
+    z-index: 10 !important;
+    background: transparent !important;
+}
+
+/* Zero out empty wrapper containers for the background mesh */
+div[data-testid="stElementContainer"]:has(.live-bg-container) {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+}
+
+/* Live Animated Mesh Background Spheres */
+.live-bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #0f0c20;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.live-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(85px);
+    opacity: 0.75;
+    mix-blend-mode: screen;
+    will-change: transform;
+}
+
+.orb-1 {
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, #7928ca 0%, rgba(121, 40, 202, 0) 70%);
+    top: -100px;
+    left: -100px;
+    animation: floatOrb1 18s ease-in-out infinite alternate;
+}
+
+.orb-2 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #2563eb 0%, rgba(37, 99, 235, 0) 70%);
+    bottom: -150px;
+    right: -100px;
+    animation: floatOrb2 22s ease-in-out infinite alternate;
+}
+
+.orb-3 {
+    width: 440px;
+    height: 440px;
+    background: radial-gradient(circle, #f7d435 0%, rgba(247, 212, 53, 0) 70%);
+    opacity: 0.45;
+    top: 35%;
+    left: 45%;
+    animation: floatOrb3 15s ease-in-out infinite alternate;
+}
+
+.orb-4 {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, #ec4899 0%, rgba(236, 72, 153, 0) 70%);
+    bottom: 15%;
+    left: 5%;
+    animation: floatOrb4 20s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb1 {
+    0% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(140px, 90px) scale(1.15); }
+    100% { transform: translate(60px, 200px) scale(0.95); }
+}
+
+@keyframes floatOrb2 {
+    0% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(-120px, -110px) scale(1.1); }
+    100% { transform: translate(-60px, -180px) scale(0.9); }
+}
+
+@keyframes floatOrb3 {
+    0% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(-100px, 120px) scale(1.25); }
+    100% { transform: translate(110px, -90px) scale(0.85); }
+}
+
+@keyframes floatOrb4 {
+    0% { transform: translate(0px, 0px) scale(0.9); }
+    50% { transform: translate(130px, -100px) scale(1.15); }
+    100% { transform: translate(70px, 70px) scale(1); }
 }
 
 /* 2. Login Card Outer Container: Scoped exclusively to authentication container */
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"],
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) {
-    background: #FFFFFF !important;
-    border-radius: 26px !important;
-    box-shadow: 0 25px 60px -15px rgba(27, 10, 66, 0.18), 0 0 1px 1px rgba(0, 0, 0, 0.05) !important;
+    width: 100% !important;
+    max-width: 1020px !important;
+    min-height: 580px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 30px 70px -15px rgba(28, 10, 60, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
     overflow: hidden !important;
-    border: none !important;
     display: flex !important;
     align-items: stretch !important;
     gap: 0 !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 0 !important;
 }
 
@@ -852,8 +960,8 @@ footer {
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:first-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:first-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:first-child {
-    background: linear-gradient(152deg, #3C1685 0%, #2E1066 48%, #1B0743 100%) !important;
-    border-radius: 26px 0 0 26px !important;
+    background: linear-gradient(155deg, #2E0854 0%, #4E2298 50%, #1E40AF 100%) !important;
+    border-radius: 24px 0 0 24px !important;
     position: relative !important;
     overflow: hidden !important;
     padding: 0 !important;
@@ -885,13 +993,24 @@ footer {
 .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="column"]:last-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div[data-testid="stColumn"]:last-child {
-    background: #FFFFFF !important;
-    border-radius: 0 26px 26px 0 !important;
-    padding: 40px 48px 34px 48px !important;
+    background: transparent !important;
+    border-radius: 0 24px 24px 0 !important;
+    padding: 36px 36px 30px 36px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    flex: 1.15 1 0% !important;
+    align-items: center !important;
+    flex: 1.22 1 0% !important;
+}
+
+/* Right Inner Form Content Centering */
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:last-child > div,
+.st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:last-child [data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:last-child > div,
+[data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:last-child [data-testid="stVerticalBlock"] {
+    max-width: 380px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
 }
 
 /* 5. Streamlit Form Overrides */
@@ -903,51 +1022,52 @@ div[data-testid="stForm"] {
 
 /* Input Labels */
 div[data-testid="stTextInput"] label {
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
     color: #374151 !important;
-    margin-bottom: 5px !important;
+    margin-bottom: 6px !important;
     letter-spacing: -0.01em !important;
 }
 
 /* Input Fields */
 div[data-testid="stTextInput"] input {
-    background-color: #F9FAFB !important;
-    border: 1px solid #E5E7EB !important;
-    border-radius: 10px !important;
-    height: 44px !important;
+    background-color: #F3F4F6 !important;
+    border: 1.5px solid transparent !important;
+    border-radius: 12px !important;
+    height: 46px !important;
     font-size: 14px !important;
     color: #1F2937 !important;
-    padding: 0 14px !important;
+    padding: 12px 16px !important;
     box-shadow: none !important;
     transition: all 0.2s ease !important;
 }
 
 div[data-testid="stTextInput"] input:focus {
-    border-color: #3C1685 !important;
+    border-color: #4E2298 !important;
     background-color: #FFFFFF !important;
-    box-shadow: 0 0 0 3px rgba(60, 22, 133, 0.12) !important;
+    box-shadow: 0 0 0 3px rgba(78, 34, 152, 0.12) !important;
 }
 
 /* Sign In Button */
 div[data-testid="stFormSubmitButton"] button {
-    background: #2D1460 !important;
+    background: #4E2298 !important;
     color: #FFFFFF !important;
     border: none !important;
-    border-radius: 10px !important;
-    height: 46px !important;
-    font-size: 14.5px !important;
+    border-radius: 12px !important;
+    height: 48px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
     font-family: inherit !important;
-    box-shadow: 0 4px 14px rgba(45, 20, 96, 0.25) !important;
+    box-shadow: 0 4px 14px rgba(78, 34, 152, 0.3) !important;
     transition: all 0.2s ease !important;
     width: 100% !important;
     margin-top: 6px !important;
+    cursor: pointer !important;
 }
 
 div[data-testid="stFormSubmitButton"] button:hover {
-    background: #3B1B7D !important;
-    box-shadow: 0 6px 18px rgba(45, 20, 96, 0.35) !important;
+    background: #5B2BB5 !important;
+    box-shadow: 0 6px 18px rgba(78, 34, 152, 0.4) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -965,18 +1085,18 @@ div[data-testid="stFormSubmitButton"] button:active {
 .social-auth-card {
     height: 44px;
     background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 10px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
-    font-size: 13.5px;
-    font-weight: 600;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
     color: #374151;
     cursor: pointer;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
 }
 .social-auth-card:hover {
     background: #F9FAFB;
@@ -995,113 +1115,119 @@ div[data-testid="stFormSubmitButton"] button:active {
     }
     .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:first-child,
     [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:first-child {
-        border-radius: 26px 26px 0 0 !important;
+        border-radius: 24px 24px 0 0 !important;
         padding: 0 !important;
     }
     .st-key-inventory_login_auth_box [data-testid="stHorizontalBlock"] > div:last-child,
     [data-testid="stHorizontalBlock"]:has([data-testid="stForm"]) > div:last-child {
-        border-radius: 0 0 26px 26px !important;
+        border-radius: 0 0 24px 24px !important;
         padding: 30px 22px !important;
     }
 }
 </style>"""
 
-LOGIN_HERO_HTML = """<div style="height: 100%; min-height: 500px; padding: 44px 38px 36px 38px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF;">
-<div style="position: absolute; top: -50px; right: -60px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(147, 51, 234, 0) 70%); pointer-events: none; z-index: 1;"></div>
-<div style="position: absolute; bottom: 20px; left: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(45, 212, 191, 0.22) 0%, rgba(45, 212, 191, 0) 70%); pointer-events: none; z-index: 1;"></div>
-<div style="position: absolute; top: 220px; right: 30px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, rgba(124, 58, 237, 0) 70%); pointer-events: none; z-index: 1;"></div>
+LOGIN_BG_MESH_HTML = """<div class="live-bg-container">
+<div class="live-orb orb-1"></div>
+<div class="live-orb orb-2"></div>
+<div class="live-orb orb-3"></div>
+<div class="live-orb orb-4"></div>
+</div>"""
 
-<div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 12px;">
-<div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); border: 1.2px solid rgba(255, 255, 255, 0.22); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-<polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-<line x1="12" y1="22.08" x2="12" y2="12"/>
+LOGIN_HERO_HTML = """<div style="height: 100%; min-height: 520px; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF;">
+<div>
+<div style="display: flex; align-items: center; gap: 10px;">
+<div style="width: 38px; height: 38px; background-color: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+<svg style="width: 22px; height: 22px; color: #ffffff;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
 </svg>
 </div>
-<span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; color: #FFFFFF;">
+<span style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: #ffffff;">
 InventoryPro
 </span>
 </div>
 
-<div style="position: relative; z-index: 2; margin: 40px 0 32px 0;">
-<h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; line-height: 1.2; letter-spacing: -0.025em; margin-bottom: 16px; color: #FFFFFF;">
-Smart Inventory<br>
-Management<br>
-<span style="color: #2ED4E5;">Made Simple</span>
+<div style="margin-top: 56px;">
+<h1 style="font-size: 32px; font-weight: 800; line-height: 1.2; margin: 0 0 16px 0; color: #ffffff;">
+Smart Quick-Commerce <br>Delivery <br>
+<span style="color: #56B4E9;">Made Fast</span>
 </h1>
-<p style="font-size: 13.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.74); margin: 0; max-width: 320px; font-weight: 400;">
-Track, analyze, and optimize your inventory with real-time insights and powerful analytics.
+<p style="color: rgba(255, 255, 255, 0.85); font-size: 14px; line-height: 1.6; margin: 0; max-width: 320px;">
+Access local dark stores, browse catalogue items, and process orders in real time.
 </p>
 </div>
+</div>
 
-<div style="position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, 0.14);">
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
 <div>
-<div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; color: #FFFFFF; letter-spacing: -0.01em;">500+</div>
-<div style="font-size: 11px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); margin-top: 4px; font-weight: 400;">Companies<br>Trust Us</div>
+<div style="font-size: 20px; font-weight: 700; color: #ffffff;">10 Min</div>
+<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Delivery Goal</div>
 </div>
 <div>
-<div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; color: #FFFFFF; letter-spacing: -0.01em;">10K+</div>
-<div style="font-size: 11px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); margin-top: 4px; font-weight: 400;">Products<br>Tracked</div>
+<div style="font-size: 20px; font-weight: 700; color: #ffffff;">100%</div>
+<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Live Tracking</div>
 </div>
 <div>
-<div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.1; color: #FFFFFF; letter-spacing: -0.01em;">99.9%</div>
-<div style="font-size: 11px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); margin-top: 4px; font-weight: 400;">Uptime<br>Guarantee</div>
+<div style="font-size: 20px; font-weight: 700; color: #ffffff;">99.9%</div>
+<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Uptime</div>
 </div>
 </div>
 </div>"""
 
-LOGIN_FORM_HEADER_HTML = """<div style="margin-bottom: 20px;">
-<h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 27px; font-weight: 800; letter-spacing: -0.025em; color: #111827; margin: 0 0 6px 0;">
+LOGIN_FORM_HEADER_HTML = """<div style="margin-bottom: 24px; text-align: center;">
+<h2 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0 0 8px 0;">
 Welcome Back
 </h2>
-<p style="font-size: 13.5px; color: #6B7280; margin: 0; font-weight: 400;">
-Login to access your inventory dashboard
+<p style="color: #6B7280; font-size: 14px; margin: 0;">
+Sign in to access your store dashboard
 </p>
 </div>"""
 
-LOGIN_SOCIAL_DIVIDER_HTML = """<div style="display: flex; align-items: center; margin: 20px 0 16px 0; color: #9CA3AF; font-size: 12px; font-weight: 500;">
-<div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
-<span style="padding: 0 14px;">Or continue with</span>
-<div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
+LOGIN_SOCIAL_DIVIDER_HTML = """<div style="margin-top: 20px;">
+<div style="position: relative; text-align: center; margin-bottom: 16px;">
+<div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background-color: #E5E7EB;"></div>
+<span style="position: relative; background-color: #ffffff; padding: 0 12px; font-size: 13px; color: #9CA3AF;">
+Or continue with
+</span>
 </div>
 
 <div class="social-auth-grid">
 <div class="social-auth-card">
-<svg width="18" height="18" viewBox="0 0 24 24">
-<path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
-<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.39 7.33 24 12 24Z"/>
-<path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
-<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.61 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+<svg style="width: 18px; height: 18px;" viewBox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
 </svg>
 <span>Google</span>
 </div>
 <div class="social-auth-card">
-<svg width="17" height="17" viewBox="0 0 170 170" fill="#111827">
-<path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.7-7.85-12.03-14.31-6.19-9.25-11.04-19.68-14.55-31.29-3.51-11.61-5.26-22.75-5.26-33.42 0-14.42 3.6-26.44 10.8-36.05 7.2-9.61 16.29-14.51 27.27-14.7 4.58 0 9.87 1.25 15.86 3.76 5.99 2.5 10.02 3.82 12.09 3.94 1.8 0 6.01-1.38 12.63-4.14 6.62-2.76 12.28-4.01 16.98-3.76 12.77.64 22.82 5.34 30.15 14.1-11.13 6.74-16.57 15.95-16.32 27.63.25 9.17 3.8 16.89 10.66 23.16 6.86 6.26 14.99 9.82 24.39 10.67-2.13 6.61-4.75 13.56-7.86 20.85zM119.22 31.84c0-7.39 2.65-14.19 7.96-20.4 5.31-6.21 11.89-10.15 19.74-11.82.85 7.52-1.39 14.37-6.72 20.55-5.33 6.18-12.33 9.94-20.98 11.67z"/>
+<svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="currentColor">
+<path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
 </svg>
 <span>Apple</span>
 </div>
 </div>
 
-<div style="text-align: center; font-size: 13px; color: #6B7280; margin-bottom: 14px;">
-Don't have an account? <a href="#" style="color: #431A8B; font-weight: 700; text-decoration: none;">Sign Up</a>
-</div>
+<p style="margin-top: 20px; text-align: center; font-size: 13px; color: #6B7280;">
+Don't have an account? <a href="#" style="color: #4E2298; font-weight: 600; text-decoration: none;">Sign Up</a>
+</p>
 
-<div style="text-align: center; padding: 8px 12px; background: #F8F7FF; border: 1px dashed #D0C9FF; border-radius: 8px; font-size: 11px; color: #5B527E;">
-⚡ <b>Demo Account:</b> <code style="background: #EBE7FF; color: #2D1460; padding: 2px 5px; border-radius: 4px; font-weight: 700;">sample_username</code> / <code style="background: #EBE7FF; color: #2D1460; padding: 2px 5px; border-radius: 4px; font-weight: 700;">password@123</code>
+<div style="text-align: center; padding: 8px 12px; background: rgba(78, 34, 152, 0.05); border: 1px dashed rgba(78, 34, 152, 0.25); border-radius: 8px; font-size: 11px; color: #4E2298; margin-top: 10px;">
+⚡ <b>Demo Credentials:</b> <code style="background: rgba(78, 34, 152, 0.1); color: #4E2298; padding: 2px 6px; border-radius: 4px; font-weight: 700;">sample_username</code> / <code style="background: rgba(78, 34, 152, 0.1); color: #4E2298; padding: 2px 6px; border-radius: 4px; font-weight: 700;">password@123</code>
+</div>
 </div>"""
 
 def render_login_screen():
     """
     Renders the modern InventoryPro split-card login interface matching the
-    exact UI/UX specification: Deep purple bokeh hero panel on the left and clean,
-    minimalist authentication portal on the right, backed by Supabase Cloud.
+    exact UI/UX specification: Animated glowing mesh orbs on #0f0c20 canvas,
+    frosted glass container, deep violet hero panel, and minimalist auth form.
     """
     st.markdown(LOGIN_CSS, unsafe_allow_html=True)
+    st.markdown(LOGIN_BG_MESH_HTML, unsafe_allow_html=True)
 
     with st.container(key="inventory_login_auth_box"):
-        col_left, col_right = st.columns([1, 1.15], gap=0)
+        col_left, col_right = st.columns([1, 1.22], gap=0)
 
         # ----------------------------------------------------------------------
         # Left Hero Panel: InventoryPro Branding & Statistics
@@ -1130,13 +1256,13 @@ def render_login_screen():
                     key="login_password_input"
                 )
 
-                # Clean inline Remember Me & Forgot Password without nested columns
-                st.markdown("""<div style="display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px 0;">
+                # Inline Remember Me & Forgot Password
+                st.markdown("""<div style="display: flex; align-items: center; justify-content: space-between; margin: 6px 0 16px 0;">
 <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4B5563; cursor: pointer; user-select: none;">
-<input type="checkbox" checked style="accent-color: #3C1685; width: 16px; height: 16px; cursor: pointer;">
+<input type="checkbox" checked style="accent-color: #4E2298; width: 16px; height: 16px; cursor: pointer;">
 <span>Remember me</span>
 </label>
-<a href="mailto:admin@inventorypro.com?subject=Password%20Reset" style="font-size: 12.5px; font-weight: 600; color: #431A8B; text-decoration: none;">Forgot password?</a>
+<a href="mailto:admin@inventorypro.com?subject=Password%20Reset" style="font-size: 13px; font-weight: 500; color: #4E2298; text-decoration: none;">Forgot password?</a>
 </div>""", unsafe_allow_html=True)
 
                 submit_btn = st.form_submit_button("Sign In", use_container_width=True)
