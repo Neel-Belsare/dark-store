@@ -70,41 +70,10 @@ It connects four synchronized tiers:
 3. **Cloud Database & Realtime Layer (Supabase PostgreSQL)**: A cloud database providing persistent storage for `stores`, `riders`, `users`, `orders`, `order_items`, and `store_inventory` with native PostGIS geospatial support, Row Level Security, and Realtime WebSocket event broadcasting.
 4. **Analytics & Command Center (`app.py`)**: A modern **Streamlit** dashboard featuring 3D PyDeck telemetry (flight arcs, concentric pulse rings, moving riders), Leaflet vector GeoJSON delivery zones, ML demand forecasting, climate friction simulations, unit economics, and Smart Inventory Management.
 
-```
-┌──────────────────────────────────────────────┐       ┌──────────────────────────────────────────────┐
-│   📱 Mobile App (React Native Expo)          │       │   🖥️ Streamlit Command Center (app.py)       │
-│   - useCurrentLocation (GPS Lock via expo)   │       │   - 3D PyDeck ArcLayer Vector Flight Path    │
-│   - CheckoutScreen (Blinkit UI, Cart, Bill)  │       │   - Real-World GeoJSON Service Polygons      │
-│   - RiderScreen (Courier Partner Stepper)    │       │   - Tab 7: Smart Inventory & Stockouts       │
-│   - RealDeliveryMap (OSRM Road Navigation)   │       │   - In-Transit Rider Marker & Telemetry      │
-│   - Direct Supabase REST Cloud Sync          │       │   - Real-Time Supabase Order Stream & Reset  │
-└──────────────────────┬───────────────────────┘       └──────────────────────┬───────────────────────┘
-                       │                                                      │
-             Order Dispatch / Sync                                  Active Order Fetch / Reset
-                       │                                                      │
-                       ▼                                                      ▼
-       ┌──────────────────────────────────────────────────────────────────────────────┐
-       │                 ⚡ Supabase Cloud Database (PostgreSQL + Realtime)           │
-       │   - stores: 12 Pre-seeded Aurangabad fulfillment hubs & coordinates          │
-       │   - riders: 12 Couriers with live GPS telemetry, vehicles & ratings          │
-       │   - store_inventory: SKU stock tracking, thresholds & inter-hub sync         │
-       │   - users: Registered consumers, addresses & loyalty tiers                   │
-       │   - orders & order_items: Single-active dispatch pipeline & line items       │
-       │   - supabase_realtime: Instant WebSocket event broadcast                     │
-       └──────────────────────────────────────▲───────────────────────────────────────┘
-                                              │
-                                    Telemetry & State Sync
-                                              │
-                       ┌──────────────────────┴───────────────────────┐
-                       │   ⚡ FastAPI Dispatch Bridge (api.py)        │
-                       │   - Haversine Nearest Dark Store Routing     │
-                       │   - ETA, SLA & Rider Assignment Engine       │
-                       │   - Serpentine S-Shape Warehouse Pick Path   │
-                       │   - Smart Inventory Auto-Decrement Engine    │
-                       │   - Multi-Order Courier Route Batching       │
-                       │   - Atomic Cloud Sync + Local Fallback       │
-                       └──────────────────────────────────────────────┘
-```
+<div align="center">
+  <img src="docs/screenshots/architecture_flowchart.png" alt="Quick-Commerce End-to-End System Architecture Flowchart" width="100%" style="border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);" />
+  <p><em>Figure 0: End-to-end synchronized 4-tier production architecture spanning mobile client, edge dispatch engine, Supabase cloud database, and Streamlit command center.</em></p>
+</div>
 
 ---
 
@@ -131,6 +100,7 @@ Below is the complete file and folder breakdown of the repository:
 │
 ├── 📂 docs/
 │   └── 📂 screenshots/                   # High-resolution application screenshots and visual assets
+│       ├── 📄 architecture_flowchart.png            # End-to-end 4-tier system architecture diagram
 │       ├── 📄 01_mobile_app_live_dispatch.png       # Mobile app live order celebration & road route
 │       ├── 📄 02_command_center_telemetry.png       # 3D PyDeck spatial telemetry visualizer
 │       ├── 📄 03_command_center_kpis_filters.png    # Dynamic cross-filters and macro KPIs
