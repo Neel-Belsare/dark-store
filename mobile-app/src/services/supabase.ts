@@ -5,12 +5,14 @@
  * to Supabase PostgreSQL without heavy dependencies.
  */
 
+const env = (typeof process !== 'undefined' && process.env) ? (process.env as Record<string, string | undefined>) : {};
+
 const SUPABASE_URL =
-  process.env.EXPO_PUBLIC_SUPABASE_URL ||
+  env.EXPO_PUBLIC_SUPABASE_URL ||
   'https://wovfqutzuppauwretoiw.supabase.co';
 
 const SUPABASE_ANON_KEY =
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+  env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdmZxdXR6dXBwYXV3cmV0b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MDk4OTIsImV4cCI6MjEwNjE4NTg5Mn0.djjjD0bnzwUo3ArsVKrlau43gRkCxPCyvAB1EPZOb7g';
 
 const getHeaders = () => ({

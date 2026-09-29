@@ -38,38 +38,93 @@ st.set_page_config(
 )
 
 # ------------------------------------------------------------------------------
-# 2. UI Styling & Design System Injection (Command Center Theme)
+# 2. UI Styling & Design System Injection (Modern Lavender & Dark Slate Theme)
 # ------------------------------------------------------------------------------
 st.markdown("""
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg: #f4f6fb;
-        --card: #ffffff;
-        --line: #e4e8f1;
-        --tx: #0f172a;
-        --mut: #64748b;
-        --acc: #6366f1;
-        --acc2: #06b6d4;
-        --warn: #f59e0b;
-        --ok: #10b981;
-        --glow: rgba(99, 102, 241, 0.12);
+        --bg: #F4F5F9;
+        --card: #FFFFFF;
+        --card-border: #EAEBF2;
+        --sidebar-bg: #16161D;
+        --sidebar-card: #20202A;
+        --sidebar-border: #2C2C39;
+        --sidebar-text: #FFFFFF;
+        --sidebar-mut: #9696A6;
+        --tx: #14141E;
+        --mut: #6E6E82;
+        --acc: #8B82F6;
+        --acc-hover: #7970E8;
+        --acc-light: #EEEDFE;
+        --dark-btn: #18181F;
+        --dark-btn-hover: #2B2B36;
+        --sand: #EDE6DC;
+        --sand-light: #FBF8F5;
+        --ok: #10B981;
+        --ok-light: #DCFCE7;
+        --warn: #F59E0B;
+        --warn-light: #FEF3C7;
+        --danger: #EF4444;
+        --glow: rgba(139, 130, 246, 0.12);
     }
 
-    /* Global App Background & Typography */
+    /* Global App Canvas & Typography */
     .stApp {
         background-color: var(--bg) !important;
-        background-image: 
-            radial-gradient(900px 400px at 10% -10%, var(--glow), transparent),
-            radial-gradient(700px 400px at 100% 0, rgba(6, 182, 212, 0.12), transparent) !important;
+        background-image: none !important;
         color: var(--tx) !important;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif !important;
     }
 
-    /* Sidebar Styling */
+    /* Dark Matte Sidebar Styling */
     section[data-testid="stSidebar"] {
-        background-color: var(--card) !important;
-        border-right: 1px solid var(--line) !important;
+        background-color: var(--sidebar-bg) !important;
+        border-right: 1px solid var(--sidebar-border) !important;
+    }
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] h4,
+    section[data-testid="stSidebar"] strong,
+    section[data-testid="stSidebar"] b {
+        color: #FFFFFF !important;
+    }
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] small,
+    section[data-testid="stSidebar"] .stMarkdown p {
+        color: var(--sidebar-mut) !important;
+    }
+    section[data-testid="stSidebar"] hr {
+        border-color: var(--sidebar-border) !important;
+        opacity: 0.6;
+    }
+    section[data-testid="stSidebar"] a {
+        color: var(--acc) !important;
+        text-decoration: none;
+    }
+    section[data-testid="stSidebar"] a:hover {
+        text-decoration: underline;
+    }
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        background-color: var(--sidebar-card) !important;
+        color: #FFFFFF !important;
+        border: 1px solid var(--sidebar-border) !important;
+        border-radius: 12px !important;
+    }
+    section[data-testid="stSidebar"] div[data-baseweb="tag"] {
+        background-color: #2D2C42 !important;
+        color: #D3CFFE !important;
+        border-radius: 8px !important;
+    }
+    section[data-testid="stSidebar"] div[data-baseweb="tag"] span {
+        color: #D3CFFE !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stSlider"] [role="slider"] {
+        background-color: var(--acc) !important;
+        border-color: var(--acc) !important;
     }
 
     /* Preserve Material Symbols Ligatures for Streamlit Collapse Arrow & Icons */
@@ -89,79 +144,387 @@ st.markdown("""
         direction: ltr;
     }
 
-    /* Header & Live Network Indicator */
-    .header-box {
+    /* Top Tablet Dashboard Header */
+    .top-header-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 16px;
+        gap: 18px;
         flex-wrap: wrap;
-        margin-bottom: 24px;
-        padding-top: 4px;
+        margin-bottom: 22px;
+        padding-top: 6px;
     }
-    .header-box h1 {
-        font-size: 28px;
+    .top-header-bar .title-block h1 {
+        font-size: 30px;
         margin: 0;
         font-weight: 800;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
         color: var(--tx);
-        line-height: 1.2;
+        line-height: 1.15;
     }
-    .header-box h1 span {
-        background: linear-gradient(90deg, var(--acc), var(--acc2));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        display: inline-block;
-    }
-    .header-box .sub {
+    .top-header-bar .title-block p {
         color: var(--mut);
         font-size: 14px;
-        margin: 6px 0 0;
+        margin: 4px 0 0;
         font-weight: 400;
     }
-    .live {
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .action-pill-search {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 12px;
-        color: var(--ok);
-        background: rgba(16, 185, 129, 0.12);
-        padding: 7px 14px;
-        border-radius: 99px;
-        font-weight: 600;
-        letter-spacing: 0.02em;
+        background: #FFFFFF;
+        border: 1px solid var(--card-border);
+        border-radius: 9999px;
+        padding: 8px 16px;
+        font-size: 13px;
+        color: var(--mut);
+        box-shadow: 0 2px 8px rgba(20, 20, 35, 0.02);
     }
-    .live i {
+    .action-pill-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        background: #FFFFFF;
+        border: 1px solid var(--card-border);
+        border-radius: 50%;
+        color: var(--tx);
+        font-size: 15px;
+        cursor: pointer;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(20, 20, 35, 0.02);
+    }
+    .action-pill-btn .notif-badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
         width: 8px;
         height: 8px;
         border-radius: 50%;
         background: var(--ok);
-        box-shadow: 0 0 0 0 var(--ok);
+        border: 2px solid #FFFFFF;
+    }
+    .action-pill-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #FFFFFF;
+        border: 1px solid var(--card-border);
+        border-radius: 9999px;
+        padding: 5px 14px 5px 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--tx);
+        box-shadow: 0 2px 8px rgba(20, 20, 35, 0.02);
+    }
+    .action-pill-user .avatar-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--acc), #6E68B8);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .live-badge-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #065F46;
+        background: #DCFCE7;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+    .live-badge-pill i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 0 0 #10B981;
         animation: pulse-dot 1.8s infinite;
     }
     @keyframes pulse-dot {
-        70% { box-shadow: 0 0 0 8px transparent; }
+        70% { box-shadow: 0 0 0 6px transparent; }
     }
 
-    /* KPI Metrics Cards Grid */
+    /* 4 Distinctive Signature KPI Metric Cards */
+    .kpis-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin: 12px 0 26px 0;
+    }
+    @media (max-width: 1100px) {
+        .kpis-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+        .kpis-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Card 1: Dark Slate Card */
+    .metric-card-dark {
+        background: #1C1C24;
+        border-radius: 22px;
+        padding: 20px 22px;
+        color: #FFFFFF;
+        box-shadow: 0 6px 24px rgba(24, 24, 31, 0.12);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+    .metric-card-dark .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .metric-card-dark .metric-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9494A4;
+    }
+    .badge-trend-dark {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34D399;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 9px;
+        border-radius: 9999px;
+    }
+    .metric-card-dark .metric-val {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin: 10px 0 2px;
+        color: #FFFFFF;
+        line-height: 1.1;
+    }
+    .metric-card-dark .metric-sub {
+        font-size: 12px;
+        color: #9494A4;
+    }
+    .metric-progress-segmented {
+        height: 7px;
+        border-radius: 9999px;
+        background: #2C2C3A;
+        display: flex;
+        overflow: hidden;
+        margin-top: 14px;
+    }
+    .metric-progress-segmented .seg-1 {
+        width: 72%;
+        background: #10B981;
+    }
+    .metric-progress-segmented .seg-2 {
+        width: 28%;
+        background: repeating-linear-gradient(45deg, #444458, #444458 4px, #2C2C3A 4px, #2C2C3A 8px);
+    }
+
+    /* Card 2: Lavender/Periwinkle Gradient Card */
+    .metric-card-gradient {
+        background: linear-gradient(135deg, #4A4674 0%, #6E68B8 50%, #9D95E8 100%);
+        border-radius: 22px;
+        padding: 20px 22px;
+        color: #FFFFFF;
+        box-shadow: 0 6px 24px rgba(110, 104, 184, 0.22);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+    .metric-card-gradient .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .metric-card-gradient .metric-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    .badge-trend-gradient {
+        background: rgba(255, 255, 255, 0.2);
+        color: #FFFFFF;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 9px;
+        border-radius: 9999px;
+        backdrop-filter: blur(4px);
+    }
+    .metric-card-gradient .metric-val {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin: 10px 0 2px;
+        color: #FFFFFF;
+        line-height: 1.1;
+    }
+    .metric-card-gradient .metric-sub {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.85);
+    }
+    .sparkline-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 18px;
+        margin-top: 10px;
+    }
+    .sparkline-bars span {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 2px;
+    }
+    .sparkline-bars span:hover, .sparkline-bars span.active {
+        background: #FFFFFF;
+    }
+
+    /* Card 3: Warm Champagne Sand Card */
+    .metric-card-sand {
+        background: linear-gradient(180deg, #FBF8F5 0%, #EDE6DC 100%);
+        border: 1px solid #E6DED4;
+        border-radius: 22px;
+        padding: 20px 22px;
+        color: #1A1A22;
+        box-shadow: 0 4px 20px rgba(70, 50, 20, 0.04);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+    .metric-card-sand .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .metric-card-sand .metric-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #7A7266;
+    }
+    .badge-trend-sand {
+        background: rgba(28, 28, 36, 0.08);
+        color: #1C1C24;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 9px;
+        border-radius: 9999px;
+    }
+    .metric-card-sand .metric-val {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin: 10px 0 2px;
+        color: #1A1A22;
+        line-height: 1.1;
+    }
+    .metric-card-sand .metric-sub {
+        font-size: 12px;
+        color: #7A7266;
+    }
+    .wave-svg-container {
+        margin-top: 8px;
+        line-height: 0;
+    }
+
+    /* Card 4: White Card with Lavender Accent */
+    .metric-card-white {
+        background: #FFFFFF;
+        border: 1px solid var(--card-border);
+        border-top: 4px solid var(--acc);
+        border-radius: 22px;
+        padding: 20px 22px;
+        color: #181820;
+        box-shadow: 0 4px 20px rgba(20, 20, 35, 0.03);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+    .metric-card-white .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .metric-card-white .metric-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--mut);
+    }
+    .badge-pill-live {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: #DCFCE7;
+        color: #065F46;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 9px;
+        border-radius: 9999px;
+    }
+    .badge-pill-live i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10B981;
+    }
+    .metric-card-white .metric-val {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin: 10px 0 2px;
+        color: #181820;
+        line-height: 1.1;
+    }
+    .metric-card-white .metric-sub {
+        font-size: 12px;
+        color: var(--mut);
+    }
+    .metric-linear-bar {
+        height: 6px;
+        border-radius: 9999px;
+        background: #EEEDFE;
+        overflow: hidden;
+        margin-top: 14px;
+    }
+    .metric-linear-bar i {
+        display: block;
+        height: 100%;
+        background: var(--acc);
+        border-radius: 9999px;
+    }
+
+    /* Backwards-compatible .kpis and .card */
     .kpis {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
         gap: 14px;
         margin: 20px 0 28px 0;
-    }
-    .card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        padding: 18px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.08);
     }
     .kpi {
         position: relative;
@@ -174,7 +537,7 @@ st.markdown("""
         top: 0;
         height: 3px;
         width: 100%;
-        background: linear-gradient(90deg, var(--acc), var(--acc2));
+        background: linear-gradient(90deg, var(--acc), #6E68B8);
     }
     .kpi small {
         color: var(--mut);
@@ -200,71 +563,98 @@ st.markdown("""
         color: var(--ok);
     }
 
-    /* Tab Navigation (Command Center Style) */
+    /* Modern Pill Tab Navigation */
     div[data-baseweb="tab-list"] {
         display: flex !important;
-        gap: 6px !important;
+        gap: 8px !important;
         overflow-x: auto !important;
-        background: var(--card) !important;
-        border: 1px solid var(--line) !important;
-        padding: 6px !important;
-        border-radius: 14px !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 4px 0 !important;
         margin-bottom: 24px !important;
     }
     div[data-baseweb="tab-highlight"] {
         display: none !important;
     }
     button[data-baseweb="tab"] {
-        border: 0 !important;
-        background: none !important;
+        border: 1px solid var(--card-border) !important;
+        background: #FFFFFF !important;
         color: var(--mut) !important;
-        font: 600 13px 'Inter', sans-serif !important;
-        padding: 10px 16px !important;
-        border-radius: 10px !important;
+        font: 600 13px 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+        padding: 10px 20px !important;
+        border-radius: 9999px !important;
         white-space: nowrap !important;
         cursor: pointer !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02) !important;
     }
     button[data-baseweb="tab"]:hover {
-        color: var(--acc) !important;
-        background: var(--glow) !important;
+        color: var(--tx) !important;
+        border-color: #D2D2E0 !important;
+        background: #FAF9FD !important;
+        transform: translateY(-1px);
     }
     button[data-baseweb="tab"][aria-selected="true"] {
-        background: linear-gradient(135deg, var(--acc), #8b5cf6) !important;
-        color: #ffffff !important;
-        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25) !important;
+        background: #18181F !important;
+        border-color: #18181F !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 14px rgba(24, 24, 31, 0.2) !important;
     }
 
-    /* Executive Summary Grid & Alert Rows */
-    .grid {
-        display: grid;
-        grid-template-columns: 1.25fr 1fr;
-        gap: 16px;
+    /* Buttons Styling */
+    .stButton button, button[kind="primary"], button[kind="secondary"] {
+        border-radius: 9999px !important;
+        background-color: var(--dark-btn) !important;
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+        border: 1px solid var(--dark-btn) !important;
+        padding: 8px 22px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 8px rgba(24, 24, 31, 0.12) !important;
     }
-    @media (max-width: 860px) {
-        .grid { grid-template-columns: 1fr; }
+    .stButton button:hover, button[kind="primary"]:hover {
+        background-color: var(--dark-btn-hover) !important;
+        border-color: var(--dark-btn-hover) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(24, 24, 31, 0.2) !important;
+    }
+
+    /* General Card Design */
+    .card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 22px;
+        padding: 22px 24px;
+        box-shadow: 0 4px 20px rgba(20, 20, 35, 0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        box-shadow: 0 8px 28px rgba(20, 20, 35, 0.06);
     }
     h2.card-title {
-        font-size: 16px;
+        font-size: 17px;
         margin: 0 0 4px;
         font-weight: 700;
         color: var(--tx);
+        letter-spacing: -0.01em;
     }
     .hint {
         color: var(--mut);
-        font-size: 12.5px;
-        margin: 0 0 14px;
+        font-size: 13px;
+        margin: 0 0 16px;
         font-weight: 400;
     }
     .row {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 12px;
-        border-radius: 12px;
-        border: 1px solid var(--line);
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--card-border);
         margin-bottom: 8px;
-        background: #ffffff;
+        background: #FFFFFF;
+        box-shadow: 0 1px 4px rgba(20, 20, 35, 0.02);
     }
     .row .n {
         flex: 1;
@@ -284,23 +674,23 @@ st.markdown("""
     .bar {
         height: 6px;
         border-radius: 9px;
-        background: var(--line);
+        background: #EAEBF2;
         margin-top: 8px;
         overflow: hidden;
     }
     .bar i {
         display: block;
         height: 100%;
-        background: linear-gradient(90deg, var(--warn), #ef4444);
+        background: linear-gradient(90deg, var(--acc), #6E68B8);
         border-radius: 9px;
     }
     .tag {
         font-size: 11px;
         font-weight: 700;
-        color: var(--warn);
-        background: rgba(245, 158, 11, 0.14);
-        padding: 5px 9px;
-        border-radius: 99px;
+        color: #18181F;
+        background: #EEEDFE;
+        padding: 5px 11px;
+        border-radius: 9999px;
         white-space: nowrap;
     }
 
@@ -344,12 +734,12 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 0.06em;
         text-align: left;
-        padding: 10px;
-        border-bottom: 1px solid var(--line);
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--card-border);
     }
     table.custom-table td {
         padding: 13px 10px;
-        border-bottom: 1px solid var(--line);
+        border-bottom: 1px solid var(--card-border);
         color: var(--tx);
         font-weight: 500;
     }
@@ -362,15 +752,15 @@ st.markdown("""
         width: 26px;
         height: 26px;
         border-radius: 8px;
-        background: var(--glow);
+        background: #EEEDFE;
         color: var(--acc);
         font-weight: 800;
         font-size: 12px;
         margin-right: 10px;
     }
     tr:first-child .rk, table.custom-table tr:first-child td .rk {
-        background: linear-gradient(135deg, #f59e0b, #ef4444);
-        color: #fff;
+        background: #18181F;
+        color: #FFFFFF;
     }
 
     /* Hide Default Footer */
@@ -383,12 +773,12 @@ st.markdown("""
         bottom: 14px;
         z-index: 999999;
         font-size: 13px;
-        font-family: 'Inter', sans-serif;
-        background: var(--card);
-        padding: 8px 16px;
-        border-radius: 99px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        border: 1px solid var(--line);
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        background: #FFFFFF;
+        padding: 8px 18px;
+        border-radius: 9999px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--card-border);
         color: var(--mut);
     }
     .custom-footer a {
@@ -1452,18 +1842,18 @@ with st.sidebar:
             st.session_state["just_simulated"] = False
 
         st.markdown(f"""
-        <div class="card" style="padding: 14px; border-left: 3px solid var(--ok); margin-top: 8px;">
+        <div class="sidebar-order-card" style="padding: 16px; background: #20202A; border: 1px solid #2F2F3E; border-radius: 16px; margin-top: 10px; color: #FFFFFF;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 11px; text-transform: uppercase; color: var(--mut); font-weight: 700;">Active Delivery</span>
-                <span class="live" style="padding: 3px 8px; font-size: 11px;"><i></i>In Transit</span>
+                <span style="font-size: 11px; text-transform: uppercase; color: #9494A0; font-weight: 700;">Active Delivery</span>
+                <span class="live-badge-pill" style="padding: 3px 8px; font-size: 10px;"><i></i>In Transit</span>
             </div>
-            <div style="font-size: 16px; font-weight: 800; color: var(--tx); margin: 6px 0 2px;">Order #{active_ord['order_id']}</div>
-            <div style="font-size: 12px; color: var(--mut); margin-bottom: 6px;">Placed at {active_ord['timestamp']} · ₹{active_ord['order_val']}</div>
-            <div style="font-size: 12.5px; color: var(--tx); margin-bottom: 3px;"><b>Hub:</b> {active_ord['assigned_store']}</div>
-            <div style="font-size: 12.5px; color: var(--tx); margin-bottom: 8px;"><b>Rider:</b> {active_ord['rider']}</div>
-            <div style="display: flex; justify-content: space-between; padding-top: 6px; border-top: 1px solid var(--line); font-size: 12px;">
-                <span>Distance: <b style="color: var(--acc);">{active_ord['distance_km']:.2f} km</b></span>
-                <span>ETA: <b style="color: var(--ok);">{active_ord['eta_mins']} mins</b></span>
+            <div style="font-size: 16px; font-weight: 800; color: #FFFFFF; margin: 8px 0 2px;">Order #{active_ord['order_id']}</div>
+            <div style="font-size: 12px; color: #9494A0; margin-bottom: 8px;">Placed at {active_ord['timestamp']} · ₹{active_ord['order_val']}</div>
+            <div style="font-size: 12.5px; color: #E2E2EA; margin-bottom: 4px;"><b style="color:#FFF;">Hub:</b> {active_ord['assigned_store']}</div>
+            <div style="font-size: 12.5px; color: #E2E2EA; margin-bottom: 10px;"><b style="color:#FFF;">Rider:</b> {active_ord['rider']}</div>
+            <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid #2F2F3E; font-size: 12px;">
+                <span style="color:#9494A0;">Distance: <b style="color: #8B82F6;">{active_ord['distance_km']:.2f} km</b></span>
+                <span style="color:#9494A0;">ETA: <b style="color: #34D399;">{active_ord['eta_mins']} mins</b></span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1503,15 +1893,31 @@ if "prev_filter_state" in st.session_state and st.session_state["prev_filter_sta
 st.session_state["prev_filter_state"] = current_state_key
 
 # ------------------------------------------------------------------------------
-# 6. Main Dashboard Header & KPI Metrics Cards (Command Center Design)
+# 6. Main Dashboard Header & KPI Metrics Cards (Modern Lavender & Slate Design)
 # ------------------------------------------------------------------------------
 st.markdown("""
-<div class="header-box">
-  <div>
-    <h1>🛒 Aurangabad <span>Dark Store Command Center</span></h1>
-    <p class="sub">Feasibility analysis, network coverage and demand forecasting across Chhatrapati Sambhajinagar micro-markets.</p>
+<div class="top-header-bar">
+  <div class="title-block">
+    <h1>Overview</h1>
+    <p>Detailed information about your store & dark store network across Chhatrapati Sambhajinagar</p>
   </div>
-  <div class="live"><i></i>Live network</div>
+  <div class="header-actions">
+    <div class="action-pill-search">
+      <span>🔍</span>
+      <span>Search network, stores, SKUs...</span>
+    </div>
+    <div class="action-pill-btn" title="Live Notifications">
+      <span>🔔</span>
+      <div class="notif-badge"></div>
+    </div>
+    <div class="action-pill-user">
+      <div class="avatar-dot">CS</div>
+      <span>Admin Hub</span>
+    </div>
+    <div class="live-badge-pill">
+      <i></i>Live Network
+    </div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1523,14 +1929,79 @@ total_monthly_orders = int(filtered_df['Predicted Online Order Volume (Monthly)'
 avg_density = int(filtered_df['Population Density (per sq km)'].mean()) if not filtered_df.empty else 0
 est_delivery_sla = round(9.0 + (simulated_radius * 1.4), 1)
 
-# Render Custom HTML KPI Cards with exact user styling
+# Render the 4 distinctive metric cards matching reference image
 kpis_html = f"""
-<section class="kpis">
-  <div class="card kpi"><small>Active stores</small><b>{total_active_stores}</b><em>+{total_proposed_stores} proposed</em></div>
-  <div class="card kpi"><small>Serviceable population</small><b>{total_serviceable_pop:,}</b><em>{len(filtered_df)} micro-markets</em></div>
-  <div class="card kpi"><small>Est. monthly orders</small><b>{total_monthly_orders:,}</b><em>Predicted demand</em></div>
-  <div class="card kpi"><small>Avg delivery buffer</small><b>{simulated_radius:.1f} km</b><em>{avg_density:,}/km² density</em></div>
-  <div class="card kpi"><small>Avg delivery SLA</small><b>{est_delivery_sla:.0f} mins</b><em>Ultra-fast QC</em></div>
+<section class="kpis-grid">
+  <!-- Card 1: Dark Slate Card -->
+  <div class="metric-card-dark">
+    <div class="card-top">
+      <span class="metric-label">Total Reach</span>
+      <span class="badge-trend-dark">↗ 79%</span>
+    </div>
+    <div>
+      <div class="metric-val">{total_serviceable_pop:,}</div>
+      <div class="metric-sub">{len(filtered_df)} micro-markets covered</div>
+    </div>
+    <div class="metric-progress-segmented">
+      <div class="seg-1"></div>
+      <div class="seg-2"></div>
+    </div>
+  </div>
+
+  <!-- Card 2: Lavender Gradient Card -->
+  <div class="metric-card-gradient">
+    <div class="card-top">
+      <span class="metric-label">Predicted Orders</span>
+      <span class="badge-trend-gradient">⚡ Quick-Commerce</span>
+    </div>
+    <div>
+      <div class="metric-val">{total_monthly_orders:,}</div>
+      <div class="metric-sub">Forecasted monthly demand</div>
+    </div>
+    <div class="sparkline-bars">
+      <span style="height: 40%"></span>
+      <span style="height: 65%"></span>
+      <span style="height: 50%"></span>
+      <span style="height: 80%"></span>
+      <span style="height: 70%"></span>
+      <span style="height: 95%" class="active"></span>
+      <span style="height: 85%"></span>
+      <span style="height: 100%"></span>
+    </div>
+  </div>
+
+  <!-- Card 3: Warm Champagne Sand Card -->
+  <div class="metric-card-sand">
+    <div class="card-top">
+      <span class="metric-label">Avg Delivery SLA</span>
+      <span class="badge-trend-sand">↗ 98.4% On-Time</span>
+    </div>
+    <div>
+      <div class="metric-val">{est_delivery_sla:.0f} mins</div>
+      <div class="metric-sub">{simulated_radius:.1f} km buffer · {avg_density:,}/km²</div>
+    </div>
+    <div class="wave-svg-container">
+      <svg width="100%" height="22" viewBox="0 0 160 24" preserveAspectRatio="none">
+        <path d="M0,18 C30,6 60,22 100,10 C130,0 150,14 160,8 L160,24 L0,24 Z" fill="rgba(28,28,36,0.06)"/>
+        <path d="M0,18 C30,6 60,22 100,10 C130,0 150,14 160,8" fill="none" stroke="#1C1C24" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Card 4: White Card with Lavender Accent -->
+  <div class="metric-card-white">
+    <div class="card-top">
+      <span class="metric-label">Fulfillment Hubs</span>
+      <span class="badge-pill-live"><i></i>Active</span>
+    </div>
+    <div>
+      <div class="metric-val">{total_active_stores} <span style="font-size: 20px; font-weight: 500; color: var(--mut);">/ {total_active_stores + total_proposed_stores}</span></div>
+      <div class="metric-sub">+{total_proposed_stores} Proposed expansion nodes</div>
+    </div>
+    <div class="metric-linear-bar">
+      <i style="width: {int((total_active_stores / (total_active_stores + total_proposed_stores)) * 100) if (total_active_stores + total_proposed_stores) > 0 else 50}%;"></i>
+    </div>
+  </div>
 </section>
 """
 st.markdown(kpis_html, unsafe_allow_html=True)
@@ -1605,14 +2076,14 @@ with tab_summary:
           <p class="hint">Active vs. proposed store hubs</p>
           <div class="donutbox">
             <svg width="170" height="170" viewBox="0 0 42 42" role="img" aria-label="Donut: {active_count} active, {proposed_count} proposed">
-              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#f59e0b" stroke-width="5"/>
-              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#6366f1" stroke-width="5" stroke-dasharray="{dash_active} {dash_gap}" stroke-linecap="round" transform="rotate(-90 21 21)"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#E6E0D6" stroke-width="5"/>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#8B82F6" stroke-width="5" stroke-dasharray="{dash_active} {dash_gap}" stroke-linecap="round" transform="rotate(-90 21 21)"/>
               <text x="21" y="22" text-anchor="middle" font-size="8" font-weight="800" style="fill:var(--tx);font-family:Inter,sans-serif">{total_count}</text>
               <text x="21" y="27.5" text-anchor="middle" font-size="3" style="fill:var(--mut);font-family:Inter,sans-serif">total hubs</text>
             </svg>
             <div class="leg">
-              <div><i style="background:#6366f1"></i>Active · {active_count}</div>
-              <div><i style="background:#f59e0b"></i>Proposed · {proposed_count}</div>
+              <div><i style="background:#8B82F6"></i>Active · {active_count}</div>
+              <div><i style="background:#E6E0D6"></i>Proposed · {proposed_count}</div>
             </div>
           </div>
         </div>
@@ -1634,24 +2105,24 @@ with tab_summary:
             x=radius_steps,
             y=sla_steps,
             mode='lines',
-            line=dict(color='#818cf8', width=3),
+            line=dict(color='#8B82F6', width=3),
             fill='tozeroy',
-            fillcolor='rgba(99, 102, 241, 0.12)',
+            fillcolor='rgba(139, 130, 246, 0.12)',
             hoverinfo='x+y',
             name='Delivery SLA'
         ))
         fig_sla.add_vline(
             x=simulated_radius,
             line_dash="dash",
-            line_color="#f59e0b",
+            line_color="#18181F",
             annotation_text=f"Selected: {simulated_radius}km · {est_delivery_sla:.0f} min",
-            annotation_font=dict(color="#f59e0b", size=11, family="Inter")
+            annotation_font=dict(color="#18181F", size=11, family="Inter")
         )
         fig_sla.add_trace(go.Scatter(
             x=[simulated_radius],
             y=[est_delivery_sla],
             mode='markers',
-            marker=dict(size=10, color='#f59e0b'),
+            marker=dict(size=10, color='#18181F'),
             showlegend=False
         ))
         fig_sla.update_layout(
@@ -1660,9 +2131,9 @@ with tab_summary:
             margin=dict(l=10, r=10, t=20, b=25),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(title=dict(text="Radius (km)", font=dict(family="Inter", size=11, color="#64748b")), tickfont=dict(family="Inter", size=10, color="#64748b")),
-            yaxis=dict(title=dict(text="Minutes", font=dict(family="Inter", size=11, color="#64748b")), tickfont=dict(family="Inter", size=10, color="#64748b")),
-            font=dict(family="Inter", color="#0f172a")
+            xaxis=dict(title=dict(text="Radius (km)", font=dict(family="Inter", size=11, color="#6E6E82")), tickfont=dict(family="Inter", size=10, color="#6E6E82")),
+            yaxis=dict(title=dict(text="Minutes", font=dict(family="Inter", size=11, color="#6E6E82")), tickfont=dict(family="Inter", size=10, color="#6E6E82")),
+            font=dict(family="Inter", color="#14141E")
         )
         st.plotly_chart(fig_sla, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -1766,9 +2237,9 @@ with tab_sim:
         # Order Source Badge
         order_src = cur_ord.get("source", "Synthetic Simulation")
         is_mobile = "Mobile" in order_src
-        badge_bg = "rgba(16, 185, 129, 0.12)" if is_mobile else "rgba(99, 102, 241, 0.12)"
-        badge_tx = "#10b981" if is_mobile else "#6366f1"
-        badge_border = "rgba(16, 185, 129, 0.3)" if is_mobile else "rgba(99, 102, 241, 0.25)"
+        badge_bg = "#DCFCE7" if is_mobile else "#EEEDFE"
+        badge_tx = "#065F46" if is_mobile else "#4A4674"
+        badge_border = "rgba(16, 185, 129, 0.3)" if is_mobile else "rgba(139, 130, 246, 0.3)"
         
         st.markdown(f"""
         <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
@@ -2435,7 +2906,7 @@ with tab_demographics:
                 'Population Density (per sq km)': 'Population Density (people/km²)',
                 'Predicted Online Order Volume (Monthly)': 'Predicted Monthly Orders'
             },
-            color_continuous_scale=[[0, '#06b6d4'], [0.5, '#6366f1'], [1, '#8b5cf6']],
+            color_continuous_scale=[[0, '#EDE6DC'], [0.5, '#8B82F6'], [1, '#18181F']],
             template="plotly_white"
         )
         fig_bubble.update_layout(
@@ -2443,7 +2914,7 @@ with tab_demographics:
             margin=dict(l=20, r=20, t=40, b=40),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter", color="#0f172a")
+            font=dict(family="Plus Jakarta Sans, Inter", color="#14141E")
         )
         st.plotly_chart(fig_bubble, use_container_width=True)
 
@@ -2456,7 +2927,7 @@ with tab_demographics:
                 y='Projected Population (2025)',
                 title="Projected Population (2025) by Area",
                 labels={'Projected Population (2025)': 'Population'},
-                color_discrete_sequence=['#6366f1'],
+                color_discrete_sequence=['#8B82F6'],
                 template="plotly_white"
             )
             fig_pop.update_layout(
@@ -2465,7 +2936,7 @@ with tab_demographics:
                 margin=dict(l=20, r=20, t=40, b=80),
                 plot_bgcolor="rgba(0,0,0,0)",
                 paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Inter", color="#0f172a")
+                font=dict(family="Plus Jakarta Sans, Inter", color="#14141E")
             )
             st.plotly_chart(fig_pop, use_container_width=True)
 
@@ -2476,7 +2947,7 @@ with tab_demographics:
                 y='Predicted Online Order Volume (Monthly)',
                 title="Predicted Monthly Orders by Area",
                 labels={'Predicted Online Order Volume (Monthly)': 'Monthly Orders'},
-                color_discrete_sequence=['#06b6d4'],
+                color_discrete_sequence=['#18181F'],
                 template="plotly_white"
             )
             fig_orders.update_layout(
@@ -2485,7 +2956,7 @@ with tab_demographics:
                 margin=dict(l=20, r=20, t=40, b=80),
                 plot_bgcolor="rgba(0,0,0,0)",
                 paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Inter", color="#0f172a")
+                font=dict(family="Plus Jakarta Sans, Inter", color="#14141E")
             )
             st.plotly_chart(fig_orders, use_container_width=True)
 
@@ -2502,7 +2973,7 @@ with tab_demographics:
         fig_corr = px.imshow(
             corr_matrix,
             text_auto=".2f",
-            color_continuous_scale=[[0, '#f4f6fb'], [0.5, '#818cf8'], [1, '#4f46e5']],
+            color_continuous_scale=[[0, '#F4F5F9'], [0.5, '#B5AFF6'], [1, '#4A4674']],
             template="plotly_white",
             title="Correlation Matrix across Micro-Market Variables"
         )
@@ -2511,7 +2982,7 @@ with tab_demographics:
             margin=dict(l=20, r=20, t=40, b=40),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter", color="#0f172a")
+            font=dict(family="Plus Jakarta Sans, Inter", color="#14141E")
         )
         st.plotly_chart(fig_corr, use_container_width=True)
 
@@ -2552,14 +3023,14 @@ with tab_forecast:
         y=y_test,
         mode='markers',
         name='Actual Orders',
-        marker=dict(color='#6366f1', size=7, opacity=0.75)
+        marker=dict(color='#18181F', size=7, opacity=0.75)
     ))
     fig_eval.add_trace(go.Scatter(
         x=y_test.index,
         y=y_pred,
         mode='markers',
         name='Predicted Demand',
-        marker=dict(color='#f59e0b', size=7, symbol='x')
+        marker=dict(color='#8B82F6', size=7, symbol='x')
     ))
     fig_eval.update_layout(
         title="Actual vs Predicted Demand on Validation Set",
@@ -2569,7 +3040,7 @@ with tab_forecast:
         template="plotly_white",
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter", color="#0f172a"),
+        font=dict(family="Plus Jakarta Sans, Inter", color="#14141E"),
         height=380,
         margin=dict(l=20, r=20, t=40, b=40)
     )
@@ -2607,8 +3078,8 @@ with tab_forecast:
             y=future_pred,
             mode='lines+markers',
             name='Forecasted Demand',
-            line=dict(color='#10b981', width=3),
-            marker=dict(size=8, color='#059669')
+            line=dict(color='#8B82F6', width=3),
+            marker=dict(size=8, color='#6E68B8')
         ))
         fig_future.update_layout(
             title=f"{forecast_days}-Day Forward Demand Projection",
@@ -2617,7 +3088,7 @@ with tab_forecast:
             template="plotly_white",
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter", color="#0f172a"),
+            font=dict(family="Plus Jakarta Sans, Inter", color="#14141E"),
             height=320,
             margin=dict(l=20, r=20, t=40, b=40)
         )
@@ -2663,7 +3134,7 @@ with tab_climate:
                 x=filtered_climate['Month'],
                 y=filtered_climate['Avg Rainfall (mm)'],
                 name='Avg Rainfall (mm)',
-                marker_color='#06b6d4'
+                marker_color='#8B82F6'
             ))
             fig_climate.add_trace(go.Scatter(
                 x=filtered_climate['Month'],
@@ -2671,8 +3142,8 @@ with tab_climate:
                 name='Delivery Impact Scale (1-5)',
                 yaxis='y2',
                 mode='lines+markers',
-                line=dict(color='#f59e0b', width=3),
-                marker=dict(size=8, color='#d97706')
+                line=dict(color='#18181F', width=3),
+                marker=dict(size=8, color='#18181F')
             ))
             fig_climate.update_layout(
                 title="Rainfall vs Delivery Friction Scale in Aurangabad",
@@ -2683,7 +3154,7 @@ with tab_climate:
                 template="plotly_white",
                 plot_bgcolor="rgba(0,0,0,0)",
                 paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Inter", color="#0f172a"),
+                font=dict(family="Plus Jakarta Sans, Inter", color="#14141E"),
                 height=380,
                 margin=dict(l=20, r=20, t=40, b=40)
             )
@@ -2827,7 +3298,7 @@ with tab_inventory:
                 x=sku_names_short,
                 y=current_stocks,
                 name="Current Stock",
-                marker_color=["#ef4444" if q <= c else "#f59e0b" if q <= l else "#10b981"
+                marker_color=["#EF4444" if q <= c else "#F59E0B" if q <= l else "#8B82F6"
                               for q, c, l in zip(current_stocks, [s["critical_threshold"] for s in catalog], [s["low_stock_threshold"] for s in catalog])]
             ))
             fig_inv.add_trace(go.Scatter(
@@ -2835,7 +3306,7 @@ with tab_inventory:
                 y=critical_bars,
                 name="Critical Threshold",
                 mode="lines+markers",
-                line=dict(color="#b91c1c", width=2, dash="dash")
+                line=dict(color="#18181F", width=2, dash="dash")
             ))
 
             fig_inv.update_layout(
@@ -2844,7 +3315,8 @@ with tab_inventory:
                 template="plotly_white",
                 legend=dict(x=0.01, y=0.99),
                 height=310,
-                margin=dict(l=10, r=10, t=30, b=30)
+                margin=dict(l=10, r=10, t=30, b=30),
+                font=dict(family="Plus Jakarta Sans, Inter", color="#14141E")
             )
             st.plotly_chart(fig_inv, use_container_width=True)
 

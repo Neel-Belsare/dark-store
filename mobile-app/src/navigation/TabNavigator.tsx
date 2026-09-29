@@ -127,11 +127,11 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     position: 'relative',
-    width: 38,
-    height: 30,
+    width: 44,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: BORDER_RADIUS.sm,
+    borderRadius: 16,
   },
   iconWrapperActive: {
     backgroundColor: COLORS.brandGreenLight,
