@@ -51,23 +51,37 @@ docker compose down
 
 ---
 
-## 🐳 2. Standalone Docker Run (Streamlit Only)
+## 🐳 2. Standalone Docker Run (Full Stack: Streamlit + FastAPI)
 
-If you only want to build and run the Streamlit dashboard as a standalone container:
+The container includes a built-in startup manager (`start.sh`) that automatically launches **both** the FastAPI Dispatch Bridge (port `8000`) and the Streamlit Command Center (port `8501`) concurrently:
 
 ```bash
 # 1. Build the image
 docker build -t dark-store-app:latest .
 
-# 2. Run container mapped to port 8501
+# 2. Run container mapped to both ports (with optional .env for Supabase sync)
 docker run -d \
-  --name dark-store-streamlit \
+  --name dark-store-app \
   -p 8501:8501 \
+  -p 8000:8000 \
+  --env-file .env \
   -v $(pwd)/latest_order.json:/app/latest_order.json \
+  -v $(pwd)/order_history.json:/app/order_history.json \
   dark-store-app:latest
 
-# 3. Check health status
-docker ps
+# 3. Check health and logs
+docker logs -f dark-store-app
+docker inspect dark-store-app --format 'Status: {{.State.Status}}, Health: {{.State.Health.Status}}'
+```
+
+#### Running a Single Service (Override Mode):
+If you want to run only one specific service, simply pass the command at the end:
+```bash
+# Run ONLY Streamlit:
+docker run -p 8501:8501 dark-store-app:latest streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+
+# Run ONLY FastAPI:
+docker run -p 8000:8000 dark-store-app:latest uvicorn api:app --host 0.0.0.0 --port 8000
 ```
 
 ---

@@ -3,7 +3,7 @@
 # Runs Streamlit Dashboard (app.py) on Port 8501
 # ==============================================================================
 
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 
 # Prevent Python from writing .pyc files and buffer stdout/stderr
 ENV PYTHONUNBUFFERED=1 \
@@ -33,8 +33,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all application code, datasets, and configuration
 COPY . /app/
 
-# Ensure non-root user for security best practices (Render, AWS, GCP)
-RUN useradd -m -u 1000 appuser && \
+# Ensure start.sh is executable and setup non-root user
+RUN chmod +x /app/start.sh && \
+    useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 
 USER appuser
@@ -46,5 +47,5 @@ EXPOSE 8501 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD curl --fail http://localhost:8501/_stcore/health || exit 1
 
-# Default Command: Run Streamlit Command Center
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Default Command: Run both FastAPI and Streamlit concurrently via start.sh
+CMD ["/app/start.sh"]

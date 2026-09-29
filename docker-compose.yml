@@ -18,6 +18,9 @@ services:
       - STREAMLIT_SERVER_HEADLESS=true
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
       - FASTAPI_BACKEND_URL=http://api-backend:8000
+    env_file:
+      - path: .env
+        required: false
     volumes:
       - ./data:/app/data
       - ./latest_order.json:/app/latest_order.json
@@ -39,6 +42,9 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
+    env_file:
+      - path: .env
+        required: false
     volumes:
       - ./data:/app/data
       - ./latest_order.json:/app/latest_order.json
