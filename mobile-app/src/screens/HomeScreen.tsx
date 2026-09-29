@@ -122,7 +122,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Filter products by category and search query
   const filteredProducts = useMemo(() => {
     return POPULAR_PRODUCTS.filter((prod) => {
       const matchesSearch =
@@ -139,11 +138,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
 
   return (
     <View style={styles.container}>
-      {/* ================================================================= */}
-      {/* 1. STICKY TOP HEADER SURFACE (LocationBar + SearchBar)            */}
-      {/* ================================================================= */}
+      {/* Sticky Location + Search Top Surface */}
       <View style={styles.stickyHeader}>
-        {/* Visually Distinct Quick-Commerce Location Bar */}
         <LocationBar
           location={location}
           address={address}
@@ -153,33 +149,28 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
           onSelectOption={setManualLocation}
           options={neighborhoodOptions}
         />
-
-        {/* Sticky Search Input Bar */}
         <SearchBar query={searchQuery} onChangeQuery={setSearchQuery} />
       </View>
 
-      {/* ================================================================= */}
-      {/* 2. SCROLLABLE STOREFRONT BODY                                     */}
-      {/* ================================================================= */}
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* High-Converting Blinkit Signature Hero Banner */}
+        {/* Purple Hero Banner */}
         <View style={styles.heroBanner}>
           <View style={styles.heroLeft}>
             <View style={styles.heroBadge}>
               <Text style={styles.heroBadgeIcon}>⚡</Text>
-              <Text style={styles.heroBadgeText}>10 MINUTES DELIVERY</Text>
+              <Text style={styles.heroBadgeText}>10 MINUTES DISPATCH</Text>
             </View>
-            <Text style={styles.heroTitle}>India's Last Minute App</Text>
+            <Text style={styles.heroTitle}>Smart Quick Delivery</Text>
             <Text style={styles.heroSubtitle}>
-              Fresh groceries & essentials delivered from your nearest hub
+              Fresh groceries & dark store inventory delivered in minutes
             </Text>
           </View>
           <View style={styles.heroRight}>
-            <Text style={styles.heroEmoji}>🛵</Text>
+            <Text style={styles.heroEmoji}>📦</Text>
           </View>
         </View>
 
@@ -189,12 +180,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
           onSelectCategory={setSelectedCategory}
         />
 
-        {/* Horizontal Popular Groceries Section */}
+        {/* Popular Groceries Grid */}
         <View style={styles.productsSection}>
           <View style={styles.sectionHeader}>
             <View>
               <Text style={styles.sectionTitle}>
-                {selectedCategory ? selectedCategory : 'Popular Groceries'}
+                {selectedCategory ? selectedCategory : 'Popular Essentials'}
               </Text>
               <Text style={styles.sectionSubtitle}>
                 {filteredProducts.length} items in stock
@@ -230,7 +221,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
         {/* Quick-Commerce Value Props */}
         <View style={styles.featuresRow}>
           <View style={styles.featureItem}>
-            <View style={[styles.featureIconBox, { backgroundColor: '#E8F8EE' }]}>
+            <View style={[styles.featureIconBox, { backgroundColor: '#EDE9FE' }]}>
               <Text style={styles.featureIcon}>⚡</Text>
             </View>
             <Text style={styles.featureTitle}>Sub-15m Promise</Text>
@@ -238,7 +229,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
           </View>
 
           <View style={styles.featureItem}>
-            <View style={[styles.featureIconBox, { backgroundColor: '#FEF9C3' }]}>
+            <View style={[styles.featureIconBox, { backgroundColor: '#EDE9FE' }]}>
               <Text style={styles.featureIcon}>🛡️</Text>
             </View>
             <Text style={styles.featureTitle}>Zero Delivery Fee</Text>
@@ -246,7 +237,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
           </View>
 
           <View style={styles.featureItem}>
-            <View style={[styles.featureIconBox, { backgroundColor: '#EEF2F6' }]}>
+            <View style={[styles.featureIconBox, { backgroundColor: '#E0E7FF' }]}>
               <Text style={styles.featureIcon}>🏬</Text>
             </View>
             <Text style={styles.featureTitle}>12 City Hubs</Text>
@@ -255,9 +246,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
         </View>
       </ScrollView>
 
-      {/* ================================================================= */}
-      {/* 3. FLOATING BOTTOM MINI-CART BAR (Quick Checkout Trigger)         */}
-      {/* ================================================================= */}
+      {/* Floating Bottom Mini-Cart Bar */}
       {totalItemCount > 0 && (
         <View style={styles.floatingCartContainer}>
           <Pressable
@@ -306,21 +295,19 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 110,
   },
-
-  /* Hero Banner */
   heroBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.brandYellow,
+    backgroundColor: '#4E2298',
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
     marginBottom: SPACING.xs,
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: '#F6E05E',
-    ...SHADOWS.small,
+    borderColor: '#6D28D9',
+    ...SHADOWS.card,
   },
   heroLeft: {
     flex: 1,
@@ -329,7 +316,7 @@ const styles = StyleSheet.create({
   heroBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
@@ -349,13 +336,13 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: TYPOGRAPHY.title,
     fontWeight: '900',
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
     letterSpacing: -0.4,
   },
   heroSubtitle: {
     fontSize: TYPOGRAPHY.footnote,
-    color: '#713F12',
-    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontWeight: '500',
     marginTop: 3,
     lineHeight: 16,
   },
@@ -363,15 +350,13 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   heroEmoji: {
-    fontSize: 28,
+    fontSize: 26,
   },
-
-  /* Products Section */
   productsSection: {
     marginTop: SPACING.sm,
     paddingLeft: SPACING.lg,
@@ -398,7 +383,7 @@ const styles = StyleSheet.create({
   seeAllText: {
     fontSize: TYPOGRAPHY.sub,
     fontWeight: '800',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
   },
   horizontalProducts: {
     paddingRight: SPACING.lg,
@@ -423,8 +408,6 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: 4,
   },
-
-  /* Value Props */
   featuresRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -465,8 +448,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 2,
   },
-
-  /* Floating Mini-Cart */
   floatingCartContainer: {
     position: 'absolute',
     bottom: SPACING.lg,
@@ -475,14 +456,18 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
   floatingCart: {
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
     borderRadius: BORDER_RADIUS.xl,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: SPACING.lg,
-    ...SHADOWS.stickyFooter,
+    shadowColor: '#4E2298',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 6,
   },
   floatingCartPressed: {
     opacity: 0.95,
@@ -511,7 +496,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   cartSavedNotice: {
-    color: '#D1FAE5',
+    color: '#E0E7FF',
     fontSize: 9.5,
     fontWeight: '600',
   },
@@ -529,13 +514,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   viewCartText: {
-    color: COLORS.brandGreenDark,
+    color: '#4E2298',
     fontSize: 13,
     fontWeight: '900',
     marginRight: 6,
   },
   viewCartArrow: {
-    color: COLORS.brandGreenDark,
+    color: '#4E2298',
     fontSize: 13,
     fontWeight: '900',
   },

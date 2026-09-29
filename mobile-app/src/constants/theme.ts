@@ -1,43 +1,43 @@
 export const COLORS = {
-  // Signature Lavender & Dark Slate Palette (Modern Tablet Dashboard Aesthetic)
-  brandYellow: '#EDE6DC', // Warm Champagne Sand
-  brandYellowDark: '#7A7266',
-  brandYellowLight: '#FBF8F5',
-  brandYellowSubtle: '#FAF7F2',
+  // Login Page Signature Royal Purple & Indigo Gradient Palette
+  brandYellow: '#4E2298',            // Replaced old mustard with Signature InventoryPro Purple
+  brandYellowDark: '#2E0854',        // Deep Midnight Violet
+  brandYellowLight: '#EDE9FE',       // Soft Lavender Tint
+  brandYellowSubtle: '#F5F3FF',      // Ultra-light Violet
 
-  brandGreen: '#8B82F6', // Periwinkle Lavender Accent
-  brandGreenDark: '#6E68B8',
-  brandGreenLight: '#EEEDFE',
-  brandGreenSubtle: '#F6F5FF',
-  brandGreenBorder: '#D4D0FC',
+  brandGreen: '#4E2298',             // Primary Accent (Purple)
+  brandGreenDark: '#2E0854',
+  brandGreenLight: '#EDE9FE',
+  brandGreenSubtle: '#F8F6FE',
+  brandGreenBorder: '#DDD6FE',
 
   // Surfaces & Backgrounds
-  background: '#F4F5F9',
-  backgroundAlt: '#ECECF4',
+  background: '#F1F3F9',             // Sleek Cool Gray matching login background
+  backgroundAlt: '#E2E8F0',
   surface: '#FFFFFF',
-  surfaceSecondary: '#F8F8FC',
-  surfaceMuted: '#F0F1F7',
-  surfaceDark: '#18181F', // Matte Dark Charcoal
+  surfaceSecondary: '#F8FAFC',
+  surfaceMuted: '#F1F5F9',
+  surfaceDark: '#1E1035',            // Deep Dark Aubergine for Header/Rider
 
   // Typography & Text Hierarchies
-  textPrimary: '#14141E',
-  textSecondary: '#4B4B5E',
-  textTertiary: '#6E6E82',
-  textMuted: '#9696A6',
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textTertiary: '#64748B',
+  textMuted: '#94A3B8',
   textInverse: '#FFFFFF',
 
   // Borders & Dividers
-  border: '#EAEBF2',
-  borderSubtle: '#F2F2F8',
-  borderStrong: '#D2D3E0',
-  borderFocus: '#8B82F6',
+  border: '#E2E8F0',
+  borderSubtle: '#F1F5F9',
+  borderStrong: '#CBD5E1',
+  borderFocus: '#4E2298',
 
   // Status & Telemetry Accents
-  accentIndigo: '#8B82F6',
-  accentLavender: '#B5AFF6',
-  accentChampagne: '#EDE6DC',
-  accentDark: '#18181F',
-  accentCyan: '#06B6D4',
+  accentIndigo: '#4E2298',
+  accentLavender: '#8B5CF6',
+  accentChampagne: '#EDE9FE',
+  accentDark: '#1E1035',
+  accentCyan: '#38BDF8',
   dangerRed: '#EF4444',
   dangerRedLight: '#FEE2E2',
   warningAmber: '#F59E0B',
@@ -88,45 +88,45 @@ export const BORDER_RADIUS = {
 
 export const SHADOWS = {
   subtle: {
-    shadowColor: '#18181F',
+    shadowColor: '#2E0854',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 2,
     elevation: 1,
   },
   small: {
-    shadowColor: '#18181F',
+    shadowColor: '#2E0854',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowRadius: 6,
     elevation: 2,
   },
   card: {
-    shadowColor: '#18181F',
+    shadowColor: '#2E0854',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
     elevation: 3,
   },
   cardHover: {
-    shadowColor: '#18181F',
+    shadowColor: '#4E2298',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 5,
+    shadowOpacity: 0.15,
+    shadowRadius: 18,
+    elevation: 6,
   },
   stickyFooter: {
-    shadowColor: '#18181F',
+    shadowColor: '#2E0854',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
     elevation: 8,
   },
   modal: {
-    shadowColor: '#18181F',
+    shadowColor: '#2E0854',
     shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
+    shadowOpacity: 0.22,
+    shadowRadius: 28,
     elevation: 12,
   },
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { COLORS, SPACING, SHADOWS } from '../constants/theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -33,13 +33,13 @@ export const TabNavigator: React.FC = () => {
       {/* Active Screen View */}
       <View style={styles.screenContainer}>{renderActiveScreen()}</View>
 
-      {/* Sleek Blinkit Bottom Tab Bar */}
+      {/* Modern Purple-Themed Bottom Tab Bar */}
       <View style={styles.tabBar}>
         {/* Tab 1: Home */}
         <TouchableOpacity
           style={styles.tabBtn}
           onPress={() => setActiveTab('Home')}
-          activeOpacity={0.7}
+          activeOpacity={0.75}
         >
           <View style={[styles.iconWrapper, activeTab === 'Home' && styles.iconWrapperActive]}>
             <Text style={[styles.tabIcon, activeTab === 'Home' && styles.tabIconActive]}>🏠</Text>
@@ -53,7 +53,7 @@ export const TabNavigator: React.FC = () => {
         <TouchableOpacity
           style={styles.tabBtn}
           onPress={() => setActiveTab('Cart')}
-          activeOpacity={0.7}
+          activeOpacity={0.75}
         >
           <View style={[styles.iconWrapper, activeTab === 'Cart' && styles.iconWrapperActive]}>
             <Text style={[styles.tabIcon, activeTab === 'Cart' && styles.tabIconActive]}>🛒</Text>
@@ -72,7 +72,7 @@ export const TabNavigator: React.FC = () => {
         <TouchableOpacity
           style={styles.tabBtn}
           onPress={() => setActiveTab('Profile')}
-          activeOpacity={0.7}
+          activeOpacity={0.75}
         >
           <View style={[styles.iconWrapper, activeTab === 'Profile' && styles.iconWrapperActive]}>
             <Text style={[styles.tabIcon, activeTab === 'Profile' && styles.tabIconActive]}>👤</Text>
@@ -86,7 +86,7 @@ export const TabNavigator: React.FC = () => {
         <TouchableOpacity
           style={styles.tabBtn}
           onPress={() => setActiveTab('Rider')}
-          activeOpacity={0.7}
+          activeOpacity={0.75}
         >
           <View style={[styles.iconWrapper, activeTab === 'Rider' && styles.iconWrapperActive]}>
             <Text style={[styles.tabIcon, activeTab === 'Rider' && styles.tabIconActive]}>🛵</Text>
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: SPACING.md,
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -127,17 +127,17 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     position: 'relative',
-    width: 44,
-    height: 32,
+    width: 46,
+    height: 34,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: 17,
   },
   iconWrapperActive: {
-    backgroundColor: COLORS.brandGreenLight,
+    backgroundColor: COLORS.brandYellowLight,
   },
   tabIcon: {
-    fontSize: 19,
+    fontSize: 18,
     opacity: 0.65,
   },
   tabIconActive: {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -2,
     right: 2,
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -177,10 +177,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     color: COLORS.textMuted,
-    marginTop: 2,
+    marginTop: 3,
   },
   tabLabelActive: {
-    color: COLORS.brandGreen,
+    color: '#4E2298',
     fontWeight: '800',
   },
 });

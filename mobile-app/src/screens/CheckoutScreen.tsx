@@ -1,362 +1,846 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
+  TextInput,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
+import { useCart } from '../context/CartContext';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
-import { LocationBar } from '../components/LocationBar';
 import { CartItemRow } from '../components/CartItemRow';
 import { BillSummary } from '../components/BillSummary';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 import { CelebrationModal } from '../components/CelebrationModal';
-import { placeLiveOrder } from '../services/api';
-import { CartItem, DispatchedOrder } from '../types';
+import { placeLiveOrder, checkServiceability, resetLiveOrder } from '../services/api';
+import { DispatchedOrder, ServiceabilityResponse, SubstitutionPreference } from '../types';
 
-const MOCK_GROCERY_ITEMS: CartItem[] = [
+interface CartScreenProps {
+  onNavigateToHome: () => void;
+}
+
+const DELIVERY_SUGGESTIONS = [
+  { id: '1', label: 'Leave at door', icon: '🚪' },
+  { id: '2', label: "Don't ring bell", icon: '🔕' },
+  { id: '3', label: 'Avoid calling', icon: '📞' },
+  { id: '4', label: 'Leave at guard', icon: '🛡️' },
+  { id: '5', label: 'Pet in house', icon: '🐶' },
+];
+
+const SUBSTITUTION_OPTIONS: { id: SubstitutionPreference; title: string; subtitle: string; icon: string }[] = [
   {
-    id: 'item-1',
-    name: 'Amul Taaza Toned Fresh Milk',
-    unit: '500 ml pouch',
-    price: 27,
-    quantity: 2,
-    emoji: '🥛',
-    category: 'Dairy',
+    id: 'similar',
+    title: 'Smart Replacement',
+    subtitle: 'Auto-replace with equal or higher value brand',
+    icon: '🔄',
   },
   {
-    id: 'item-2',
-    name: 'Britannia 100% Whole Wheat Bread',
-    unit: '400 g pack',
-    price: 45,
-    quantity: 1,
-    emoji: '🍞',
-    category: 'Bakery',
+    id: 'call_confirm',
+    title: 'Call to Confirm',
+    subtitle: 'Rider calls for approval before picking alternative',
+    icon: '📞',
   },
   {
-    id: 'item-3',
-    name: "Lay's India's Magic Masala Chips",
-    unit: '50 g pouch',
-    price: 20,
-    quantity: 2,
-    emoji: '🥔',
-    category: 'Snacks',
-  },
-  {
-    id: 'item-4',
-    name: 'Fortune Sunlite Refined Sunflower Oil',
-    unit: '1 Litre pouch',
-    price: 145,
-    quantity: 1,
-    emoji: '🌻',
-    category: 'Pantry',
-  },
-  {
-    id: 'item-5',
-    name: 'Tata Salt Vacuum Evaporated Iodized',
-    unit: '1 kg packet',
-    price: 28,
-    quantity: 1,
-    emoji: '🧂',
-    category: 'Pantry',
+    id: 'do_not_substitute',
+    title: "Don't Substitute",
+    subtitle: 'Refund unavailable items immediately',
+    icon: '🚫',
   },
 ];
 
-export const CheckoutScreen: React.FC = () => {
+export const CheckoutScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
   const {
-    location,
-    address,
-    loading: locationLoading,
-    isUsingGPS,
-    fetchLiveGPS,
-    setManualLocation,
-    neighborhoodOptions,
-  } = useCurrentLocation();
+    cartItems,
+    updateQuantity,
+    totalItemCount,
+    itemTotalAmount,
+    deliveryFee,
+    platformFee,
+    grandTotal,
+    savings,
+    clearCart,
+    deliveryNotes,
+    setDeliveryNotes,
+    substitutionPreference,
+    setSubstitutionPreference,
+  } = useCart();
 
-  const [cartItems, setCartItems] = useState<CartItem[]>(MOCK_GROCERY_ITEMS);
-  const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false);
+  const { location, address, isUsingGPS } = useCurrentLocation();
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [confirmedOrder, setConfirmedOrder] = useState<DispatchedOrder | null>(null);
   const [celebrationVisible, setCelebrationVisible] = useState<boolean>(false);
+  const [serviceability, setServiceability] = useState<ServiceabilityResponse | null>(null);
+  const [, setCheckingServiceability] = useState<boolean>(false);
 
-  // Cart financial calculations
-  const itemTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const deliveryFee = 0; // Quick-commerce free delivery promise
-  const platformFee = itemTotal > 0 ? 2 : 0;
-  const grandTotal = itemTotal + deliveryFee + platformFee;
-  const totalItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  useEffect(() => {
+    if (location) {
+      let isMounted = true;
+      setCheckingServiceability(true);
+      checkServiceability(location.latitude, location.longitude)
+        .then((res) => {
+          if (isMounted) setServiceability(res);
+        })
+        .catch((err) => {
+          console.warn('Serviceability verification error:', err);
+        })
+        .finally(() => {
+          if (isMounted) setCheckingServiceability(false);
+        });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [location]);
 
-  const handleIncrement = (id: string) => {
-    setCartItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i))
-    );
-  };
+  const isServiceable = serviceability ? serviceability.is_serviceable : true;
 
-  const handleDecrement = (id: string) => {
-    setCartItems((prev) =>
-      prev
-        .map((i) => (i.id === id ? { ...i, quantity: Math.max(0, i.quantity - 1) } : i))
-        .filter((i) => i.quantity > 0)
-    );
-  };
-
-  const handlePlaceOrder = async () => {
+  const handleCheckout = async () => {
     if (cartItems.length === 0) {
-      Alert.alert('Empty Basket', 'Please add items to your grocery cart before placing an order.');
+      Alert.alert('Empty Basket', 'Add items from the store before checking out.');
       return;
     }
 
     if (!location) {
-      Alert.alert('Location Missing', 'Please enable GPS or select a delivery location.');
+      Alert.alert('Location Required', 'Please enable GPS or select a delivery location.');
       return;
     }
 
-    setIsPlacingOrder(true);
+    if (!isServiceable) {
+      Alert.alert(
+        'Out of Service Area',
+        `Your delivery address is ${serviceability?.distance_km ?? '>4'} km away, exceeding our quick-commerce dark store radius (4.0 km).`
+      );
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
-      // Call placeLiveOrder using current user coordinates
       const response = await placeLiveOrder(location.latitude, location.longitude, {
-        customer_name: 'Neel Belsare',
+        customer_name: 'Mansi Gaike',
+        customer_phone: '+91 98765 43210',
         delivery_address: address,
-        items: cartItems.map((i) => ({
-          name: i.name,
-          quantity: i.quantity,
-          price: i.price,
+        delivery_notes: deliveryNotes,
+        substitution_preference: substitutionPreference,
+        items: cartItems.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
         })),
         order_value: grandTotal,
       });
+
+      await new Promise((r) => setTimeout(r, 800));
 
       if (response && response.success) {
         setConfirmedOrder(response.order);
         setCelebrationVisible(true);
       } else {
-        Alert.alert('Dispatch Notice', response?.message || 'Could not route order.');
+        Alert.alert('Routing Notice', response?.message || 'Could not route order.');
       }
-    } catch (error: any) {
-      Alert.alert('Routing Error', error.message || 'Unable to connect to dark-store router.');
+    } catch (err: any) {
+      Alert.alert('Connection Error', err.message || 'Failed to connect to dark-store router.');
     } finally {
-      setIsPlacingOrder(false);
+      setIsLoading(false);
     }
   };
 
-  return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      {/* 1. Sticky Quick-Commerce Location Bar */}
-      <LocationBar
-        location={location}
-        address={address}
-        isUsingGPS={isUsingGPS}
-        loading={locationLoading}
-        onRefreshGPS={fetchLiveGPS}
-        onSelectOption={setManualLocation}
-        options={neighborhoodOptions}
-      />
+  const handleCloseCelebration = async () => {
+    setCelebrationVisible(false);
+    try {
+      await resetLiveOrder();
+    } catch (err) {
+      console.warn('Reset live order sync error:', err);
+    }
+    clearCart();
+    onNavigateToHome();
+  };
 
-      {/* 2. Scrollable Body */}
+  const handlePromptClearCart = () => {
+    Alert.alert(
+      'Clear Basket?',
+      'Are you sure you want to remove all items from your basket?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear', style: 'destructive', onPress: clearCart },
+      ]
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Top Header */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onNavigateToHome}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>Checkout</Text>
+            <Text style={styles.headerSubtitle}>
+              {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'} in your cart
+            </Text>
+          </View>
+        </View>
+
+        {cartItems.length > 0 && (
+          <TouchableOpacity
+            style={styles.clearBtn}
+            onPress={handlePromptClearCart}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.clearBtnText}>Clear Cart</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Sub-15 Min SLA Banner */}
-        <View style={styles.slaBanner}>
-          <View style={styles.slaIconBadge}>
-            <Text style={styles.slaLightning}>⚡</Text>
+        {/* Delivery Address Pill & SLA Banner */}
+        <View style={styles.addressCard}>
+          <View style={styles.slaRow}>
+            <View style={styles.slaBadge}>
+              <Text style={styles.slaBolt}>⚡</Text>
+              <Text style={styles.slaText}>10 MINS DELIVERY</Text>
+            </View>
+            <View style={styles.gpsStatusPill}>
+              <View style={[styles.gpsDot, isUsingGPS ? styles.gpsActive : styles.gpsManual]} />
+              <Text style={styles.gpsStatusText}>
+                {isUsingGPS ? 'Live GPS Locked' : 'Selected Hub'}
+              </Text>
+            </View>
           </View>
-          <View style={styles.slaTextCol}>
-            <Text style={styles.slaBannerTitle}>Guaranteed 10-15 Min Delivery</Text>
-            <Text style={styles.slaBannerSub}>
-              Automatically dispatched from your strictly nearest Chhatrapati Sambhajinagar hub.
+
+          <View style={styles.addressDivider} />
+
+          <View style={styles.addressBody}>
+            <View style={styles.addressIconCircle}>
+              <Text style={styles.addressIconEmoji}>📍</Text>
+            </View>
+            <View style={styles.addressTextCol}>
+              <Text style={styles.addressLabel}>Delivering to</Text>
+              <Text style={styles.addressLine} numberOfLines={2}>
+                {address}
+              </Text>
+              {location && (
+                <Text style={styles.coordsLine}>
+                  {location.latitude.toFixed(4)}° N, {location.longitude.toFixed(4)}° E
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* Catchment Serviceability Warning */}
+        {!isServiceable && (
+          <View style={styles.serviceabilityAlertCard}>
+            <View style={styles.serviceabilityAlertHeader}>
+              <Text style={styles.serviceabilityAlertEmoji}>🚫</Text>
+              <Text style={styles.serviceabilityAlertTitle}>Location Outside Delivery Zone</Text>
+            </View>
+            <Text style={styles.serviceabilityAlertBody}>
+              {serviceability?.message ||
+                `Your selected address is ${serviceability?.distance_km ?? 'beyond'} km away, which exceeds our 4.0 km 10-minute dark store delivery perimeter.`}
+            </Text>
+            <Text style={styles.serviceabilityAlertSub}>
+              Please select an address within dark store coverage (e.g., Osmanpura, CIDCO, Kranti Chowk).
             </Text>
           </View>
-        </View>
+        )}
 
-        {/* Grocery Cart Items Section */}
-        <View style={styles.cartSection}>
-          <View style={styles.cartSectionHeader}>
-            <Text style={styles.cartSectionTitle}>Grocery Basket ({totalItemCount} items)</Text>
-            <Text style={styles.reviewStepText}>Review items</Text>
-          </View>
-
-          {cartItems.map((item) => (
-            <CartItemRow
-              key={item.id}
-              item={item}
-              onIncrement={handleIncrement}
-              onDecrement={handleDecrement}
-            />
-          ))}
-
-          {cartItems.length === 0 && (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>🛒</Text>
-              <Text style={styles.emptyTitle}>Your cart is currently empty</Text>
+        {/* Cart Items List */}
+        {cartItems.length > 0 ? (
+          <View style={styles.itemsSection}>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionTitleLeft}>
+                <Text style={styles.sectionTitle}>Basket Items</Text>
+                <View style={styles.countBadge}>
+                  <Text style={styles.countBadgeText}>{totalItemCount}</Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={onNavigateToHome} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Text style={styles.addMoreLink}>+ Add More</Text>
+              </TouchableOpacity>
             </View>
-          )}
-        </View>
+
+            {cartItems.map((item) => (
+              <CartItemRow
+                key={item.id}
+                item={item}
+                onIncrement={() => updateQuantity(item.id, item.quantity + 1)}
+                onDecrement={() => updateQuantity(item.id, item.quantity - 1)}
+              />
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIcon}>🛍️</Text>
+            </View>
+            <Text style={styles.emptyTitle}>Your basket is empty</Text>
+            <Text style={styles.emptySub}>
+              Browse through fresh groceries dispatched in 10 minutes from our nearest dark store.
+            </Text>
+            <TouchableOpacity
+              style={styles.shopNowBtn}
+              onPress={onNavigateToHome}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.shopNowText}>Start Shopping ➔</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Delivery Notes */}
+        {cartItems.length > 0 && (
+          <View style={styles.instructionsSection}>
+            <Text style={styles.sectionTitle}>Delivery Notes & Instructions</Text>
+            <Text style={styles.instructionsSub}>Drop-off directions for the dark store courier</Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsRow}
+            >
+              {DELIVERY_SUGGESTIONS.map((chip) => {
+                const isPresent = deliveryNotes.includes(chip.label);
+                return (
+                  <TouchableOpacity
+                    key={chip.id}
+                    style={[styles.chip, isPresent && styles.chipSelected]}
+                    onPress={() => {
+                      if (isPresent) {
+                        setDeliveryNotes(
+                          deliveryNotes
+                            .replace(chip.label, '')
+                            .replace(/,\s*,/g, ',')
+                            .replace(/^,\s*|\s*,\s*$/g, '')
+                            .trim()
+                        );
+                      } else {
+                        const newNotes = deliveryNotes ? `${deliveryNotes}, ${chip.label}` : chip.label;
+                        setDeliveryNotes(newNotes);
+                      }
+                    }}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={styles.chipIcon}>{chip.icon}</Text>
+                    <Text style={[styles.chipText, isPresent && styles.chipTextSelected]}>
+                      {chip.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <View style={styles.customNotesBox}>
+              <Text style={styles.customNotesLabel}>Courier Note / Gate Details:</Text>
+              <TextInput
+                style={styles.customNotesInput}
+                placeholder="e.g. Ring bell twice, leave with security guard..."
+                placeholderTextColor={COLORS.textMuted}
+                value={deliveryNotes}
+                onChangeText={setDeliveryNotes}
+                maxLength={140}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* Substitution Preferences */}
+        {cartItems.length > 0 && (
+          <View style={styles.substitutionSection}>
+            <Text style={styles.sectionTitle}>Item Substitution Policy</Text>
+            <Text style={styles.instructionsSub}>If an item runs out during warehouse picking</Text>
+
+            <View style={styles.substitutionList}>
+              {SUBSTITUTION_OPTIONS.map((opt) => {
+                const isSelected = substitutionPreference === opt.id;
+                return (
+                  <TouchableOpacity
+                    key={opt.id}
+                    style={[styles.substitutionCard, isSelected && styles.substitutionCardSelected]}
+                    onPress={() => setSubstitutionPreference(opt.id)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.substitutionRadioRow}>
+                      <View style={[styles.radioCircle, isSelected && styles.radioCircleSelected]}>
+                        {isSelected && <View style={styles.radioDot} />}
+                      </View>
+                      <Text style={styles.substitutionIcon}>{opt.icon}</Text>
+                      <View style={styles.substitutionTextCol}>
+                        <Text style={[styles.substitutionTitle, isSelected && styles.substitutionTitleSelected]}>
+                          {opt.title}
+                        </Text>
+                        <Text style={styles.substitutionSubtitle}>{opt.subtitle}</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* Bill Receipt Component */}
-        <BillSummary
-          itemTotal={itemTotal}
-          deliveryFee={deliveryFee}
-          platformFee={platformFee}
-          grandTotal={grandTotal}
-          savings={25}
-        />
+        {cartItems.length > 0 && (
+          <BillSummary
+            itemTotal={itemTotalAmount}
+            deliveryFee={deliveryFee}
+            platformFee={platformFee}
+            grandTotal={grandTotal}
+            savings={savings}
+          />
+        )}
 
-        {/* Backend Routing Note */}
-        <View style={styles.telemetryCard}>
-          <Text style={styles.telemetryTitle}>📡 Real-Time Dispatch Pipeline</Text>
-          <Text style={styles.telemetryBody}>
-            Tapping "Place Order" transmits your GPS coordinates to the FastAPI backend, calculates Haversine nearest dark-store geometry, and broadcasts live 3D Arc vectors to the Streamlit Command Center.
-          </Text>
-        </View>
+        {/* Dark Store Router Telemetry Card */}
+        {cartItems.length > 0 && (
+          <View style={styles.telemetryCard}>
+            <View style={styles.telemetryHeader}>
+              <View style={styles.telemetryPill}>
+                <Text style={styles.telemetryDot}>●</Text>
+                <Text style={styles.telemetryPillText}>AI DISPATCH ENGINE</Text>
+              </View>
+              <Text style={styles.telemetrySubTag}>12 Operational Hubs</Text>
+            </View>
+            <Text style={styles.telemetryTitle}>Predictive Dark Store Routing</Text>
+            <Text style={styles.telemetryText}>
+              Checkout calculates the exact Haversine vector from your location to all operational dark stores, evaluates modifiers, and dispatches your order instantly to the 3D Command Center.
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
-      {/* 3. Sticky Bottom Checkout Footer */}
-      <View style={styles.stickyFooter}>
-        <View style={styles.footerPriceCol}>
-          <Text style={styles.footerToPayLabel}>TO PAY</Text>
-          <Text style={styles.footerGrandTotal}>₹{grandTotal}</Text>
-          <Text style={styles.footerSavingsText}>Free Delivery Saved ₹25</Text>
-        </View>
-
-        <TouchableOpacity
-          style={[styles.placeOrderButton, (isPlacingOrder || cartItems.length === 0) && styles.disabledButton]}
-          onPress={handlePlaceOrder}
-          disabled={isPlacingOrder || cartItems.length === 0}
-          activeOpacity={0.88}
-        >
-          {isPlacingOrder ? (
-            <ActivityIndicator color="#FFF" size="small" />
-          ) : (
-            <View style={styles.placeOrderRow}>
-              <Text style={styles.placeOrderText}>Place Order</Text>
-              <Text style={styles.placeOrderChevron}>➔</Text>
+      {/* Sticky Bottom Checkout Footer */}
+      {cartItems.length > 0 && (
+        <View style={styles.footer}>
+          <View style={styles.footerPriceCol}>
+            <Text style={styles.toPayLabel}>TO PAY</Text>
+            <View style={styles.totalWithSavings}>
+              <Text style={styles.grandTotalText}>₹{grandTotal}</Text>
+              {savings > 0 && (
+                <View style={styles.savingsPill}>
+                  <Text style={styles.savingsPillText}>SAVE ₹{savings}</Text>
+                </View>
+              )}
             </View>
-          )}
-        </TouchableOpacity>
-      </View>
+            <Text style={styles.freeDeliveryLabel}>
+              {isServiceable ? '⚡ FREE Delivery applied' : '⚠️ Address unserviceable'}
+            </Text>
+          </View>
 
-      {/* 4. Celebratory Animated Modal */}
+          <TouchableOpacity
+            style={[
+              styles.checkoutBtn,
+              (isLoading || !isServiceable) && styles.checkoutBtnDisabled,
+            ]}
+            onPress={handleCheckout}
+            disabled={isLoading || !isServiceable}
+            activeOpacity={0.88}
+          >
+            <View style={styles.btnRow}>
+              <Text style={styles.checkoutText}>
+                {isLoading
+                  ? 'Routing...'
+                  : !isServiceable
+                  ? 'Out of Zone'
+                  : 'Place Order'}
+              </Text>
+              {isServiceable && !isLoading && <Text style={styles.checkoutArrow}>➔</Text>}
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Animated Loading Overlay */}
+      <LoadingOverlay visible={isLoading} />
+
+      {/* Celebratory Order Confirmed Modal */}
       <CelebrationModal
         visible={celebrationVisible}
         order={confirmedOrder}
-        onClose={() => setCelebrationVisible(false)}
+        onClose={handleCloseCelebration}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderSubtle,
+    ...SHADOWS.small,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: SPACING.md,
+    padding: SPACING.xs,
+  },
+  backArrow: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  headerTitle: {
+    fontSize: TYPOGRAPHY.h3,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    letterSpacing: -0.3,
+  },
+  headerSubtitle: {
+    fontSize: TYPOGRAPHY.caption,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+    marginTop: 1,
+  },
+  clearBtn: {
+    backgroundColor: COLORS.dangerRedLight,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+  },
+  clearBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.dangerRed,
   },
   scrollArea: {
     flex: 1,
   },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: SPACING.xxxl,
+    paddingBottom: 110,
   },
-  slaBanner: {
+  addressCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    ...SHADOWS.card,
+  },
+  slaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  slaBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.brandYellowLight,
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
-    borderColor: '#F6E05E',
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
+    borderColor: '#DDD6FE',
   },
-  slaIconBadge: {
+  slaBolt: {
+    fontSize: 12,
+    marginRight: 4,
+  },
+  slaText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#4E2298',
+    letterSpacing: 0.4,
+  },
+  gpsStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surfaceSecondary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+  },
+  gpsDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    marginRight: 5,
+  },
+  gpsActive: {
+    backgroundColor: '#4E2298',
+  },
+  gpsManual: {
+    backgroundColor: COLORS.warningAmber,
+  },
+  gpsStatusText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+  },
+  addressDivider: {
+    height: 1,
+    backgroundColor: COLORS.borderSubtle,
+    marginVertical: SPACING.md,
+  },
+  addressBody: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  addressIconCircle: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.brandYellow,
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
-  slaLightning: {
-    fontSize: 18,
+  addressIconEmoji: {
+    fontSize: 17,
   },
-  slaTextCol: {
+  addressTextCol: {
     flex: 1,
   },
-  slaBannerTitle: {
-    fontSize: 13.5,
+  addressLabel: {
+    fontSize: 10,
     fontWeight: '800',
-    color: '#744210',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
-  slaBannerSub: {
-    fontSize: 11,
-    color: '#975A16',
+  addressLine: {
+    fontSize: TYPOGRAPHY.bodySmall,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    lineHeight: 18,
+  },
+  coordsLine: {
+    fontSize: 10,
+    color: COLORS.textMuted,
     marginTop: 2,
-    lineHeight: 15,
   },
-  cartSection: {
+  itemsSection: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderSubtle,
     marginBottom: SPACING.md,
     ...SHADOWS.card,
   },
-  cartSectionHeader: {
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+    paddingBottom: SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderSubtle,
+  },
+  sectionTitleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: TYPOGRAPHY.h3,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    letterSpacing: -0.2,
+  },
+  countBadge: {
+    backgroundColor: COLORS.surfaceSecondary,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+    marginLeft: 6,
+  },
+  countBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.textSecondary,
+  },
+  addMoreLink: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#4E2298',
+  },
+  emptyCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.xxxl,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    marginTop: SPACING.lg,
+    ...SHADOWS.card,
+  },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#EDE9FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  emptyIcon: {
+    fontSize: 34,
+  },
+  emptyTitle: {
+    fontSize: TYPOGRAPHY.h2,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+  },
+  emptySub: {
+    fontSize: TYPOGRAPHY.bodySmall,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginVertical: SPACING.md,
+    lineHeight: 18,
+    paddingHorizontal: SPACING.md,
+  },
+  shopNowBtn: {
+    backgroundColor: '#4E2298',
+    paddingHorizontal: SPACING.xxl,
+    paddingVertical: 12,
+    borderRadius: BORDER_RADIUS.full,
+    marginTop: SPACING.sm,
+    shadowColor: '#4E2298',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  shopNowText: {
+    color: '#FFF',
+    fontSize: TYPOGRAPHY.bodySmall,
+    fontWeight: '800',
+  },
+  instructionsSection: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
+  },
+  instructionsSub: {
+    fontSize: TYPOGRAPHY.caption,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+    marginBottom: SPACING.md,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    paddingVertical: 2,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    backgroundColor: COLORS.surfaceSecondary,
+    marginRight: 8,
+  },
+  chipSelected: {
+    borderColor: '#4E2298',
+    backgroundColor: '#EDE9FE',
+  },
+  chipIcon: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  chipTextSelected: {
+    color: '#4E2298',
+    fontWeight: '800',
+  },
+  telemetryCard: {
+    backgroundColor: '#F5F3FF',
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  telemetryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SPACING.xs,
   },
-  cartSectionTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: COLORS.textPrimary,
-  },
-  reviewStepText: {
-    fontSize: 11.5,
-    color: COLORS.textMuted,
-    fontWeight: '600',
-  },
-  emptyContainer: {
-    paddingVertical: SPACING.xxxl,
+  telemetryPill: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.xs,
   },
-  emptyIcon: {
-    fontSize: 32,
-    marginBottom: SPACING.xs,
+  telemetryDot: {
+    fontSize: 8,
+    color: '#4E2298',
+    marginRight: 5,
   },
-  emptyTitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
+  telemetryPillText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#4E2298',
+    letterSpacing: 0.5,
   },
-  telemetryCard: {
-    backgroundColor: '#EEF2FF',
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1,
-    borderColor: '#C7D2FE',
-    padding: SPACING.md,
-    marginTop: SPACING.xs,
+  telemetrySubTag: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#6D28D9',
   },
   telemetryTitle: {
-    fontSize: 12.5,
+    fontSize: TYPOGRAPHY.bodySmall,
     fontWeight: '800',
-    color: COLORS.accentIndigo,
+    color: '#2E0854',
     marginBottom: 4,
   },
-  telemetryBody: {
+  telemetryText: {
     fontSize: 11.5,
-    color: '#3730A3',
+    color: '#4C1D95',
     lineHeight: 16,
   },
-  stickyFooter: {
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -364,58 +848,203 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: COLORS.borderSubtle,
     ...SHADOWS.stickyFooter,
   },
   footerPriceCol: {
     flex: 1,
+    marginRight: SPACING.md,
   },
-  footerToPayLabel: {
-    fontSize: 10,
+  toPayLabel: {
+    fontSize: 9.5,
     fontWeight: '800',
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
     letterSpacing: 0.5,
   },
-  footerGrandTotal: {
-    fontSize: 20,
+  totalWithSavings: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 1,
+  },
+  grandTotalText: {
+    fontSize: TYPOGRAPHY.h2,
     fontWeight: '900',
     color: COLORS.textPrimary,
+    letterSpacing: -0.5,
   },
-  footerSavingsText: {
-    fontSize: 11,
+  savingsPill: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.xs,
+    marginLeft: 6,
+  },
+  savingsPillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#4E2298',
+  },
+  freeDeliveryLabel: {
+    fontSize: 10.5,
     fontWeight: '700',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
   },
-  placeOrderButton: {
-    backgroundColor: COLORS.brandGreen,
-    paddingHorizontal: SPACING.xxl,
+  checkoutBtn: {
+    backgroundColor: '#4E2298',
+    paddingHorizontal: SPACING.xl,
     paddingVertical: 14,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 165,
-    shadowColor: COLORS.brandGreen,
+    minWidth: 155,
+    shadowColor: '#4E2298',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  disabledButton: {
-    opacity: 0.65,
+  checkoutBtnDisabled: {
+    backgroundColor: COLORS.textMuted,
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  placeOrderRow: {
+  btnRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  placeOrderText: {
+  checkoutText: {
     color: '#FFF',
-    fontSize: 15,
+    fontSize: TYPOGRAPHY.bodyMedium,
     fontWeight: '800',
     marginRight: 6,
   },
-  placeOrderChevron: {
+  checkoutArrow: {
     color: '#FFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
+  },
+  serviceabilityAlertCard: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1.5,
+    borderColor: '#F87171',
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
+  },
+  serviceabilityAlertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  serviceabilityAlertEmoji: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  serviceabilityAlertTitle: {
+    fontSize: TYPOGRAPHY.bodyMedium,
+    fontWeight: '800',
+    color: '#991B1B',
+  },
+  serviceabilityAlertBody: {
+    fontSize: TYPOGRAPHY.bodySmall,
+    color: '#B91C1C',
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  serviceabilityAlertSub: {
+    fontSize: TYPOGRAPHY.caption,
+    fontWeight: '600',
+    color: '#7F1D1D',
+  },
+  customNotesBox: {
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderSubtle,
+  },
+  customNotesLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+  },
+  customNotesInput: {
+    backgroundColor: COLORS.surfaceSecondary,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 10,
+    fontSize: 12.5,
+    color: COLORS.textPrimary,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+  },
+  substitutionSection: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    marginBottom: SPACING.md,
+    ...SHADOWS.card,
+  },
+  substitutionList: {
+    marginTop: 4,
+  },
+  substitutionCard: {
+    backgroundColor: COLORS.surfaceSecondary,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: 8,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
+  substitutionCardSelected: {
+    backgroundColor: '#EDE9FE',
+    borderColor: '#4E2298',
+  },
+  substitutionRadioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  radioCircleSelected: {
+    borderColor: '#4E2298',
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4E2298',
+  },
+  substitutionIcon: {
+    fontSize: 18,
+    marginRight: 10,
+  },
+  substitutionTextCol: {
+    flex: 1,
+  },
+  substitutionTitle: {
+    fontSize: TYPOGRAPHY.bodySmall,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  substitutionTitleSelected: {
+    color: '#4E2298',
+    fontWeight: '800',
+  },
+  substitutionSubtitle: {
+    fontSize: 10.5,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
 });

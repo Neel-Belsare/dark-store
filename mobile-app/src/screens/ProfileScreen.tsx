@@ -52,9 +52,9 @@ export const ProfileScreen: React.FC = () => {
         </View>
         <View style={styles.profileInfo}>
           <Text style={styles.userName} numberOfLines={1}>{userEmail}</Text>
-          <Text style={styles.userPhone}>Quick Commerce Customer</Text>
+          <Text style={styles.userPhone}>InventoryPro Registered Customer</Text>
           <View style={styles.membershipPill}>
-            <Text style={styles.membershipText}>⚡ BLINKIT VIP • FREE DELIVERY</Text>
+            <Text style={styles.membershipText}>⚡ VIP CUSTOMER • FREE PRIORITY DISPATCH</Text>
           </View>
         </View>
       </View>
@@ -92,7 +92,7 @@ export const ProfileScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Backend API & Command Center Telemetry Links */}
+      {/* Quick-Commerce Telemetry & Command Center Links */}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Quick-Commerce Infrastructure</Text>
         
@@ -155,14 +155,14 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
-    shadowColor: COLORS.brandGreen,
-    shadowOffset: { width: 0, height: 3 },
+    shadowColor: '#4E2298',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 4,
   },
   avatarText: {
@@ -184,9 +184,9 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   membershipPill: {
-    backgroundColor: COLORS.brandYellowLight,
+    backgroundColor: '#EDE9FE',
     borderWidth: 1,
-    borderColor: '#F6E05E',
+    borderColor: '#DDD6FE',
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   membershipText: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: '#744210',
+    color: '#4E2298',
     letterSpacing: 0.4,
   },
   sectionCard: {
@@ -222,8 +222,8 @@ const styles = StyleSheet.create({
   tagHome: {
     fontSize: 10,
     fontWeight: '800',
-    color: COLORS.brandGreen,
-    backgroundColor: COLORS.brandGreenLight,
+    color: '#4E2298',
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   statNum: {
     fontSize: 18,
     fontWeight: '900',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
   },
   statLabel: {
     fontSize: 11,
@@ -285,9 +285,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   webAppBtn: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#EDE9FE',
     borderWidth: 1,
-    borderColor: '#C7D2FE',
+    borderColor: '#DDD6FE',
     borderRadius: BORDER_RADIUS.md,
     paddingVertical: 12,
     alignItems: 'center',
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   webAppBtnText: {
     fontSize: 13,
     fontWeight: '800',
-    color: COLORS.accentIndigo,
+    color: '#4E2298',
   },
   logoutBtn: {
     backgroundColor: '#FEF2F2',

@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
@@ -75,9 +74,8 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
   const [confirmedOrder, setConfirmedOrder] = useState<DispatchedOrder | null>(null);
   const [celebrationVisible, setCelebrationVisible] = useState<boolean>(false);
   const [serviceability, setServiceability] = useState<ServiceabilityResponse | null>(null);
-  const [checkingServiceability, setCheckingServiceability] = useState<boolean>(false);
+  const [, setCheckingServiceability] = useState<boolean>(false);
 
-  // Real-time GeoJSON Catchment Serviceability Evaluation
   useEffect(() => {
     if (location) {
       let isMounted = true;
@@ -119,13 +117,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
       return;
     }
 
-    // 1. Show animated "Finding your nearest dark store..." overlay
     setIsLoading(true);
 
     try {
-      // 2. Transmit coordinates and enriched payload to Python FastAPI backend
       const response = await placeLiveOrder(location.latitude, location.longitude, {
-        customer_name: 'Neel Belsare',
+        customer_name: 'Mansi Gaike',
         customer_phone: '+91 98765 43210',
         delivery_address: address,
         delivery_notes: deliveryNotes,
@@ -138,8 +134,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
         order_value: grandTotal,
       });
 
-      // Artificial small delay so the user experiences the sleek loading animation
-      await new Promise((r) => setTimeout(r, 900));
+      await new Promise((r) => setTimeout(r, 800));
 
       if (response && response.success) {
         setConfirmedOrder(response.order);
@@ -156,7 +151,6 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
 
   const handleCloseCelebration = async () => {
     setCelebrationVisible(false);
-    // Bi-directional Done/Reset Sync: Notify backend & Streamlit to return to idle
     try {
       await resetLiveOrder();
     } catch (err) {
@@ -179,7 +173,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
 
   return (
     <View style={styles.container}>
-      {/* Top Navigation Bar */}
+      {/* Top Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity
@@ -248,7 +242,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
           </View>
         </View>
 
-        {/* Catchment Serviceability Warning Banner (When outside dark store radius) */}
+        {/* Catchment Serviceability Warning */}
         {!isServiceable && (
           <View style={styles.serviceabilityAlertCard}>
             <View style={styles.serviceabilityAlertHeader}>
@@ -260,7 +254,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
                 `Your selected address is ${serviceability?.distance_km ?? 'beyond'} km away, which exceeds our 4.0 km 10-minute dark store delivery perimeter.`}
             </Text>
             <Text style={styles.serviceabilityAlertSub}>
-              Please select an address within Aurangabad dark store coverage (e.g., Osmanpura, CIDCO, Kranti Chowk).
+              Please select an address within dark store coverage (e.g., Osmanpura, CIDCO, Kranti Chowk).
             </Text>
           </View>
         )}
@@ -290,14 +284,13 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
             ))}
           </View>
         ) : (
-          /* Empty Cart State */
           <View style={styles.emptyCard}>
             <View style={styles.emptyIconCircle}>
               <Text style={styles.emptyIcon}>🛍️</Text>
             </View>
             <Text style={styles.emptyTitle}>Your basket is empty</Text>
             <Text style={styles.emptySub}>
-              Browse through fresh groceries and everyday essentials dispatched in 10 minutes from our nearest dark store.
+              Browse through fresh groceries dispatched in 10 minutes from our nearest dark store.
             </Text>
             <TouchableOpacity
               style={styles.shopNowBtn}
@@ -309,7 +302,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
           </View>
         )}
 
-        {/* Delivery Instructions & Custom Notes Card */}
+        {/* Delivery Notes */}
         {cartItems.length > 0 && (
           <View style={styles.instructionsSection}>
             <Text style={styles.sectionTitle}>Delivery Notes & Instructions</Text>
@@ -351,9 +344,8 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
               })}
             </ScrollView>
 
-            {/* Custom Notes Input Field */}
             <View style={styles.customNotesBox}>
-              <Text style={styles.customNotesLabel}>Courier Note / Flat / Gate Details:</Text>
+              <Text style={styles.customNotesLabel}>Courier Note / Gate Details:</Text>
               <TextInput
                 style={styles.customNotesInput}
                 placeholder="e.g. Ring bell twice, leave with security guard..."
@@ -366,7 +358,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
           </View>
         )}
 
-        {/* Out-of-Stock Substitution Preferences */}
+        {/* Substitution Preferences */}
         {cartItems.length > 0 && (
           <View style={styles.substitutionSection}>
             <Text style={styles.sectionTitle}>Item Substitution Policy</Text>
@@ -412,7 +404,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
           />
         )}
 
-        {/* Dark Store Haversine Router Telemetry Card */}
+        {/* Dark Store Router Telemetry Card */}
         {cartItems.length > 0 && (
           <View style={styles.telemetryCard}>
             <View style={styles.telemetryHeader}>
@@ -420,21 +412,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({ onNavigateToHome }) => {
                 <Text style={styles.telemetryDot}>●</Text>
                 <Text style={styles.telemetryPillText}>AI DISPATCH ENGINE</Text>
               </View>
-              <Text style={styles.telemetrySubTag}>12 Aurangabad Hubs</Text>
+              <Text style={styles.telemetrySubTag}>12 Operational Hubs</Text>
             </View>
             <Text style={styles.telemetryTitle}>Predictive Dark Store Routing</Text>
             <Text style={styles.telemetryText}>
-              Checkout calculates the exact Haversine vector from your location to all 12 operational dark stores in Aurangabad, evaluates weather & traffic modifiers, and dispatches your order instantly to the Streamlit Command Center.
-            </Text>
-          </View>
-        )}
-
-        {/* Cancellation Notice */}
-        {cartItems.length > 0 && (
-          <View style={styles.policyCard}>
-            <Text style={styles.policyIcon}>⏱️</Text>
-            <Text style={styles.policyText}>
-              Orders cannot be cancelled once packed to guarantee rapid 10-minute dispatch.
+              Checkout calculates the exact Haversine vector from your location to all operational dark stores, evaluates modifiers, and dispatches your order instantly to the 3D Command Center.
             </Text>
           </View>
         )}
@@ -572,12 +554,12 @@ const styles = StyleSheet.create({
   slaBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.brandYellowLight,
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#DDD6FE',
   },
   slaBolt: {
     fontSize: 12,
@@ -586,7 +568,7 @@ const styles = StyleSheet.create({
   slaText: {
     fontSize: 10,
     fontWeight: '900',
-    color: '#854D0E',
+    color: '#4E2298',
     letterSpacing: 0.4,
   },
   gpsStatusPill: {
@@ -606,7 +588,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   gpsActive: {
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
   },
   gpsManual: {
     backgroundColor: COLORS.warningAmber,
@@ -629,12 +611,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.brandGreenLight,
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
     borderWidth: 1,
-    borderColor: '#C6F6D5',
+    borderColor: '#DDD6FE',
   },
   addressIconEmoji: {
     fontSize: 17,
@@ -704,7 +686,7 @@ const styles = StyleSheet.create({
   addMoreLink: {
     fontSize: 12.5,
     fontWeight: '800',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
   },
   emptyCard: {
     backgroundColor: COLORS.surface,
@@ -720,7 +702,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: COLORS.brandYellowLight,
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
@@ -742,15 +724,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   shopNowBtn: {
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
     paddingHorizontal: SPACING.xxl,
     paddingVertical: 12,
     borderRadius: BORDER_RADIUS.full,
     marginTop: SPACING.sm,
-    shadowColor: COLORS.brandGreen,
+    shadowColor: '#4E2298',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 3,
   },
   shopNowText: {
@@ -789,8 +771,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   chipSelected: {
-    borderColor: COLORS.brandGreen,
-    backgroundColor: COLORS.brandGreenLight,
+    borderColor: '#4E2298',
+    backgroundColor: '#EDE9FE',
   },
   chipIcon: {
     fontSize: 14,
@@ -802,14 +784,14 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   chipTextSelected: {
-    color: COLORS.brandGreen,
+    color: '#4E2298',
     fontWeight: '800',
   },
   telemetryCard: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#F5F3FF',
     borderRadius: BORDER_RADIUS.xl,
     borderWidth: 1,
-    borderColor: '#C7D2FE',
+    borderColor: '#DDD6FE',
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
@@ -822,57 +804,37 @@ const styles = StyleSheet.create({
   telemetryPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E0E7FF',
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: BORDER_RADIUS.xs,
   },
   telemetryDot: {
     fontSize: 8,
-    color: COLORS.accentIndigo,
+    color: '#4E2298',
     marginRight: 5,
   },
   telemetryPillText: {
     fontSize: 9.5,
     fontWeight: '800',
-    color: COLORS.accentIndigo,
+    color: '#4E2298',
     letterSpacing: 0.5,
   },
   telemetrySubTag: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#6366F1',
+    color: '#6D28D9',
   },
   telemetryTitle: {
     fontSize: TYPOGRAPHY.bodySmall,
     fontWeight: '800',
-    color: '#1E1B4B',
+    color: '#2E0854',
     marginBottom: 4,
   },
   telemetryText: {
     fontSize: 11.5,
-    color: '#4338CA',
+    color: '#4C1D95',
     lineHeight: 16,
-  },
-  policyCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surfaceSecondary,
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginBottom: SPACING.md,
-  },
-  policyIcon: {
-    fontSize: 16,
-    marginRight: SPACING.sm,
-  },
-  policyText: {
-    flex: 1,
-    fontSize: TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
-    lineHeight: 15,
   },
   footer: {
     position: 'absolute',
@@ -911,7 +873,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   savingsPill: {
-    backgroundColor: COLORS.brandGreenLight,
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: BORDER_RADIUS.xs,
@@ -920,30 +882,31 @@ const styles = StyleSheet.create({
   savingsPillText: {
     fontSize: 9,
     fontWeight: '800',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
   },
   freeDeliveryLabel: {
     fontSize: 10.5,
     fontWeight: '700',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
   },
   checkoutBtn: {
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
     paddingHorizontal: SPACING.xl,
     paddingVertical: 14,
     borderRadius: BORDER_RADIUS.lg,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 155,
-    shadowColor: COLORS.brandGreen,
+    shadowColor: '#4E2298',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 5,
   },
   checkoutBtnDisabled: {
     backgroundColor: COLORS.textMuted,
     shadowOpacity: 0,
+    elevation: 0,
   },
   btnRow: {
     flexDirection: 'row',
@@ -1037,8 +1000,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   substitutionCardSelected: {
-    backgroundColor: COLORS.brandGreenLight,
-    borderColor: COLORS.brandGreen,
+    backgroundColor: '#EDE9FE',
+    borderColor: '#4E2298',
   },
   substitutionRadioRow: {
     flexDirection: 'row',
@@ -1055,13 +1018,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   radioCircleSelected: {
-    borderColor: COLORS.brandGreen,
+    borderColor: '#4E2298',
   },
   radioDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
   },
   substitutionIcon: {
     fontSize: 18,
@@ -1076,7 +1039,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   substitutionTitleSelected: {
-    color: COLORS.brandGreenDark,
+    color: '#4E2298',
     fontWeight: '800',
   },
   substitutionSubtitle: {

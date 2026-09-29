@@ -8,9 +8,8 @@ import {
   Switch,
   ActivityIndicator,
   Alert,
-  Platform,
 } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, SHADOWS, TYPOGRAPHY } from '../constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { RealDeliveryMap } from '../components/RealDeliveryMap';
 import { getLatestOrder, updateRiderStatus } from '../services/api';
 import { DispatchedOrder, RiderOrderStatus, RiderShiftStats } from '../types';
@@ -29,7 +28,6 @@ export const RiderScreen: React.FC = () => {
     rating: 4.94,
   });
 
-  // Fetch active order from FastAPI / Supabase
   const pollActiveOrder = useCallback(async () => {
     try {
       const order = await getLatestOrder();
@@ -44,13 +42,11 @@ export const RiderScreen: React.FC = () => {
         } else {
           setRiderStatus('incoming');
         }
-      } else if (!activeOrder) {
-        // No active order from backend
       }
     } catch (e) {
       console.warn('Rider poll error:', e);
     }
-  }, [activeOrder]);
+  }, []);
 
   useEffect(() => {
     pollActiveOrder();
@@ -58,7 +54,6 @@ export const RiderScreen: React.FC = () => {
     return () => clearInterval(interval);
   }, [pollActiveOrder]);
 
-  // Demo Fallback Order generator when user clicks "Simulate Incoming Dispatch"
   const handleSimulateDispatch = () => {
     const mockOrder: DispatchedOrder = {
       order_id: `CSN-RDR-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -66,7 +61,7 @@ export const RiderScreen: React.FC = () => {
       cust_lon: 75.3654,
       customer_name: 'Aditi Sharma',
       delivery_address: 'Flat 402, Royal Palms, Cannaught Place, CIDCO',
-      delivery_notes: 'Leave at front security desk. Don\'t ring bell.',
+      delivery_notes: "Leave at front security desk. Don't ring bell.",
       substitution_preference: 'similar',
       assigned_store: 'Store 1 - CIDCO Hub',
       store_lat: 19.8735,
@@ -79,7 +74,7 @@ export const RiderScreen: React.FC = () => {
       items: [
         'Amul Taaza Toned Fresh Milk (x2)',
         'Britannia 100% Whole Wheat Bread (x1)',
-        'Lay\'s India\'s Magic Masala Chips (x2)',
+        "Lay's India's Magic Masala Chips (x2)",
       ],
       order_val: 179,
       rider: 'Rahul S. (Rider #18)',
@@ -93,7 +88,6 @@ export const RiderScreen: React.FC = () => {
     setItemsChecked({});
   };
 
-  // Status transitions
   const handleAcceptOrder = async () => {
     if (!activeOrder) return;
     setLoading(true);
@@ -145,7 +139,7 @@ export const RiderScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* 1. Rider Partner Header & Duty Status */}
+      {/* Rider Partner Header */}
       <View style={styles.partnerHeader}>
         <View style={styles.riderProfileRow}>
           <View style={styles.riderAvatar}>
@@ -174,13 +168,13 @@ export const RiderScreen: React.FC = () => {
           <Switch
             value={isOnline}
             onValueChange={setIsOnline}
-            trackColor={{ false: '#94A3B8', true: '#10B981' }}
+            trackColor={{ false: '#64748B', true: '#10B981' }}
             thumbColor="#FFFFFF"
           />
         </View>
       </View>
 
-      {/* 2. Today's Performance & Earnings Strip */}
+      {/* Today's Performance & Earnings Strip */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>₹{stats.earningsToday}</Text>
@@ -204,18 +198,17 @@ export const RiderScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 3. Active Order / Dispatch Management Card */}
+      {/* Active Order Card */}
       {!isOnline ? (
         <View style={styles.offlinePlaceholder}>
           <Text style={styles.placeholderEmoji}>⏸️</Text>
           <Text style={styles.placeholderTitle}>You are currently Offline</Text>
           <Text style={styles.placeholderSub}>
-            Toggle your status to Online above to receive fast dark-store dispatch orders in Aurangabad.
+            Toggle your status to Online above to receive fast dispatch orders in Aurangabad.
           </Text>
         </View>
       ) : activeOrder ? (
         <View style={styles.orderCard}>
-          {/* Top Order Pill & Payout */}
           <View style={styles.orderTopBar}>
             <View>
               <Text style={styles.orderIdText}>Order #{activeOrder.order_id}</Text>
@@ -227,7 +220,7 @@ export const RiderScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Stepper Progress Indicator */}
+          {/* Stepper Progress */}
           <View style={styles.stepperContainer}>
             <View style={[styles.stepItem, riderStatus !== 'incoming' && styles.stepItemActive]}>
               <View style={[styles.stepCircle, riderStatus !== 'incoming' && styles.stepCircleActive]}>
@@ -291,7 +284,7 @@ export const RiderScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Interactive Road Navigation Map */}
+          {/* Turn-by-Turn Map */}
           <View style={styles.mapSection}>
             <Text style={styles.mapHeaderTitle}>🗺️ Live Turn-by-Turn Road Route</Text>
             <RealDeliveryMap
@@ -307,7 +300,7 @@ export const RiderScreen: React.FC = () => {
             />
           </View>
 
-          {/* Item Checklist for Bag Packing */}
+          {/* Items Checklist */}
           <View style={styles.itemsBox}>
             <Text style={styles.itemsHeader}>📦 Items to Verify ({activeOrder.items?.length || 0}):</Text>
             {activeOrder.items && activeOrder.items.map((item, idx) => (
@@ -327,10 +320,10 @@ export const RiderScreen: React.FC = () => {
             ))}
           </View>
 
-          {/* Contextual Action Stepper Buttons */}
+          {/* Stepper Buttons */}
           <View style={styles.actionSection}>
             {loading ? (
-              <ActivityIndicator size="large" color={COLORS.brandGreen} />
+              <ActivityIndicator size="large" color="#4E2298" />
             ) : riderStatus === 'incoming' ? (
               <TouchableOpacity
                 style={styles.primaryActionBtn}
@@ -383,7 +376,7 @@ export const RiderScreen: React.FC = () => {
           <Text style={styles.radarEmoji}>📡</Text>
           <Text style={styles.waitingTitle}>Scanning for Dispatch Orders...</Text>
           <Text style={styles.waitingSub}>
-            You are stationed in a high-demand quick commerce zone (CIDCO Sector N-4). Orders are automatically dispatched to the nearest available rider.
+            Stationed in CIDCO Sector N-4. Incoming orders are dispatched automatically based on proximity.
           </Text>
 
           <TouchableOpacity
@@ -396,9 +389,9 @@ export const RiderScreen: React.FC = () => {
         </View>
       )}
 
-      {/* 4. Safety & Rider Support Notice */}
+      {/* Rider Protocol Notice */}
       <View style={styles.supportCard}>
-        <Text style={styles.supportTitle}>🛡️ Aurangabad Rider Safety & Protocol</Text>
+        <Text style={styles.supportTitle}>🛡️ Aurangabad Rider Protocol</Text>
         <Text style={styles.supportPoint}>• Max speed limit: 35 km/h on internal sector streets.</Text>
         <Text style={styles.supportPoint}>• Wear high-visibility helmet and dark store rain windcheater.</Text>
         <Text style={styles.supportPoint}>• Cold-bag insulation mandatory for dairy & ice cream items.</Text>
@@ -417,11 +410,15 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxxl,
   },
   partnerHeader: {
-    backgroundColor: COLORS.surfaceDark,
+    backgroundColor: '#1E1035',
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
-    ...SHADOWS.card,
+    shadowColor: '#1E1035',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
   },
   riderProfileRow: {
     flexDirection: 'row',
@@ -432,7 +429,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
@@ -454,24 +451,24 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   verifiedBadge: {
-    backgroundColor: '#F59E0B',
+    backgroundColor: '#8B5CF6',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   verifiedText: {
-    color: '#000000',
+    color: '#FFFFFF',
     fontSize: 9,
     fontWeight: '900',
   },
   vehicleText: {
-    color: '#94A3B8',
+    color: '#CBD5E1',
     fontSize: 12,
     fontWeight: '500',
     marginTop: 2,
   },
   hubSubtext: {
-    color: '#38BDF8',
+    color: '#A78BFA',
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
@@ -544,7 +541,7 @@ const styles = StyleSheet.create({
   statDelta: {
     fontSize: 9,
     fontWeight: '700',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
     marginTop: 2,
   },
   orderCard: {
@@ -573,23 +570,23 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   payoutBadge: {
-    backgroundColor: COLORS.brandGreenLight,
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.brandGreenBorder,
+    borderColor: '#DDD6FE',
   },
   payoutAmount: {
     fontSize: 16,
     fontWeight: '900',
-    color: COLORS.brandGreen,
+    color: '#4E2298',
   },
   payoutSub: {
     fontSize: 9,
     fontWeight: '700',
-    color: COLORS.brandGreenDark,
+    color: '#6D28D9',
   },
   stepperContainer: {
     flexDirection: 'row',
@@ -613,7 +610,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   stepCircleActive: {
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
   },
   stepNum: {
     fontSize: 11,
@@ -633,7 +630,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   stepLineActive: {
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
   },
   routeBox: {
     backgroundColor: COLORS.surfaceSecondary,
@@ -650,7 +647,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -727,7 +724,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   itemCheckRowDone: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#F5F3FF',
   },
   checkbox: {
     width: 20,
@@ -740,8 +737,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   checkboxActive: {
-    backgroundColor: COLORS.brandGreen,
-    borderColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
+    borderColor: '#4E2298',
   },
   checkMark: {
     color: '#FFFFFF',
@@ -762,11 +759,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   primaryActionBtn: {
-    backgroundColor: COLORS.brandGreen,
+    backgroundColor: '#4E2298',
     paddingVertical: 14,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
-    ...SHADOWS.card,
+    shadowColor: '#4E2298',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   primaryActionBtnText: {
     color: '#FFFFFF',
@@ -794,17 +795,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   nextOrderBtn: {
-    backgroundColor: COLORS.brandYellow,
+    backgroundColor: '#EDE9FE',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: '#EAB308',
+    borderColor: '#DDD6FE',
   },
   nextOrderBtnText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#4E2298',
   },
   waitingCard: {
     backgroundColor: COLORS.surface,
@@ -834,16 +835,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   simulateBtn: {
-    backgroundColor: COLORS.brandYellow,
+    backgroundColor: '#EDE9FE',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: '#EAB308',
+    borderColor: '#DDD6FE',
     ...SHADOWS.small,
   },
   simulateBtnText: {
-    color: '#0F172A',
+    color: '#4E2298',
     fontSize: 13,
     fontWeight: '800',
   },
@@ -870,21 +871,21 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   supportCard: {
-    backgroundColor: '#FEF9C3',
+    backgroundColor: '#F5F3FF',
     padding: 12,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: '#FDE047',
+    borderColor: '#DDD6FE',
   },
   supportTitle: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#854D0E',
+    color: '#4E2298',
     marginBottom: 4,
   },
   supportPoint: {
     fontSize: 10,
-    color: '#713F12',
+    color: '#5B21B6',
     lineHeight: 15,
   },
 });
