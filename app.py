@@ -814,28 +814,17 @@ footer {
 
 .stMainBlockContainer {
     max-width: 980px !important;
-    padding-top: 5vh !important;
-    padding-bottom: 5vh !important;
-    padding-left: 1.5rem !important;
-    padding-right: 1.5rem !important;
+    padding: 6vh 1.5rem !important;
     margin: 0 auto !important;
 }
 
-/* 2. Login Card Outer Container */
-div[class*="st-key-inventory_login_card"] {
+/* 2. Login Card Outer Container: Target the single horizontal block directly */
+[data-testid="stHorizontalBlock"] {
     background: #FFFFFF !important;
     border-radius: 26px !important;
-    box-shadow: 0 25px 60px -15px rgba(27, 10, 66, 0.16), 0 0 1px 1px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 25px 60px -15px rgba(27, 10, 66, 0.18), 0 0 1px 1px rgba(0, 0, 0, 0.05) !important;
     overflow: hidden !important;
     border: none !important;
-    padding: 0 !important;
-}
-
-div[class*="st-key-inventory_login_card"] > div {
-    padding: 0 !important;
-}
-
-div[class*="st-key-inventory_login_card"] [data-testid="stHorizontalBlock"] {
     display: flex !important;
     align-items: stretch !important;
     gap: 0 !important;
@@ -843,8 +832,8 @@ div[class*="st-key-inventory_login_card"] [data-testid="stHorizontalBlock"] {
     padding: 0 !important;
 }
 
-/* 3. Left Hero Column - Gradient applied directly on column */
-div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child {
+/* 3. Left Hero Column */
+[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
     background: linear-gradient(152deg, #3C1685 0%, #2E1066 48%, #1B0743 100%) !important;
     border-radius: 26px 0 0 26px !important;
     position: relative !important;
@@ -856,10 +845,10 @@ div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child {
 }
 
 /* Force left column children to fill 100% height */
-div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child > div,
-div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child [data-testid="stVerticalBlock"],
-div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child [data-testid="stElementContainer"],
-div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child [data-testid="stMarkdownContainer"] {
+[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child > div,
+[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child [data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child [data-testid="stElementContainer"],
+[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child [data-testid="stMarkdownContainer"] {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
@@ -870,7 +859,7 @@ div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child [da
 }
 
 /* 4. Right Form Column */
-div[class*="st-key-inventory_login_card"] [data-testid="column"]:last-child {
+[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
     background: #FFFFFF !important;
     border-radius: 0 26px 26px 0 !important;
     padding: 40px 48px 34px 48px !important;
@@ -913,18 +902,6 @@ div[data-testid="stTextInput"] input:focus {
     border-color: #3C1685 !important;
     background-color: #FFFFFF !important;
     box-shadow: 0 0 0 3px rgba(60, 22, 133, 0.12) !important;
-}
-
-/* Checkbox */
-div[data-testid="stCheckbox"] {
-    margin-top: 4px !important;
-}
-div[data-testid="stCheckbox"] label span {
-    font-size: 12.5px !important;
-    color: #4B5563 !important;
-}
-div[data-testid="stCheckbox"] input[type="checkbox"] {
-    accent-color: #3C1685 !important;
 }
 
 /* Sign In Button */
@@ -987,21 +964,21 @@ div[data-testid="stFormSubmitButton"] button:active {
         padding-top: 1.5rem !important;
         padding-bottom: 1.5rem !important;
     }
-    div[class*="st-key-inventory_login_card"] [data-testid="stHorizontalBlock"] {
+    [data-testid="stHorizontalBlock"] {
         flex-direction: column !important;
     }
-    div[class*="st-key-inventory_login_card"] [data-testid="column"]:first-child {
+    [data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
         border-radius: 26px 26px 0 0 !important;
         padding: 0 !important;
     }
-    div[class*="st-key-inventory_login_card"] [data-testid="column"]:last-child {
+    [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
         border-radius: 0 0 26px 26px !important;
         padding: 30px 22px !important;
     }
 }
 </style>"""
 
-LOGIN_HERO_HTML = """<div style="height: 100%; min-height: 520px; padding: 44px 38px 36px 38px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF;">
+LOGIN_HERO_HTML = """<div style="height: 100%; min-height: 500px; padding: 44px 38px 36px 38px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF;">
 <div style="position: absolute; top: -50px; right: -60px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(147, 51, 234, 0) 70%); pointer-events: none; z-index: 1;"></div>
 <div style="position: absolute; bottom: 20px; left: -60px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(45, 212, 191, 0.22) 0%, rgba(45, 212, 191, 0) 70%); pointer-events: none; z-index: 1;"></div>
 <div style="position: absolute; top: 220px; right: 30px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, rgba(124, 58, 237, 0) 70%); pointer-events: none; z-index: 1;"></div>
@@ -1098,74 +1075,76 @@ def render_login_screen():
     default_user = "sample_username"
     default_pass = "password@123"
 
-    with st.container(key="inventory_login_card"):
-        col_left, col_right = st.columns([1, 1.15], gap=0)
+    col_left, col_right = st.columns([1, 1.15], gap=0)
 
-        # ----------------------------------------------------------------------
-        # Left Hero Panel: InventoryPro Branding & Statistics
-        # ----------------------------------------------------------------------
-        with col_left:
-            st.markdown(LOGIN_HERO_HTML, unsafe_allow_html=True)
+    # ----------------------------------------------------------------------
+    # Left Hero Panel: InventoryPro Branding & Statistics
+    # ----------------------------------------------------------------------
+    with col_left:
+        st.markdown(LOGIN_HERO_HTML, unsafe_allow_html=True)
 
-        # ----------------------------------------------------------------------
-        # Right Form Panel: Welcome Back & Sign In
-        # ----------------------------------------------------------------------
-        with col_right:
-            st.markdown(LOGIN_FORM_HEADER_HTML, unsafe_allow_html=True)
+    # ----------------------------------------------------------------------
+    # Right Form Panel: Welcome Back & Sign In
+    # ----------------------------------------------------------------------
+    with col_right:
+        st.markdown(LOGIN_FORM_HEADER_HTML, unsafe_allow_html=True)
 
-            with st.form("inventory_login_form", clear_on_submit=False):
-                username_input = st.text_input(
-                    "Email Address",
-                    value=default_user,
-                    placeholder="you@example.com",
-                    key="login_email_input"
-                )
-                password_input = st.text_input(
-                    "Password",
-                    value=default_pass,
-                    type="password",
-                    placeholder="Enter your password",
-                    key="login_password_input"
-                )
+        with st.form("inventory_login_form", clear_on_submit=False):
+            username_input = st.text_input(
+                "Email Address",
+                value=default_user,
+                placeholder="you@example.com",
+                key="login_email_input"
+            )
+            password_input = st.text_input(
+                "Password",
+                value=default_pass,
+                type="password",
+                placeholder="Enter your password",
+                key="login_password_input"
+            )
 
-                col_rem, col_forgot = st.columns([1, 1])
-                with col_rem:
-                    remember_me = st.checkbox("Remember me", value=True, key="login_remember_me")
-                with col_forgot:
-                    st.markdown("""<div style="text-align: right; margin-top: 4px;"><a href="mailto:admin@inventorypro.com?subject=Password%20Reset%20Request" style="font-size: 12.5px; font-weight: 600; color: #431A8B; text-decoration: none;">Forgot password?</a></div>""", unsafe_allow_html=True)
+            # Clean inline Remember Me & Forgot Password without nested columns
+            st.markdown("""<div style="display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px 0;">
+<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4B5563; cursor: pointer; user-select: none;">
+<input type="checkbox" checked style="accent-color: #3C1685; width: 16px; height: 16px; cursor: pointer;">
+<span>Remember me</span>
+</label>
+<a href="mailto:admin@inventorypro.com?subject=Password%20Reset" style="font-size: 12.5px; font-weight: 600; color: #431A8B; text-decoration: none;">Forgot password?</a>
+</div>""", unsafe_allow_html=True)
 
-                submit_btn = st.form_submit_button("Sign In", use_container_width=True)
+            submit_btn = st.form_submit_button("Sign In", use_container_width=True)
 
-            # Social Sign-In, Footer, and Demo Credentials Note
-            st.markdown(LOGIN_SOCIAL_DIVIDER_HTML, unsafe_allow_html=True)
+        # Social Sign-In, Footer, and Demo Credentials Note
+        st.markdown(LOGIN_SOCIAL_DIVIDER_HTML, unsafe_allow_html=True)
 
-            # Submission Processing
-            if submit_btn:
-                if not username_input or not password_input:
-                    st.error("⚠️ Please enter your email/username and password.")
-                else:
-                    with st.spinner("Authenticating with Supabase Cloud..."):
-                        if supabase_client:
-                            auth_res = supabase_client.authenticate_user(username_input, password_input)
-                        else:
-                            is_valid = (username_input.strip() in ["sample_username", "you@example.com", "sample_username@inventorypro.com"]) and (password_input.strip() == "password@123")
-                            auth_res = {
-                                "authenticated": is_valid,
-                                "username": username_input.strip(),
-                                "full_name": "Operations Admin (Neel Belsare)",
-                                "role": "Lead Administrator",
-                                "source": "Supabase Local Verified",
-                                "error": "Invalid email/username or password. Access denied."
-                            }
+        # Submission Processing
+        if submit_btn:
+            if not username_input or not password_input:
+                st.error("⚠️ Please enter your email/username and password.")
+            else:
+                with st.spinner("Authenticating with Supabase Cloud..."):
+                    if supabase_client:
+                        auth_res = supabase_client.authenticate_user(username_input, password_input)
+                    else:
+                        is_valid = (username_input.strip() in ["sample_username", "you@example.com", "sample_username@inventorypro.com"]) and (password_input.strip() == "password@123")
+                        auth_res = {
+                            "authenticated": is_valid,
+                            "username": username_input.strip(),
+                            "full_name": "Operations Admin (Neel Belsare)",
+                            "role": "Lead Administrator",
+                            "source": "Supabase Local Verified",
+                            "error": "Invalid email/username or password. Access denied."
+                        }
 
-                        if auth_res.get("authenticated"):
-                            st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')}.")
-                            st.session_state["authenticated"] = True
-                            st.session_state["user_info"] = auth_res
-                            time.sleep(0.35)
-                            st.rerun()
-                        else:
-                            st.error(f"❌ {auth_res.get('error', 'Invalid email or password. Access denied.')}")
+                    if auth_res.get("authenticated"):
+                        st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')}.")
+                        st.session_state["authenticated"] = True
+                        st.session_state["user_info"] = auth_res
+                        time.sleep(0.35)
+                        st.rerun()
+                    else:
+                        st.error(f"❌ {auth_res.get('error', 'Invalid email or password. Access denied.')}")
 
 
 # ------------------------------------------------------------------------------
