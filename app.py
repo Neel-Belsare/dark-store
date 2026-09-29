@@ -1390,6 +1390,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+def render_html(html_str: str):
+    """
+    Renders pure HTML without Markdown converting lines with leading spaces into code blocks.
+    Uses st.html if available, or dedents before st.markdown.
+    """
+    clean = "\n".join(line.strip() for line in html_str.strip().splitlines())
+    if hasattr(st, "html"):
+        st.html(clean)
+    else:
+        st.markdown(clean, unsafe_allow_html=True)
+
+
 
 # ------------------------------------------------------------------------------
 # 3. Cached Data Ingestion & Synthesis Functions
@@ -2642,7 +2654,7 @@ kpis_html = f"""
   </div>
 </section>
 """
-st.markdown(kpis_html, unsafe_allow_html=True)
+render_html(kpis_html)
 
 # ------------------------------------------------------------------------------
 # 7. Dashboard Layout: Modern Structured Tabs
@@ -2670,36 +2682,33 @@ with tab_summary:
 
         if not high_demand_df.empty:
             max_orders_val = high_demand_df['Predicted Online Order Volume (Monthly)'].max()
-            rows_html = ""
+            rows_list = []
             for _, row in high_demand_df.iterrows():
                 orders_val = int(row['Predicted Online Order Volume (Monthly)'])
                 density_val = int(row['Population Density (per sq km)'])
                 pct = int((orders_val / max_orders_val) * 100) if max_orders_val > 0 else 50
-                rows_html += f"""
-                <div class="row">
-                  <div class="n">
-                    <strong>{row['Neighborhood']}</strong>
-                    <span>{orders_val:,} orders/mo · {density_val:,} people/km²</span>
-                    <div class="bar"><i style="width:{pct}%"></i></div>
-                  </div>
-                  <span class="tag">Add hub</span>
-                </div>
-                """
+                rows_list.append(
+                    f'<div class="row">'
+                    f'<div class="n">'
+                    f'<strong>{row["Neighborhood"]}</strong>'
+                    f'<span>{orders_val:,} orders/mo · {density_val:,} people/km²</span>'
+                    f'<div class="bar"><i style="width:{pct}%"></i></div>'
+                    f'</div>'
+                    f'<span class="tag">Add hub</span>'
+                    f'</div>'
+                )
+            rows_html = "".join(rows_list)
         else:
-            rows_html = """
-            <div style="padding: 12px 0; color: var(--ok); font-size: 13.5px; font-weight: 500;">
-                ✅ All micro-markets in current selection operate within single-store capacity limits.
-            </div>
-            """
+            rows_html = '<div style="padding: 12px 0; color: var(--ok); font-size: 13.5px; font-weight: 500;">✅ All micro-markets in current selection operate within single-store capacity limits.</div>'
 
-        high_volume_card_html = f"""
-        <div class="card" style="margin-bottom: 16px;">
-            <h2 class="card-title">🚨 High-volume micro-markets needing 2+ stores</h2>
-            <p class="hint">Clusters above 80,000 monthly orders need dual hubs to hold a sub-12 minute SLA.</p>
-            {rows_html}
-        </div>
-        """
-        st.markdown(high_volume_card_html, unsafe_allow_html=True)
+        high_volume_card_html = (
+            f'<div class="card" style="margin-bottom: 16px;">'
+            f'<h2 class="card-title">🚨 High-volume micro-markets needing 2+ stores</h2>'
+            f'<p class="hint">Clusters above 80,000 monthly orders need dual hubs to hold a sub-12 minute SLA.</p>'
+            f'{rows_html}'
+            f'</div>'
+        )
+        render_html(high_volume_card_html)
 
     with col_r:
         # Donut Chart SVG Card
@@ -2709,25 +2718,25 @@ with tab_summary:
         dash_active = round((active_count / total_count) * 99.9, 1) if total_count > 0 else 91.6
         dash_gap = round(99.9 - dash_active, 1)
 
-        donut_html = f"""
-        <div class="card" style="margin-bottom: 16px;">
-          <h2 class="card-title">🏬 Network composition</h2>
-          <p class="hint">Active vs. proposed store hubs</p>
-          <div class="donutbox">
-            <svg width="170" height="170" viewBox="0 0 42 42" role="img" aria-label="Donut: {active_count} active, {proposed_count} proposed">
-              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#E6E0D6" stroke-width="5"/>
-              <circle cx="21" cy="21" r="15.9" fill="none" stroke="#8B82F6" stroke-width="5" stroke-dasharray="{dash_active} {dash_gap}" stroke-linecap="round" transform="rotate(-90 21 21)"/>
-              <text x="21" y="22" text-anchor="middle" font-size="8" font-weight="800" style="fill:var(--tx);font-family:Inter,sans-serif">{total_count}</text>
-              <text x="21" y="27.5" text-anchor="middle" font-size="3" style="fill:var(--mut);font-family:Inter,sans-serif">total hubs</text>
-            </svg>
-            <div class="leg">
-              <div><i style="background:#8B82F6"></i>Active · {active_count}</div>
-              <div><i style="background:#E6E0D6"></i>Proposed · {proposed_count}</div>
-            </div>
-          </div>
-        </div>
-        """
-        st.markdown(donut_html, unsafe_allow_html=True)
+        donut_html = (
+            f'<div class="card" style="margin-bottom: 16px;">'
+            f'<h2 class="card-title">🏬 Network composition</h2>'
+            f'<p class="hint">Active vs. proposed store hubs</p>'
+            f'<div class="donutbox">'
+            f'<svg width="170" height="170" viewBox="0 0 42 42" role="img" aria-label="Donut: {active_count} active, {proposed_count} proposed">'
+            f'<circle cx="21" cy="21" r="15.9" fill="none" stroke="#E6E0D6" stroke-width="5"/>'
+            f'<circle cx="21" cy="21" r="15.9" fill="none" stroke="#8B82F6" stroke-width="5" stroke-dasharray="{dash_active} {dash_gap}" stroke-linecap="round" transform="rotate(-90 21 21)"/>'
+            f'<text x="21" y="22" text-anchor="middle" font-size="8" font-weight="800" style="fill:var(--tx);font-family:Inter,sans-serif">{total_count}</text>'
+            f'<text x="21" y="27.5" text-anchor="middle" font-size="3" style="fill:var(--mut);font-family:Inter,sans-serif">total hubs</text>'
+            f'</svg>'
+            f'<div class="leg">'
+            f'<div><i style="background:#8B82F6"></i>Active · {active_count}</div>'
+            f'<div><i style="background:#E6E0D6"></i>Proposed · {proposed_count}</div>'
+            f'</div>'
+            f'</div>'
+            f'</div>'
+        )
+        render_html(donut_html)
 
         # SLA vs Delivery Radius Card (Native Bordered Container to cleanly enclose Plotly Chart)
         with st.container(border=True):
@@ -2779,44 +2788,45 @@ with tab_summary:
     # Top 5 Priority Expansion Zones Table (Built as single contiguous HTML block)
     if not filtered_df.empty:
         top_exp = filtered_df.nlargest(5, 'Predicted Online Order Volume (Monthly)')
-        table_rows = ""
+        table_rows_list = []
         for idx, (_, row) in enumerate(top_exp.iterrows(), start=1):
             shoppers = f"{int(row['Estimated Online Shoppers']):,}"
             orders = f"{int(row['Predicted Online Order Volume (Monthly)']):,}"
             density = f"{int(row['Population Density (per sq km)']):,}"
-            table_rows += f"""
-            <tr>
-              <td><span class="rk">{idx}</span>{row['Neighborhood']}</td>
-              <td class="r">{shoppers}</td>
-              <td class="r">{orders}</td>
-              <td class="r">{density}</td>
-            </tr>
-            """
+            table_rows_list.append(
+                f'<tr>'
+                f'<td><span class="rk">{idx}</span>{row["Neighborhood"]}</td>'
+                f'<td class="r">{shoppers}</td>'
+                f'<td class="r">{orders}</td>'
+                f'<td class="r">{density}</td>'
+                f'</tr>'
+            )
+        table_rows = "".join(table_rows_list)
     else:
         table_rows = "<tr><td colspan='4' style='text-align: center; padding: 14px;'>No micro-markets meet current filter criteria.</td></tr>"
 
-    top_exp_card_html = f"""
-    <div class="card" style="margin-top: 16px;">
-      <h2 class="card-title">🏆 Top 5 priority expansion zones</h2>
-      <p class="hint">Ranked by estimated monthly online orders and shopper density.</p>
-      <div class="tbl">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Neighborhood</th>
-              <th class="r">Online shoppers</th>
-              <th class="r">Orders / month</th>
-              <th class="r">Density /km²</th>
-            </tr>
-          </thead>
-          <tbody>
-            {table_rows}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    """
-    st.markdown(top_exp_card_html, unsafe_allow_html=True)
+    top_exp_card_html = (
+        f'<div class="card" style="margin-top: 16px;">'
+        f'<h2 class="card-title">🏆 Top 5 priority expansion zones</h2>'
+        f'<p class="hint">Ranked by estimated monthly online orders and shopper density.</p>'
+        f'<div class="tbl">'
+        f'<table class="custom-table">'
+        f'<thead>'
+        f'<tr>'
+        f'<th>Neighborhood</th>'
+        f'<th class="r">Online shoppers</th>'
+        f'<th class="r">Orders / month</th>'
+        f'<th class="r">Density /km²</th>'
+        f'</tr>'
+        f'</thead>'
+        f'<tbody>'
+        f'{table_rows}'
+        f'</tbody>'
+        f'</table>'
+        f'</div>'
+        f'</div>'
+    )
+    render_html(top_exp_card_html)
 
 # ------------------------------------------------------------------------------
 # TAB 2: Live Order Simulation & Geospatial Dispatch
@@ -3104,22 +3114,22 @@ with tab_sim:
                 for it in cur_ord['items']
             ])
 
-            manifest_card_html = f"""
-            <div class="card">
-              <h2 class="card-title">📦 Customer Order Manifest</h2>
-              <p class="hint">Items picked & packed at dark store fulfillment staging</p>
-              <div style="margin-bottom: 12px;">{items_pills}</div>
-              <div style="display: flex; justify-content: space-between; padding: 10px 0 4px; border-top: 1px solid var(--card-border); font-size: 13px;">
-                <span style="color: var(--mut);">Estimated Basket Value</span>
-                <span style="font-weight: 700; color: var(--tx);">₹{cur_ord['order_val']}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--mut);">
-                <span>Payment Mode</span>
-                <span style="font-weight: 600; color: var(--ok);">UPI / Online Paid</span>
-              </div>
-            </div>
-            """
-            st.markdown(manifest_card_html, unsafe_allow_html=True)
+            manifest_card_html = (
+                f'<div class="card">'
+                f'<h2 class="card-title">📦 Customer Order Manifest</h2>'
+                f'<p class="hint">Items picked & packed at dark store fulfillment staging</p>'
+                f'<div style="margin-bottom: 12px;">{items_pills}</div>'
+                f'<div style="display: flex; justify-content: space-between; padding: 10px 0 4px; border-top: 1px solid var(--card-border); font-size: 13px;">'
+                f'<span style="color: var(--mut);">Estimated Basket Value</span>'
+                f'<span style="font-weight: 700; color: var(--tx);">₹{cur_ord["order_val"]}</span>'
+                f'</div>'
+                f'<div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--mut);">'
+                f'<span>Payment Mode</span>'
+                f'<span style="font-weight: 600; color: var(--ok);">UPI / Online Paid</span>'
+                f'</div>'
+                f'</div>'
+            )
+            render_html(manifest_card_html)
 
         with col_man2:
             prox_df = df_stores[df_stores['Status'] == 'Active'].copy()
@@ -3129,97 +3139,100 @@ with tab_sim:
             )
             prox_sorted = prox_df.sort_values('Distance_km').head(6)
 
-            matrix_rows = ""
+            matrix_rows_list = []
             for i, (_, s_row) in enumerate(prox_sorted.iterrows()):
                 is_winner = (s_row['Store Name'] == cur_ord['assigned_store'])
                 badge = '<span class="live" style="padding: 2px 8px; font-size: 11px;">🏆 Assigned</span>' if is_winner else '<span style="color: var(--mut); font-size: 11px;">Alternate</span>'
                 dist_str = f"<b>{s_row['Distance_km']:.2f} km</b>" if is_winner else f"{s_row['Distance_km']:.2f} km"
-                matrix_rows += f"""
-                <tr>
-                  <td>{s_row['Store Name']}</td>
-                  <td class="r">{dist_str}</td>
-                  <td class="r">{s_row['Delivery Radius (km)']} km</td>
-                  <td class="r">{badge}</td>
-                </tr>
-                """
+                matrix_rows_list.append(
+                    f'<tr>'
+                    f'<td>{s_row["Store Name"]}</td>'
+                    f'<td class="r">{dist_str}</td>'
+                    f'<td class="r">{s_row["Delivery Radius (km)"]} km</td>'
+                    f'<td class="r">{badge}</td>'
+                    f'</tr>'
+                )
+            matrix_rows = "".join(matrix_rows_list)
 
-            matrix_card_html = f"""
-            <div class="card">
-              <h2 class="card-title">🧠 Geospatial Proximity Matrix (Haversine)</h2>
-              <p class="hint">Real-time distance ranking of all operational dark store hubs to customer coordinates</p>
-              <div class="tbl">
-                <table class="custom-table">
-                  <thead>
-                    <tr>
-                      <th>Store Hub</th>
-                      <th class="r">Distance</th>
-                      <th class="r">Radius</th>
-                      <th class="r">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matrix_rows}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            """
-            st.markdown(matrix_card_html, unsafe_allow_html=True)
+            matrix_card_html = (
+                f'<div class="card">'
+                f'<h2 class="card-title">🧠 Geospatial Proximity Matrix (Haversine)</h2>'
+                f'<p class="hint">Real-time distance ranking of all operational dark store hubs to customer coordinates</p>'
+                f'<div class="tbl">'
+                f'<table class="custom-table">'
+                f'<thead>'
+                f'<tr>'
+                f'<th>Store Hub</th>'
+                f'<th class="r">Distance</th>'
+                f'<th class="r">Radius</th>'
+                f'<th class="r">Status</th>'
+                f'</tr>'
+                f'</thead>'
+                f'<tbody>'
+                f'{matrix_rows}'
+                f'</tbody>'
+                f'</table>'
+                f'</div>'
+                f'</div>'
+            )
+            render_html(matrix_card_html)
 
             # If warehouse pick plan exists, render warehouse Serpentine pick path
             if cur_ord.get("warehouse_pick_plan"):
                 pick_plan = cur_ord["warehouse_pick_plan"]
-                pick_rows = ""
+                pick_rows_list = []
                 for step in pick_plan.get("pick_sequence", []):
-                    pick_rows += f"""
-                    <tr>
-                      <td><span class="rk">{step.get('pick_step', 1)}</span><b>{step.get('item_name')}</b></td>
-                      <td class="r"><code style="color: #10b981; font-weight: 700;">Aisle {step.get('aisle')}</code></td>
-                      <td class="r">Shelf {step.get('shelf')} ({step.get('bin')})</td>
-                      <td class="r"><span class="tag">{step.get('zone')}</span></td>
-                    </tr>
-                    """
-                pick_card_html = f"""
-                <div class="card" style="margin-top: 14px;">
-                  <h2 class="card-title">🏭 Warehouse Serpentine (S-Shape) Pick Sequence</h2>
-                  <p class="hint">Physical item pick path optimized to minimize picker walking time (0 backtracks)</p>
-                  <div class="tbl">
-                    <table class="custom-table">
-                      <thead>
-                        <tr>
-                          <th>Item</th>
-                          <th class="r">Aisle</th>
-                          <th class="r">Location</th>
-                          <th class="r">Zone</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pick_rows}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--mut);">
-                    <span>Strategy: <b>{pick_plan.get('pick_path_strategy', 'Serpentine S-Shape')}</b></span>
-                    <span>Est. Pick Time: <b>{pick_plan.get('estimated_pick_time_seconds', 75)}s</b></span>
-                  </div>
-                </div>
-                """
-                st.markdown(pick_card_html, unsafe_allow_html=True)
+                    pick_rows_list.append(
+                        f'<tr>'
+                        f'<td><span class="rk">{step.get("pick_step", 1)}</span><b>{step.get("item_name")}</b></td>'
+                        f'<td class="r"><code style="color: #10b981; font-weight: 700;">Aisle {step.get("aisle")}</code></td>'
+                        f'<td class="r">Shelf {step.get("shelf")} ({step.get("bin")})</td>'
+                        f'<td class="r"><span class="tag">{step.get("zone")}</span></td>'
+                        f'</tr>'
+                    )
+                pick_rows = "".join(pick_rows_list)
+                pick_card_html = (
+                    f'<div class="card" style="margin-top: 14px;">'
+                    f'<h2 class="card-title">🏭 Warehouse Serpentine (S-Shape) Pick Sequence</h2>'
+                    f'<p class="hint">Physical item pick path optimized to minimize picker walking time (0 backtracks)</p>'
+                    f'<div class="tbl">'
+                    f'<table class="custom-table">'
+                    f'<thead>'
+                    f'<tr>'
+                    f'<th>Item</th>'
+                    f'<th class="r">Aisle</th>'
+                    f'<th class="r">Location</th>'
+                    f'<th class="r">Zone</th>'
+                    f'</tr>'
+                    f'</thead>'
+                    f'<tbody>'
+                    f'{pick_rows}'
+                    f'</tbody>'
+                    f'</table>'
+                    f'</div>'
+                    f'<div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--mut);">'
+                    f'<span>Strategy: <b>{pick_plan.get("pick_path_strategy", "Serpentine S-Shape")}</b></span>'
+                    f'<span>Est. Pick Time: <b>{pick_plan.get("estimated_pick_time_seconds", 75)}s</b></span>'
+                    f'</div>'
+                    f'</div>'
+                )
+                render_html(pick_card_html)
     else:
         # Standby Mode Display
-        st.markdown("""
-        <div class="card" style="text-align: center; padding: 42px 20px; margin-top: 16px;">
-            <div style="font-size: 46px; margin-bottom: 12px;">📡</div>
-            <h2 class="card-title" style="font-size: 20px;">Dispatch Operations Center • Standby</h2>
-            <p class="hint" style="max-width: 540px; margin: 8px auto 20px auto; font-size: 13.5px; line-height: 1.6;">
-                All 12 Dark Store hubs in Chhatrapati Sambhajinagar are online and operational. Place an order on the mobile app (or click <b>🚀 Simulate New Customer Order</b> above) to trigger live candidate multi-route analysis, shortest path selection, and autonomous courier tracking.
-            </p>
-            <div style="display: inline-flex; gap: 12px; align-items: center; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 8px 18px; border-radius: 99px;">
-                <span class="live"><i></i></span>
-                <span style="font-size: 12px; font-weight: 700; color: #10b981;">Hub Fleet Ready • Listening for Mobile GPS Orders</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        standby_card_html = (
+            f'<div class="card" style="text-align: center; padding: 42px 20px; margin-top: 16px;">'
+            f'<div style="font-size: 46px; margin-bottom: 12px;">📡</div>'
+            f'<h2 class="card-title" style="font-size: 20px;">Dispatch Operations Center • Standby</h2>'
+            f'<p class="hint" style="max-width: 540px; margin: 8px auto 20px auto; font-size: 13.5px; line-height: 1.6;">'
+            f'All 12 Dark Store hubs in Chhatrapati Sambhajinagar are online and operational. Place an order on the mobile app (or click <b>🚀 Simulate New Customer Order</b> above) to trigger live candidate multi-route analysis, shortest path selection, and autonomous courier tracking.'
+            f'</p>'
+            f'<div style="display: inline-flex; gap: 12px; align-items: center; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 8px 18px; border-radius: 99px;">'
+            f'<span class="live"><i></i></span>'
+            f'<span style="font-size: 12px; font-weight: 700; color: #10b981;">Hub Fleet Ready • Listening for Mobile GPS Orders</span>'
+            f'</div>'
+            f'</div>'
+        )
+        render_html(standby_card_html)
 
 # ------------------------------------------------------------------------------
 # TAB 3: Geospatial View
