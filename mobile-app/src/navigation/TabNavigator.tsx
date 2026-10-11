@@ -9,7 +9,15 @@ import { RiderScreen } from '../screens/RiderScreen';
 import { useCart } from '../context/CartContext';
 import { TabName } from '../types';
 
-export const TabNavigator: React.FC = () => {
+interface TabNavigatorProps {
+  userSession?: any;
+  onLogout?: () => void;
+}
+
+export const TabNavigator: React.FC<TabNavigatorProps> = ({
+  userSession,
+  onLogout,
+}) => {
   const [activeTab, setActiveTab] = useState<TabName>('Home');
   const { totalItemCount } = useCart();
 
@@ -20,7 +28,12 @@ export const TabNavigator: React.FC = () => {
       case 'Cart':
         return <CartScreen onNavigateToHome={() => setActiveTab('Home')} />;
       case 'Profile':
-        return <ProfileScreen />;
+        return (
+          <ProfileScreen
+            userSession={userSession}
+            onLogout={onLogout}
+          />
+        );
       case 'Rider':
         return <RiderScreen />;
       default:
@@ -33,7 +46,7 @@ export const TabNavigator: React.FC = () => {
       {/* Active Screen View */}
       <View style={styles.screenContainer}>{renderActiveScreen()}</View>
 
-      {/* Modern Purple-Themed Bottom Tab Bar */}
+      {/* Modern QuickZap Tab Bar */}
       <View style={styles.tabBar}>
         {/* Tab 1: Home */}
         <TouchableOpacity
@@ -78,7 +91,7 @@ export const TabNavigator: React.FC = () => {
             <Text style={[styles.tabIcon, activeTab === 'Profile' && styles.tabIconActive]}>👤</Text>
           </View>
           <Text style={[styles.tabLabel, activeTab === 'Profile' && styles.tabLabelActive]}>
-            Profile
+            Account
           </Text>
         </TouchableOpacity>
 
@@ -104,16 +117,16 @@ export const TabNavigator: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#f9f9fd',
   },
   screenContainer: {
     flex: 1,
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#ffffff',
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: '#e8e8ec',
     paddingVertical: 10,
     paddingHorizontal: SPACING.md,
     justifyContent: 'space-around',
@@ -134,7 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
   },
   iconWrapperActive: {
-    backgroundColor: COLORS.brandYellowLight,
+    backgroundColor: '#f7ce00',
   },
   tabIcon: {
     fontSize: 18,
@@ -147,7 +160,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -2,
     right: 2,
-    backgroundColor: '#4E2298',
+    backgroundColor: '#6549be',
     borderRadius: 8,
     minWidth: 16,
     height: 16,
@@ -169,18 +182,18 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#10B981',
+    backgroundColor: '#006d32',
     borderWidth: 1,
     borderColor: '#FFFFFF',
   },
   tabLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: COLORS.textMuted,
+    color: '#7f775f',
     marginTop: 3,
   },
   tabLabelActive: {
-    color: '#4E2298',
+    color: '#6549be',
     fontWeight: '800',
   },
 });

@@ -338,8 +338,10 @@ def authenticate_user(username: str, password: str) -> Dict[str, Any]:
         "sample_username",
         "you@example.com",
         "sample_username@inventorypro.com",
+        "sample_username@quickzap.in",
         "admin",
-        "admin@inventorypro.com"
+        "admin@inventorypro.com",
+        "admin@quickzap.in"
     }
     if (username_clean.lower() in valid_usernames or username_clean == "sample_username") and password_clean == "password@123":
         return {

@@ -4,48 +4,84 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CartProvider } from './src/context/CartContext';
 import { TabNavigator } from './src/navigation/TabNavigator';
-
-// @ts-ignore
-import Login from './login';
+import { LoginScreen } from './src/screens/LoginScreen';
 import { supabase } from './src/supabaseClient';
-
 
 export default function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then((res: { data: { session: any } }) => {
-      setSession(res.data.session);
+    let isMounted = true;
+    if (supabase && typeof supabase.auth?.getSession === 'function') {
+      supabase.auth
+        .getSession()
+        .then((res: { data: { session: any } }) => {
+          if (isMounted) {
+            setSession(res.data?.session || null);
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          if (isMounted) setLoading(false);
+        });
+
+      const { data } = supabase.auth.onAuthStateChange(
+        (_event: any, currentSession: any) => {
+          if (isMounted) {
+            setSession(currentSession);
+          }
+        }
+      );
+
+      return () => {
+        isMounted = false;
+        data?.subscription?.unsubscribe?.();
+      };
+    } else {
       setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event: any, currentSession: any) => {
-        setSession(currentSession);
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    }
   }, []);
+
+  const handleLogout = () => {
+    if (supabase && typeof supabase.auth?.signOut === 'function') {
+      supabase.auth.signOut().catch(() => {});
+    }
+    setSession(null);
+  };
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F7D435' }}>
-        <ActivityIndicator size="large" color="#4E2298" />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#f7ce00',
+        }}
+      >
+        <ActivityIndicator size="large" color="#6549be" />
       </View>
     );
   }
 
   if (!session) {
-    return <Login onLogin={(user: any) => setSession({ user })} />;
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" backgroundColor="#f7ce00" />
+        <LoginScreen onLogin={(user: any) => setSession({ user })} />
+      </SafeAreaProvider>
+    );
   }
 
   return (
     <SafeAreaProvider>
       <CartProvider>
-        <StatusBar style="dark" backgroundColor="#F7D435" />
-        <TabNavigator />
+        <StatusBar style="dark" backgroundColor="#f7ce00" />
+        <TabNavigator
+          userSession={session?.user || session}
+          onLogout={handleLogout}
+        />
       </CartProvider>
     </SafeAreaProvider>
   );

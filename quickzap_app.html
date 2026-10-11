@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+  <title>QuickZap - Quick Commerce Dark Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'error': '#ba1a1a',
+            'on-tertiary-fixed': '#1f005f',
+            'on-surface': '#1a1c1f',
+            'background': '#f9f9fd',
+            'on-background': '#1a1c1f',
+            'surface-container-high': '#e8e8ec',
+            'on-secondary-fixed-variant': '#005224',
+            'error-container': '#ffdad6',
+            'on-surface-variant': '#4d4632',
+            'tertiary-container': '#d7caff',
+            'on-tertiary-fixed-variant': '#4d2ea5',
+            'inverse-primary': '#eac300',
+            'on-primary-fixed': '#221b00',
+            'surface-tint': '#705d00',
+            'primary': '#705d00',
+            'surface-container': '#eeedf2',
+            'surface-variant': '#e2e2e6',
+            'on-primary': '#ffffff',
+            'on-tertiary-container': '#6044b9',
+            'secondary-container': '#80f89d',
+            'tertiary-fixed-dim': '#cdbdff',
+            'on-primary-fixed-variant': '#554500',
+            'tertiary': '#6549be',
+            'primary-container': '#f7ce00',
+            'secondary': '#006d32',
+            'on-primary-container': '#6b5800',
+            'on-tertiary': '#ffffff',
+            'outline': '#7f775f',
+            'on-secondary-container': '#007235',
+            'surface-container-lowest': '#ffffff',
+            'on-error-container': '#93000a',
+            'on-secondary': '#ffffff',
+            'outline-variant': '#d0c6ab',
+            'primary-fixed-dim': '#eac300',
+            'on-error': '#ffffff',
+            'surface-dim': '#d9dade',
+            'inverse-on-surface': '#f0f0f4',
+            'surface': '#f9f9fd',
+            'tertiary-fixed': '#e7deff',
+            'on-secondary-fixed': '#00210b',
+            'inverse-surface': '#2f3034',
+            'secondary-fixed-dim': '#65de86',
+            'primary-fixed': '#ffe174',
+            'surface-bright': '#f9f9fd',
+            'surface-container-low': '#f3f3f7',
+            'secondary-fixed': '#82fba0',
+            'surface-container-highest': '#e2e2e6'
+          },
+          borderRadius: {
+            'DEFAULT': '0.25rem',
+            'lg': '0.5rem',
+            'xl': '0.75rem',
+            'full': '9999px'
+          },
+          spacing: {
+            'space-xs': '0.25rem',
+            'margin-md': '1.5rem',
+            'margin': '1rem',
+            'gutter-md': '1rem',
+            'gutter': '0.75rem',
+            'space-2xs': '0.125rem',
+            'space-md': '0.75rem',
+            'space-xl': '1.5rem',
+            'space-lg': '1rem',
+            'space-sm': '0.5rem'
+          },
+          fontFamily: {
+            'body-lg': ['Plus Jakarta Sans', 'sans-serif'],
+            'body-md': ['Plus Jakarta Sans', 'sans-serif'],
+            'display-timer': ['Outfit', 'sans-serif'],
+            'label-btn': ['Plus Jakarta Sans', 'sans-serif'],
+            'headline-lg': ['Outfit', 'sans-serif'],
+            'price-lg': ['Outfit', 'sans-serif'],
+            'body-sm': ['Plus Jakarta Sans', 'sans-serif'],
+            'headline-sm': ['Outfit', 'sans-serif'],
+            'label-badge': ['Plus Jakarta Sans', 'sans-serif'],
+            'price-sm': ['Outfit', 'sans-serif'],
+            'headline-md': ['Outfit', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @layer base {
+      html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9fd;
+        color: #1a1c1f;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+      body {
+        overscroll-behavior-y: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+      .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+    }
+    ::-webkit-scrollbar { display: none; }
+    .screen-view { display: none; }
+    .screen-view.active { display: flex; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-surface text-body-md text-on-surface min-h-screen flex flex-col antialiased selection:bg-secondary/20">
+
+  <!-- ================= TOP NAVIGATION CONTROLLER BAR ================= -->
+  <header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.05)] border-b border-surface-container-high/60">
+    <div class="h-16 px-margin flex items-center justify-between max-w-md mx-auto">
+      <div class="flex items-center gap-space-sm">
+        <button id="nav-back-btn" class="w-10 h-10 -ml-1.5 hidden items-center justify-center rounded-full text-on-surface hover:bg-surface-container-low active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+        </button>
+        <img alt="QuickZap Logo" class="h-8 w-auto object-contain cursor-pointer" onclick="switchScreen('home')" src="https://lh3.googleusercontent.com/aida/AEtjO1Vh3Mbb3D8gWaPGL-O-aKAQaoxmt2emquOpFf9tp5rxHffVr0_1ciZkNo1fBxEnbBTdnUilthGYjBpUaWwqA6NTstPkWwtO0tEB97NNKUonQCU5zfN2Nq_jsVMoV9M1g4BM_I6YNtoMxF-c7VeuNvc7CZLMtCR_ZRnIbu6N9SpkCdskNThxgMXPcmfaieL_Y4EklMujOlGXxsS7tA4-Z8uY3WdNY3ftXfEra03xycCnCxugIlFERH0coZY"/>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-space-2xs">
+            <span class="font-headline-sm text-[18px] text-on-surface font-black tracking-tight cursor-pointer" onclick="switchScreen('home')">QuickZap</span>
+            <span class="bg-primary-container text-on-primary-fixed text-[11px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+              <span class="material-symbols-outlined text-[12px] leading-none text-on-primary-fixed material-symbols-fill">bolt</span>10m
+            </span>
+          </div>
+          <span id="screen-subtitle" class="text-[12px] text-on-surface-variant font-medium line-clamp-1">CIDCO N-4, Aurangabad</span>
+        </div>
+      </div>
+      
+      <!-- Right Controls: Profile / Login Action -->
+      <div class="flex items-center gap-1.5">
+        <div class="hidden sm:flex bg-surface-container rounded-full p-1 gap-1 text-[11px] font-bold">
+          <button onclick="switchScreen('home')" class="nav-tab-pill px-2.5 py-1 rounded-full text-secondary font-black bg-surface-container-lowest shadow-sm" data-tab="home">Shop</button>
+          <button onclick="switchScreen('cart')" class="nav-tab-pill px-2.5 py-1 rounded-full text-on-surface-variant hover:text-on-surface" data-tab="cart">Cart</button>
+          <button onclick="switchScreen('tracking')" class="nav-tab-pill px-2.5 py-1 rounded-full text-on-surface-variant hover:text-on-surface" data-tab="tracking">Track</button>
+          <button onclick="switchScreen('profile')" class="nav-tab-pill px-2.5 py-1 rounded-full text-on-surface-variant hover:text-on-surface" data-tab="profile">Account</button>
+        </div>
+        
+        <!-- Interactive Profile / Login Button -->
+        <button id="top-auth-btn" onclick="handleAuthButtonClick()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-low border border-surface-container-high hover:bg-surface-container active:scale-95 transition-all text-on-surface">
+          <div class="relative w-7 h-7 rounded-full overflow-hidden flex items-center justify-center bg-primary-container text-on-primary-fixed">
+            <img id="header-user-avatar" class="w-full h-full object-cover hidden" alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzOYSwOBkOmr3p_HRbvK884A7KqlSlakvRRfslQ9LTVXKVlv3ctuJyEsyw5ZKz_olpSmzrXudlLIzPRdXZTtNBdz8bVySfNdfx8y8kqmlbBFcIMKXZuZfCx8CEiiNgmTm1bwxNU2_xOyEJczAznkYA5q2e5Tc55f-8Iojrgir-BD5m9KrUdJo9QxokSLl1kQfUqg8EsY-DGJf6nfjZyrC7x89i9igNVz1ovlr-eP_jiN7aLkC90J067A"/>
+            <span id="header-user-icon" class="material-symbols-outlined text-[17px]">person</span>
+          </div>
+          <span id="header-auth-label" class="text-[12px] font-bold pr-0.5">Login</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 w-full max-w-md mx-auto pt-16 flex flex-col relative">
+
+    <!-- ======================================================== -->
+    <!-- SCREEN 1: HOME CATALOG & MICRO-MARKET                   -->
+    <!-- ======================================================== -->
+    <div id="screen-home" class="screen-view active flex-col w-full pb-28">
+      
+      <!-- Location & Delivery Speed Ribbon -->
+      <section class="px-margin pt-space-sm pb-space-xs">
+        <div class="bg-primary-container/20 border border-primary-container/30 rounded-2xl p-space-sm flex items-center justify-between shadow-sm">
+          <div class="flex items-center gap-space-xs min-w-0">
+            <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center shrink-0 shadow-sm">
+              <span class="material-symbols-outlined text-[19px] text-on-primary-fixed material-symbols-fill">location_on</span>
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-[11px] uppercase tracking-wider text-on-surface-variant font-black">Delivery Location</span>
+              <button aria-label="Change delivery location" onclick="promptAddressChange()" class="flex items-center gap-space-2xs text-left truncate group">
+                <span id="home-delivery-address" class="text-[14px] font-bold text-on-surface truncate">CIDCO N-4, Aurangabad</span>
+                <span class="material-symbols-outlined text-[16px] text-on-surface-variant shrink-0 group-hover:translate-y-0.5 transition-transform">keyboard_arrow_down</span>
+              </button>
+            </div>
+          </div>
+          <div class="bg-primary-container px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm shrink-0">
+            <span class="material-symbols-outlined text-[15px] text-on-primary-fixed material-symbols-fill">bolt</span>
+            <span class="text-[11px] font-black text-on-primary-fixed uppercase tracking-tight">10 MINS</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Welcome Back User Ribbon (Shows when logged in) -->
+      <div id="user-greeting-ribbon" class="hidden px-margin py-1">
+        <div class="bg-gradient-to-r from-secondary/15 to-secondary-container/30 border border-secondary/20 rounded-xl px-3 py-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[16px]">👋</span>
+            <div class="text-[12px]">
+              <span class="text-on-surface font-black">Welcome back, <span id="greeting-name">Neel</span>!</span>
+              <span class="text-secondary font-bold ml-1">Gold Member ⚡</span>
+            </div>
+          </div>
+          <button onclick="switchScreen('profile')" class="text-[11px] font-black text-secondary hover:underline">Manage</button>
+        </div>
+      </div>
+
+      <!-- Omni Search & Voice Input -->
+      <section class="px-margin py-space-xs">
+        <div class="relative flex items-center bg-surface-container-low border border-surface-container-high/60 rounded-full px-space-md py-2.5 shadow-sm">
+          <span class="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0 mr-2">search</span>
+          <div class="flex-1 relative h-5 overflow-hidden">
+            <div class="absolute left-0 top-0 w-full transition-transform duration-500 ease-out flex flex-col" id="search-placeholder-track">
+              <span class="text-[14px] text-on-surface-variant/80 truncate">Search "Milk, Curd, Bread..."</span>
+              <span class="text-[14px] text-on-surface-variant/80 truncate">Search "Chips, Munchies &amp; Dips..."</span>
+              <span class="text-[14px] text-on-surface-variant/80 truncate">Search "Cold Drinks &amp; Juices..."</span>
+              <span class="text-[14px] text-on-surface-variant/80 truncate">Search "Maggi, Instant Noodles..."</span>
+            </div>
+          </div>
+          <button aria-label="Voice Search" onclick="alert('Voice search listening for groceries...')" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0 ml-1 text-on-surface hover:bg-surface-container-high active:scale-90 transition-transform">
+            <span class="material-symbols-outlined text-[18px]">mic</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Flash Deals & Urgency Banners (Snap Carousel) -->
+      <section class="py-space-sm">
+        <div class="flex gap-space-md overflow-x-auto px-margin scrollbar-none snap-x snap-mandatory">
+          <!-- Flash Card 1 -->
+          <div class="snap-start shrink-0 w-[84vw] max-w-[340px] bg-gradient-to-r from-tertiary via-tertiary/90 to-tertiary-container/80 text-on-tertiary rounded-2xl p-space-md relative overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="bg-primary-container text-on-primary-fixed text-[11px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                <span class="material-symbols-outlined text-[12px] material-symbols-fill">timer</span>
+                FLASH SALE
+              </span>
+              <div class="flex items-center gap-1 bg-inverse-surface/80 text-inverse-on-surface px-2 py-0.5 rounded-md">
+                <span class="text-[10px] font-bold">ENDS IN</span>
+                <span class="font-display-timer text-[13px] leading-tight font-extrabold tracking-tight" id="flash-timer-1">14:32</span>
+              </div>
+            </div>
+            <div class="z-10 my-1">
+              <h3 class="font-headline-md text-[20px] font-black text-on-tertiary leading-tight">FLAT 50% OFF</h3>
+              <p class="text-[12px] text-tertiary-fixed opacity-95">Monsoon Hot Treats &amp; Hot Sips</p>
+            </div>
+            <div onclick="switchScreen('cart')" class="z-10 mt-1 flex items-center gap-1 text-primary-fixed text-[13px] font-bold cursor-pointer hover:underline">
+              <span>Claim Deal</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </div>
+            <div class="absolute -right-3 -bottom-3 opacity-15 pointer-events-none">
+              <span class="material-symbols-outlined text-[96px] text-white">electric_bolt</span>
+            </div>
+          </div>
+          <!-- Flash Card 2 -->
+          <div class="snap-start shrink-0 w-[84vw] max-w-[340px] bg-gradient-to-r from-primary-container via-primary-fixed to-primary-container text-on-primary-fixed rounded-2xl p-space-md relative overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="bg-inverse-surface text-inverse-on-surface text-[11px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span class="material-symbols-outlined text-[12px]">local_fire_department</span>
+                NIGHT OWL
+              </span>
+              <div class="flex items-center gap-1 bg-surface-container-lowest/80 text-on-surface px-2 py-0.5 rounded-md">
+                <span class="text-[10px] font-bold">ENDS IN</span>
+                <span class="font-display-timer text-[13px] leading-tight font-extrabold tracking-tight" id="flash-timer-2">28:45</span>
+              </div>
+            </div>
+            <div class="z-10 my-1">
+              <h3 class="font-headline-md text-[20px] font-black text-on-primary-fixed leading-tight">Late Night Munchies</h3>
+              <p class="text-[12px] text-on-primary-container font-semibold">Up to 40% Off on Chips &amp; Dip Combos</p>
+            </div>
+            <div onclick="switchScreen('cart')" class="z-10 mt-1 flex items-center gap-1 text-on-primary-fixed text-[13px] font-bold cursor-pointer hover:underline">
+              <span>Explore Snacks</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </div>
+            <div class="absolute -right-2 -bottom-2 opacity-15 pointer-events-none">
+              <span class="material-symbols-outlined text-[96px] text-on-primary-fixed">nightlight</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Categories Horizontal Shelf -->
+      <section class="py-space-xs">
+        <div class="px-margin flex items-center justify-between mb-space-xs">
+          <h2 class="font-headline-sm text-[17px] font-black text-on-surface tracking-tight">Shop by Category</h2>
+          <a class="text-[13px] font-bold text-secondary flex items-center gap-0.5 hover:underline" href="#categories">
+            <span>See All</span>
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+          </a>
+        </div>
+        <div class="flex gap-space-sm overflow-x-auto px-margin pb-2 scrollbar-none">
+          <button class="shrink-0 flex flex-col items-center gap-1 group active:scale-95 transition-transform">
+            <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shadow-sm p-1.5 group-hover:bg-primary-container/20 transition-colors">
+              <img class="w-full h-full object-contain rounded-xl" alt="Dairy & Milk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4rKbkfUTYUy3QqIlLYhy9NQsdUy_x2Zs7OfqqelPACgZ8_igVb_xXhrboMYk3-qUIQp0oO510V47wzssuk1FmR8itbMrJMOjB1FRNQRlNWbMqRYuEPXWq16aWqn5_ck8pc4tAH3XOhiTh9P8dZYkv-3Gz2Hso83088ZjitRTUk4TEmgJj1OMS2ErPtuiJ1m261xSGe7QH9eNJ44Xb2HghXe1ViyHSlzERZ99O2FMBONfxmo9wRKSRIA"/>
+            </div>
+            <span class="text-[11px] font-bold text-on-surface text-center w-16 leading-tight">Dairy &amp; Milk</span>
+          </button>
+          <button class="shrink-0 flex flex-col items-center gap-1 group active:scale-95 transition-transform">
+            <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shadow-sm p-1.5 group-hover:bg-primary-container/20 transition-colors">
+              <img class="w-full h-full object-contain rounded-xl" alt="Fruits & Veg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGXspGajBhH0WEdS-kYXSs7QLTvwH8yB3S_mWtvHNft_iJGT1opIWhzTxzOmSqjbBS6sPThiRk0tGYjzWr5PyAKZUIwBSocit9wx248xV7_h_jMdtj8Rac0WHrZFg9NpV3UtkFITLEk8dOktOexj5YSVfgl_n67ChxjSjmQJjFnBGznwuyTMGDM8w-t35mX6ypSLGvoGCrwsjH2hFAJrUNt2wCVtLh_Rfx4nhN7rOw_NXgCOgo3MRIKA"/>
+            </div>
+            <span class="text-[11px] font-bold text-on-surface text-center w-16 leading-tight">Fruits &amp; Veg</span>
+          </button>
+          <button class="shrink-0 flex flex-col items-center gap-1 group active:scale-95 transition-transform">
+            <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shadow-sm p-1.5 group-hover:bg-primary-container/20 transition-colors">
+              <img class="w-full h-full object-contain rounded-xl" alt="Munchies" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3RyWpRKCr-vkPyomHz9Z7rTGqSc57Or0X2eHpaxb0iGFLIhjQCQ7R-8uqlArJevOTjBW51xbx68an-BaFfi1dUxV5v1b0rLO0jb9rnwxDx6akh_9XaxS90WVoKZ9e0vO4NuHcHaqj_2gqQqokMoYEmw04ohMIOQKJ9rsbGHVEv6FvI2A2TxL3xNLrP5ZFKvvpjuEHXvLZ01p9umLqG1fX5QkhzhF3HrQKN63IShZ8zBzhoEEUa6HwOQ"/>
+            </div>
+            <span class="text-[11px] font-bold text-on-surface text-center w-16 leading-tight">Munchies</span>
+          </button>
+          <button class="shrink-0 flex flex-col items-center gap-1 group active:scale-95 transition-transform">
+            <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shadow-sm p-1.5 group-hover:bg-primary-container/20 transition-colors">
+              <img class="w-full h-full object-contain rounded-xl" alt="Cold Drinks" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKjdaKHSy90pjP1bpjPc4FfAxisWb9NuIV-EetvsgkNVAuZltZyxXJ6JZRiwZfEs8HtUM0NQXh60fM5l8jS3xgG2Nr_CGs3Y1BhECJHAem8ydvT_A_SxLWmFqXAwyYXKOhIzNijTNG1kHxOwwT6AFaF34j7CL_-e5HyjKOstaantmcZCu25vJgxW78ewgVlXkHnlinmcIkRxY33jRU-KwNa8B3qTzP1cqM4nAV1UmF-EWWDckW_0iqGg"/>
+            </div>
+            <span class="text-[11px] font-bold text-on-surface text-center w-16 leading-tight">Cold Drinks</span>
+          </button>
+          <button class="shrink-0 flex flex-col items-center gap-1 group active:scale-95 transition-transform">
+            <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center shadow-sm p-1.5 group-hover:bg-primary-container/20 transition-colors">
+              <img class="w-full h-full object-contain rounded-xl" alt="Instant Food" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjvo_Eats0tz6zsJ0bhYHcb0GTvnBf-oMjiG3_YezD-LOyOB5zGHqCzcL1gmrT8ybG1nHt1ckNxiB_vFc1K7GdNy4ErRy3LCkNbrlGGGMkmdQxSH8z1n287C0_UQCMgE0dKvbjokPNDCvaGd9VT5_2MgTWlIryg_w8RupDZepoRSWh0mVmg1cpKGOKMm4l0FekMB3xItnKdJ8Jjtta9qvMcSs2Vmge8SZCOMt3lingI38Vl3lCTEHB3w"/>
+            </div>
+            <span class="text-[11px] font-bold text-on-surface text-center w-16 leading-tight">Instant Food</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Curated Product Catalog / Micro-Market Grid -->
+      <section class="px-margin pt-space-xs pb-space-md">
+        <div class="flex items-center justify-between mb-space-sm">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+            <h2 class="font-headline-sm text-[17px] font-black text-on-surface">Trending Groceries</h2>
+          </div>
+          <span class="text-[12px] text-on-surface-variant font-semibold">Delivered in 10m</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-space-sm" id="home-product-grid">
+          
+          <!-- Item 1: Amul Milk -->
+          <div class="catalog-card bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm border border-surface-container-high/60 flex flex-col justify-between relative group hover:shadow-md transition-all" data-id="item1">
+            <div>
+              <div class="relative w-full aspect-square bg-surface-container-low rounded-xl p-2 flex items-center justify-center mb-space-xs overflow-hidden">
+                <span class="absolute top-1.5 left-1.5 bg-tertiary text-on-tertiary text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm z-10">10% OFF</span>
+                <img class="w-full h-full object-contain group-hover:scale-105 transition-transform" alt="Amul Milk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0XiuCmUMhMvlGcpRE37cPu6gGJ4T_FvONaMs_C6Lrhd09ab4cVnPFSIxqbNefIV6X3TGUHrfiGHg6rVIFQV74n_PS_cA04CvEfMT1L5pygjXjoqt0PcxUncCLNdOiVfHKqGs93BILZu7TwbnRYd8gpZoZ4xLSPIWyD3Mfqij14Ra_WpIXOVVu2OS3ZPKyssZVZSiTjrGzyjtH1l-g4Y4ZXSrbz8yN2WWZ8zIRWWWoUgUgM3kNS5wQNQ"/>
+              </div>
+              <div class="flex items-center gap-1 text-on-surface-variant mb-0.5">
+                <span class="material-symbols-outlined text-[13px] text-primary material-symbols-fill">timer</span>
+                <span class="text-[11px] font-bold text-primary">8 MINS</span>
+              </div>
+              <h3 class="text-[13px] font-bold text-on-surface line-clamp-2 leading-tight">Amul Taaza Fresh Toned Milk</h3>
+              <span class="text-[11px] text-on-surface-variant">500 ml</span>
+            </div>
+            <div class="mt-space-sm pt-space-xs flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-price-sm text-[16px] text-on-surface font-extrabold">₹27</span>
+                <span class="text-[11px] text-on-surface-variant/70 line-through">₹30</span>
+              </div>
+              <div class="product-stepper-slot" data-id="item1"></div>
+            </div>
+          </div>
+
+          <!-- Item 2: Lay's Magic Masala -->
+          <div class="catalog-card bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm border border-surface-container-high/60 flex flex-col justify-between relative group hover:shadow-md transition-all" data-id="item2">
+            <div>
+              <div class="relative w-full aspect-square bg-surface-container-low rounded-xl p-2 flex items-center justify-center mb-space-xs overflow-hidden">
+                <span class="absolute top-1.5 left-1.5 bg-secondary text-on-secondary text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm z-10">HOT</span>
+                <img class="w-full h-full object-contain group-hover:scale-105 transition-transform" alt="Lay's Chips" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbPctwSGzVMuk4jywZ-yIfGnVRvNOlGUkR00Nm2Hn5NDskfqGKdU6gJrdaSxC4RsbU6VtMI79R3D2sG-tiQK6W3QejPnwTyKPpwOFr9F6MdEL1xhZnaqXLBndZvx98ntj1-oPjRbvpIyXBUHZYNJuZPsXVxmShHNzm3MnPIDCypw0dbUXkKmL4wdmCDoHDQVeuwqtU6NJg791t-BE3tSAU0P0WAwWUvQ3U8EIdosZqvY3S0y_IM5XRBg"/>
+              </div>
+              <div class="flex items-center gap-1 text-on-surface-variant mb-0.5">
+                <span class="material-symbols-outlined text-[13px] text-primary material-symbols-fill">timer</span>
+                <span class="text-[11px] font-bold text-primary">10 MINS</span>
+              </div>
+              <h3 class="text-[13px] font-bold text-on-surface line-clamp-2 leading-tight">Lay's India's Magic Masala Chips</h3>
+              <span class="text-[11px] text-on-surface-variant">50 g</span>
+            </div>
+            <div class="mt-space-sm pt-space-xs flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-price-sm text-[16px] text-on-surface font-extrabold">₹20</span>
+                <span class="text-[11px] text-on-surface-variant/70">MRP ₹25</span>
+              </div>
+              <div class="product-stepper-slot" data-id="item2"></div>
+            </div>
+          </div>
+
+          <!-- Item 3: Coca-Cola Zero Sugar -->
+          <div class="catalog-card bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm border border-surface-container-high/60 flex flex-col justify-between relative group hover:shadow-md transition-all" data-id="item3">
+            <div>
+              <div class="relative w-full aspect-square bg-surface-container-low rounded-xl p-2 flex items-center justify-center mb-space-xs overflow-hidden">
+                <span class="absolute top-1.5 left-1.5 bg-tertiary text-on-tertiary text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm z-10">11% OFF</span>
+                <img class="w-full h-full object-contain group-hover:scale-105 transition-transform" alt="Coca-Cola Zero" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3aHjhNuxfN9gw-yWgcGQ5T55lahSXnHTOKXKFN8riM4Tpd3o7pU1woL0Nrz5yHl-3-H9rDvmQQCBKki0sLuPpdbaTIUQoh1Iaky2bNz15WMtf7sulNCHD0B7mbJtHxcP-JV3tfeTnwtrOVKf39Y_6XhOuHa_-kdHuFafwjy70TZRI8Tmvc-yxLyJmLmhrl7oUEV6NgUzca90GIiIBpZSha72Uw-6DNqKQcV1QDoQHsK-fmfZ7GoWJ2g"/>
+              </div>
+              <div class="flex items-center gap-1 text-on-surface-variant mb-0.5">
+                <span class="material-symbols-outlined text-[13px] text-primary material-symbols-fill">timer</span>
+                <span class="text-[11px] font-bold text-primary">7 MINS</span>
+              </div>
+              <h3 class="text-[13px] font-bold text-on-surface line-clamp-2 leading-tight">Coca-Cola Zero Sugar Can</h3>
+              <span class="text-[11px] text-on-surface-variant">300 ml</span>
+            </div>
+            <div class="mt-space-sm pt-space-xs flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-price-sm text-[16px] text-on-surface font-extrabold">₹40</span>
+                <span class="text-[11px] text-on-surface-variant/70 line-through">₹45</span>
+              </div>
+              <div class="product-stepper-slot" data-id="item3"></div>
+            </div>
+          </div>
+
+          <!-- Item 4: Alphonso Mangoes -->
+          <div class="catalog-card bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm border border-surface-container-high/60 flex flex-col justify-between relative group hover:shadow-md transition-all" data-id="item4">
+            <div>
+              <div class="relative w-full aspect-square bg-surface-container-low rounded-xl p-2 flex items-center justify-center mb-space-xs overflow-hidden">
+                <span class="absolute top-1.5 left-1.5 bg-tertiary text-on-tertiary text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm z-10">15% OFF</span>
+                <img class="w-full h-full object-contain group-hover:scale-105 transition-transform" alt="Alphonso Mangoes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2YTs24qWTWtNYITeVUzNiuJ4We5FCwJZNJRU8hI0WmCP5AapPpdFe77FgcpIZO73IR3HETD3pR76I-nknT2_fir4fA_HSmuGIeL9zandMFS3Be04WfbttBg9QRmLAqNQZz0j52oz-dD2NCCb9pCLYLBA7Y_apd6K-pdw_vb2ufoazsj5yHzC8J__2ObH24nNRpIlz5f5HIOVPBl3fY225zIW2pD_iIrSHruBo0ga6P5bbOYM6DO2AyQ"/>
+              </div>
+              <div class="flex items-center gap-1 text-on-surface-variant mb-0.5">
+                <span class="material-symbols-outlined text-[13px] text-primary material-symbols-fill">timer</span>
+                <span class="text-[11px] font-bold text-primary">12 MINS</span>
+              </div>
+              <h3 class="text-[13px] font-bold text-on-surface line-clamp-2 leading-tight">Fresh Alphonso Mangoes</h3>
+              <span class="text-[11px] text-on-surface-variant">1 kg (4-5 pcs)</span>
+            </div>
+            <div class="mt-space-sm pt-space-xs flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="font-price-sm text-[16px] text-on-surface font-extrabold">₹299</span>
+                <span class="text-[11px] text-on-surface-variant/70 line-through">₹350</span>
+              </div>
+              <div class="product-stepper-slot" data-id="item4"></div>
+            </div>
+          </div>
+
+          <!-- Item 5: Maggi Noodles (Full-width banner card) -->
+          <div class="col-span-2 catalog-card bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm border border-surface-container-high/60 flex items-center justify-between gap-space-md hover:shadow-md transition-all" data-id="item5">
+            <div class="relative w-24 h-24 bg-surface-container-low rounded-xl p-2 flex items-center justify-center shrink-0 overflow-hidden">
+              <span class="absolute top-1 left-1 bg-tertiary text-on-tertiary text-[10px] px-1.5 py-0.5 rounded shadow-sm z-10 font-bold">SAVER</span>
+              <img class="w-full h-full object-contain" alt="Maggi Noodles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzJxx4MDpfnq_WPZpqHZtjVoCCnD6w0iQN5yTlpBytvN1AcOdyS8W6q47omWhnf6VDo-ivMRHGOGqJKLmOfS2l5JmnQWJdxoD2LnH5z85T0Au4zc5xfU6n_pojkPSVaISeDJ4yN-dHbIS8UFJHDz9CCrMoJKdALluVQN5qG5kORp8jX4fhkMlpySiHnaSL7tD6B29K5FXP6xzh9GE8Q8reNd73g97MZvXuxvLAAMNT5EzbqL6dl5nBVw"/>
+            </div>
+            <div class="flex flex-col flex-1 min-w-0">
+              <div class="flex items-center gap-1 text-on-surface-variant mb-0.5">
+                <span class="material-symbols-outlined text-[13px] text-primary material-symbols-fill">timer</span>
+                <span class="text-[11px] font-bold text-primary">6 MINS</span>
+              </div>
+              <h3 class="text-[14px] font-bold text-on-surface truncate">Maggi 2-Minute Instant Noodles</h3>
+              <span class="text-[12px] text-on-surface-variant">4-Pack (280g)</span>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="font-price-sm text-[16px] text-on-surface font-extrabold">₹56</span>
+                <span class="text-[11px] text-on-surface-variant/70 line-through">₹60</span>
+              </div>
+            </div>
+            <div class="product-stepper-slot shrink-0" data-id="item5"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Floating Active Cart Preview Pill (Sticky above bottom nav) -->
+      <div id="floating-cart-pill" class="sticky bottom-20 z-40 px-margin mt-auto mb-2 transition-all duration-300">
+        <div onclick="switchScreen('cart')" class="w-full bg-secondary text-on-secondary py-3 px-space-md rounded-2xl shadow-xl flex items-center justify-between hover:bg-on-secondary-container transition-all active:scale-[0.99] cursor-pointer group">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-9 h-9 rounded-full bg-secondary-container/30 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[20px] text-on-secondary material-symbols-fill">shopping_basket</span>
+            </div>
+            <div class="flex flex-col">
+              <span id="pill-item-count" class="text-[11px] text-secondary-container uppercase font-black tracking-wider">2 ITEMS IN CART</span>
+              <span id="pill-total-amount" class="font-price-sm text-[16px] font-black text-on-secondary">₹80 Total</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-[13px] font-black text-on-secondary">
+            <span>View Cart</span>
+            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SCREEN 2: INTERACTIVE CART & BILL SUMMARY               -->
+    <!-- ======================================================== -->
+    <div id="screen-cart" class="screen-view flex-col w-full pb-36">
+
+      <!-- Milestone Free Delivery Progress Header -->
+      <div class="px-margin pt-space-md">
+        <div class="bg-secondary-container rounded-2xl p-space-md shadow-sm border border-secondary/20 relative overflow-hidden">
+          <div class="flex items-center justify-between gap-space-sm mb-space-xs">
+            <div class="flex items-center gap-space-xs">
+              <div class="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-on-secondary shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[16px] leading-none">local_shipping</span>
+              </div>
+              <span id="free-delivery-text" class="text-[14px] font-black text-on-secondary-container">Add ₹49 more for FREE Delivery!</span>
+            </div>
+            <span id="free-delivery-badge" class="text-[11px] bg-surface-container-lowest/90 text-secondary px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black shadow-sm">80% reached</span>
+          </div>
+          <!-- Animated Progress Track -->
+          <div class="w-full bg-surface-container-lowest/60 rounded-full h-2.5 overflow-hidden p-0.5 relative">
+            <div id="free-delivery-bar" class="h-full bg-secondary rounded-full relative transition-all duration-500 ease-out flex items-center justify-end" style="width: 80%;">
+              <span class="w-2 h-2 rounded-full bg-surface-container-lowest shadow-sm mr-0.5 animate-pulse"></span>
+            </div>
+          </div>
+          <p class="text-[12px] text-on-secondary-variant mt-1.5 flex items-center justify-between">
+            <span>Cart value: <strong id="cart-value-label" class="font-black text-on-secondary-container">₹409</strong></span>
+            <span>Free Delivery Target: <strong>₹458</strong></span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Delivery SLA Micro-Banner -->
+      <div class="px-margin mt-space-sm">
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container-high/60 flex items-center justify-between">
+          <div class="flex items-center gap-space-md">
+            <div class="w-10 h-10 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined text-[24px]">electric_bolt</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[15px] font-black text-on-surface">Delivering in 9 mins</span>
+                <span class="bg-primary-container text-on-primary-container text-[10px] font-black px-1.5 py-0.5 rounded-full">FASTEST</span>
+              </div>
+              <p class="text-[12px] text-on-surface-variant font-medium">Shipment 1 of 1 • From CIDCO Darkstore #04</p>
+            </div>
+          </div>
+          <button onclick="promptAddressChange()" class="text-secondary text-[13px] font-bold hover:underline cursor-pointer">Change</button>
+        </div>
+      </div>
+
+      <!-- Itemized Basket Card List -->
+      <div class="px-margin mt-space-md">
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container-high/60">
+          <div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container">
+            <h2 class="text-[16px] font-black text-on-surface flex items-center gap-1.5">
+              <span>Basket Items</span>
+              <span id="header-item-count" class="bg-surface-container text-on-surface-variant text-[11px] font-black px-2 py-0.5 rounded-full">5 Items</span>
+            </h2>
+            <button onclick="clearCart()" class="text-[12px] text-error font-bold flex items-center gap-0.5 hover:opacity-80 transition-opacity">
+              <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+              Clear
+            </button>
+          </div>
+
+          <div id="cart-items-container" class="space-y-1">
+            <!-- Rendered by JS -->
+          </div>
+
+          <button onclick="switchScreen('home')" class="mt-space-sm flex items-center justify-center gap-space-xs w-full py-2.5 rounded-xl bg-surface-container-low text-secondary text-[13px] font-bold hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            Add more items to unlock savings
+          </button>
+        </div>
+      </div>
+
+      <!-- Delivery Instructions Pill Selector -->
+      <div class="px-margin mt-space-md">
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container-high/60">
+          <div class="flex items-center gap-space-xs mb-space-xs">
+            <span class="material-symbols-outlined text-secondary text-[20px]">directions_bike</span>
+            <h3 class="text-[15px] font-black text-on-surface">Delivery Instructions</h3>
+          </div>
+          <p class="text-[12px] text-on-surface-variant mb-space-sm">Tap preferences to inform your rider before arrival:</p>
+          <div class="flex flex-wrap gap-2" id="delivery-instructions-group">
+            <button class="instruction-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold transition-all bg-secondary text-on-secondary shadow-sm active:scale-95" data-selected="true" type="button">
+              <span>🔕</span>
+              <span>Avoid Calling</span>
+              <span class="material-symbols-outlined text-[14px]">check</span>
+            </button>
+            <button class="instruction-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold transition-all bg-secondary text-on-secondary shadow-sm active:scale-95" data-selected="true" type="button">
+              <span>🚪</span>
+              <span>Leave at Door</span>
+              <span class="material-symbols-outlined text-[14px]">check</span>
+            </button>
+            <button class="instruction-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all bg-surface-container text-on-surface active:scale-95 hover:bg-surface-container-high" data-selected="false" type="button">
+              <span>🐾</span>
+              <span>Beware of Pets</span>
+              <span class="material-symbols-outlined text-[14px] hidden">check</span>
+            </button>
+            <button class="instruction-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all bg-surface-container text-on-surface active:scale-95 hover:bg-surface-container-high" data-selected="false" type="button">
+              <span>🔔</span>
+              <span>Ring Bell Once</span>
+              <span class="material-symbols-outlined text-[14px] hidden">check</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rider Tip Selector -->
+      <div class="px-margin mt-space-md">
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container-high/60">
+          <div class="flex items-center justify-between mb-space-xs">
+            <div class="flex items-center gap-space-xs">
+              <span class="material-symbols-outlined text-primary text-[20px]">sports_motorsports</span>
+              <h3 class="text-[15px] font-black text-on-surface">Tip your delivery partner</h3>
+            </div>
+            <span class="bg-primary-container text-on-primary-container text-[10px] px-2 py-0.5 rounded-full font-black">100% TO RIDER</span>
+          </div>
+          <p class="text-[12px] text-on-surface-variant mb-space-md">Show gratitude for lightning speed under the weather.</p>
+          <div class="grid grid-cols-4 gap-2" id="tip-selector-group">
+            <button class="tip-btn py-2 px-1 rounded-xl text-[13px] font-bold flex flex-col items-center justify-center transition-all bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-95" data-tip="10" type="button">
+              <span>₹10</span>
+              <span class="text-[10px] text-on-surface-variant font-normal">Smile</span>
+            </button>
+            <button class="tip-btn py-2 px-1 rounded-xl text-[13px] font-bold flex flex-col items-center justify-center transition-all bg-secondary text-on-secondary shadow-md active:scale-95 ring-offset-1" data-tip="20" type="button">
+              <div class="flex items-center gap-0.5">
+                <span>₹20</span>
+                <span class="material-symbols-outlined text-[12px]">favorite</span>
+              </div>
+              <span class="text-[10px] text-on-secondary/80 font-normal">Popular</span>
+            </button>
+            <button class="tip-btn py-2 px-1 rounded-xl text-[13px] font-bold flex flex-col items-center justify-center transition-all bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-95" data-tip="30" type="button">
+              <span>₹30</span>
+              <span class="text-[10px] text-on-surface-variant font-normal">Hero</span>
+            </button>
+            <button class="tip-btn py-2 px-1 rounded-xl text-[13px] font-bold flex flex-col items-center justify-center transition-all bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-95" data-tip="custom" type="button">
+              <span>Custom</span>
+              <span class="text-[10px] text-on-surface-variant font-normal">Other</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Bill Summary & Breakdown Card -->
+      <div class="px-margin mt-space-md">
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container-high/60">
+          <div class="flex items-center justify-between pb-space-sm border-b border-surface-container">
+            <h3 class="text-[16px] font-black text-on-surface">Bill Summary</h3>
+            <span class="bg-secondary-container text-on-secondary-container text-[11px] px-2.5 py-0.5 rounded-full flex items-center gap-1 font-black">
+              <span class="material-symbols-outlined text-[13px]">verified</span>
+              BEST PRICE
+            </span>
+          </div>
+          <div class="space-y-2.5 pt-space-sm text-[13px] font-medium">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 text-on-surface">
+                <span>Items Total</span>
+                <span class="text-[11px] text-on-surface-variant">(MRP <span id="bill-mrp">₹455</span>)</span>
+              </div>
+              <span class="font-bold text-on-surface text-[14px]" id="bill-items-total">₹409</span>
+            </div>
+            <div class="flex items-center justify-between text-on-surface">
+              <div class="flex items-center gap-1">
+                <span>Handling Fee</span>
+                <span class="material-symbols-outlined text-[13px] text-on-surface-variant">info</span>
+              </div>
+              <span class="font-bold text-[14px]" id="bill-handling-fee">₹5</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 text-on-surface">
+                <span>Delivery Partner Fee</span>
+                <span class="bg-secondary text-on-secondary text-[10px] px-1 rounded font-black">FREE</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="line-through text-on-surface-variant text-[12px]">₹25</span>
+                <span class="text-secondary font-black text-[13px]">FREE</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-on-surface">
+              <span>Delivery Partner Tip</span>
+              <span class="font-bold text-[14px] text-secondary" id="bill-tip-amount">+₹20</span>
+            </div>
+            <div class="flex items-center justify-between text-on-surface">
+              <span>Taxes &amp; Operational Charges</span>
+              <span class="font-bold text-[14px]" id="bill-taxes">₹12</span>
+            </div>
+            <div class="pt-2">
+              <div class="flex items-baseline justify-between py-2.5 bg-surface-container-low px-3.5 rounded-xl border border-surface-container-high/60">
+                <div>
+                  <span class="text-[16px] font-black text-on-surface">Grand Total</span>
+                  <p class="text-[11px] text-on-surface-variant font-normal">Inclusive of all taxes</p>
+                </div>
+                <span class="font-price-lg text-[22px] font-black text-on-surface" id="bill-grand-total">₹446</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delight Savings Ribbon -->
+          <div class="mt-space-md bg-secondary-container/60 rounded-xl p-3 flex items-center gap-space-sm border border-secondary/20">
+            <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-on-secondary shrink-0 shadow-sm">
+              <span class="material-symbols-outlined text-[18px]">celebration</span>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[13px] font-black text-on-secondary-container" id="savings-tag">🎉 You saved ₹71 on this order!</p>
+              <p class="text-[11px] text-on-secondary-variant">Includes item discounts &amp; ₹25 free delivery waiver</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feeding India & Cancellation Policy -->
+      <div class="px-margin mt-space-md space-y-space-sm">
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm border border-surface-container-high/60 flex items-start gap-space-sm cursor-pointer" id="donation-card">
+          <input checked="" class="mt-1 w-4 h-4 rounded text-secondary accent-secondary cursor-pointer" id="donation-toggle" type="checkbox"/>
+          <label class="flex-1 cursor-pointer select-none" for="donation-toggle">
+            <div class="flex items-center justify-between">
+              <span class="text-[13px] font-black text-on-surface">Feeding India Donation</span>
+              <span class="text-[13px] font-black text-on-surface">₹1</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant mt-0.5">Partnering with Zomato Feeding India to nourish malnourished children in schools.</p>
+          </label>
+        </div>
+        <div class="bg-surface-container-low/70 rounded-2xl p-space-md border border-surface-container-high/60">
+          <div class="flex items-center gap-1.5 text-on-surface-variant mb-1">
+            <span class="material-symbols-outlined text-[16px]">verified_user</span>
+            <span class="text-[11px] font-black uppercase tracking-wider">Instant Prep &amp; Cancellation Policy</span>
+          </div>
+          <p class="text-[11px] text-on-surface-variant leading-relaxed">
+            Orders cannot be cancelled once packed by the dark store (usually within 60 seconds). For missing items, 100% instant refund is credited.
+          </p>
+        </div>
+      </div>
+
+      <!-- Bottom Sticky Action Bar & Swipe-to-Order Slider -->
+      <div class="fixed bottom-16 left-0 right-0 z-40 bg-surface-container-lowest/95 backdrop-blur-xl px-margin py-3 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] border-t border-surface-container max-w-md mx-auto">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+            <span class="text-[15px] font-black text-on-surface" id="sticky-order-summary">₹446 | 5 Items</span>
+          </div>
+          <div class="flex items-center gap-1 text-on-surface-variant text-[12px]">
+            <span>Deliver to: <strong id="sticky-delivery-label">Home</strong></span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Interactive Slide-to-Place-Order Component -->
+        <div class="relative w-full h-14 bg-surface-container-high rounded-full overflow-hidden select-none flex items-center p-1 cursor-pointer shadow-inner" id="slider-track">
+          <div class="absolute left-0 top-0 bottom-0 bg-secondary rounded-full transition-all duration-75" id="slider-fill" style="width: 56px;"></div>
+          <div class="w-full text-center text-[14px] font-black text-on-surface z-10 pointer-events-none flex items-center justify-center gap-2 tracking-wide pl-12 pr-4 transition-opacity" id="slider-label">
+            <span>Slide to Place Order</span>
+            <div class="flex items-center text-secondary">
+              <span class="material-symbols-outlined text-[18px] animate-pulse">chevron_right</span>
+              <span class="material-symbols-outlined text-[18px] animate-pulse -ml-2.5" style="animation-delay: 200ms;">chevron_right</span>
+              <span class="material-symbols-outlined text-[18px] animate-pulse -ml-2.5" style="animation-delay: 400ms;">chevron_right</span>
+            </div>
+          </div>
+          <div class="absolute left-1 top-1 bottom-1 w-12 h-12 bg-secondary text-on-secondary rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-20 touch-none active:scale-105 transition-transform" id="slider-thumb">
+            <span class="material-symbols-outlined text-[24px]" id="slider-icon">electric_bolt</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Confirmation Modal Overlay -->
+      <div class="fixed inset-0 z-50 bg-on-surface/60 backdrop-blur-md hidden items-center justify-center p-margin" id="order-success-modal">
+        <div class="bg-surface-container-lowest w-full max-w-sm rounded-3xl p-space-xl shadow-2xl text-center transform scale-95 transition-transform flex flex-col items-center border border-surface-container">
+          <div class="w-20 h-20 rounded-full bg-secondary-container text-secondary flex items-center justify-center mb-space-md animate-bounce shadow-md">
+            <span class="material-symbols-outlined text-[48px] material-symbols-fill">check_circle</span>
+          </div>
+          <h3 class="font-headline-lg text-[24px] font-black text-on-surface">Order Placed! ⚡</h3>
+          <p class="text-[13px] text-on-surface-variant mt-space-xs font-medium">
+            Delivery partner is picking up your items at CIDCO Darkstore #04.
+          </p>
+          <div class="w-full bg-surface-container-low rounded-2xl p-space-md my-space-md border border-surface-container">
+            <div class="flex justify-between items-center text-[13px] font-bold">
+              <span class="text-on-surface-variant">Estimated Arrival:</span>
+              <span class="text-secondary font-black text-[15px]">9 Minutes (⚡ Express)</span>
+            </div>
+          </div>
+          <button onclick="openLiveTrackingFromModal()" class="w-full py-3.5 rounded-full bg-secondary text-on-secondary text-[14px] font-black shadow-md hover:opacity-95 active:scale-95 transition-all">
+            Track Live Delivery 🛵
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SCREEN 3: LIVE ORDER TRACKING & CONFETTI                -->
+    <!-- ======================================================== -->
+    <div id="screen-tracking" class="screen-view flex-col w-full pb-28 relative">
+      <!-- Confetti Canvas Layer -->
+      <canvas class="pointer-events-none absolute inset-0 z-30 w-full h-80" id="confetti-canvas"></canvas>
+
+      <div class="px-margin pt-space-md pb-margin flex flex-col gap-space-lg">
+        
+        <!-- Confetti Celebration Banner Card -->
+        <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-container via-surface-container-low to-tertiary-fixed p-space-lg shadow-sm border border-primary-container/40">
+          <div class="relative z-10 flex flex-col gap-space-sm">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-space-xs rounded-full bg-secondary px-space-md py-space-2xs text-on-secondary text-[11px] font-black shadow-sm">
+                <span class="material-symbols-outlined text-[14px] material-symbols-fill">bolt</span>
+                INSTANT FULFILLMENT
+              </span>
+              <span class="text-[11px] text-on-surface-variant bg-surface/90 backdrop-blur px-space-sm py-space-2xs rounded-full font-bold">
+                10 MIN GUARANTEE
+              </span>
+            </div>
+            
+            <div class="flex items-start gap-space-md mt-space-xs">
+              <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shrink-0 shadow-sm animate-bounce">
+                <span class="material-symbols-outlined text-on-primary-container text-[28px] material-symbols-fill">celebration</span>
+              </div>
+              <div class="flex flex-col min-w-0">
+                <h2 class="font-headline-sm text-[20px] text-on-surface font-black leading-tight">
+                  Order Confirmed! ⚡
+                </h2>
+                <p class="text-[13px] text-on-surface-variant font-semibold mt-space-2xs">
+                  Your dark store partner is hand-packing your essentials right now.
+                </p>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-surface/90 backdrop-blur p-space-sm mt-space-xs flex flex-col gap-space-2xs border border-surface-container">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-on-surface-variant">ORDER #QZ-89421</span>
+                <span class="text-[12px] text-secondary font-black flex items-center gap-space-2xs">
+                  <span class="material-symbols-outlined text-[14px]">schedule</span> Placed 10:42 PM
+                </span>
+              </div>
+              <div class="text-[12px] text-on-surface font-bold flex items-center gap-space-xs">
+                <span class="material-symbols-outlined text-secondary text-[16px] material-symbols-fill">check_circle</span>
+                Guaranteed by <span class="text-secondary ml-space-2xs font-black text-[15px]">10:52 PM</span>
+              </div>
+            </div>
+          </div>
+          <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-secondary-container/40 blur-xl pointer-events-none"></div>
+          <div class="absolute -left-6 -top-6 w-28 h-28 rounded-full bg-primary-fixed/50 blur-lg pointer-events-none"></div>
+        </section>
+
+        <!-- Milestone Stage Tracker -->
+        <section class="rounded-2xl bg-surface-container-lowest p-space-md shadow-sm border border-surface-container-high/60">
+          <div class="grid grid-cols-4 relative items-center">
+            <div class="absolute left-[12%] right-[12%] top-3.5 h-[3px] bg-surface-container-highest -z-0">
+              <div class="h-full bg-secondary transition-all duration-700" style="width: 70%;"></div>
+            </div>
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center text-center relative z-10 gap-space-xs">
+              <div class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[16px] font-black">done</span>
+              </div>
+              <span class="text-[11px] text-secondary font-black">Placed</span>
+            </div>
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center text-center relative z-10 gap-space-xs">
+              <div class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[16px] font-black">done</span>
+              </div>
+              <span class="text-[11px] text-secondary font-black">Packed</span>
+            </div>
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center text-center relative z-10 gap-space-xs">
+              <div class="relative flex items-center justify-center">
+                <span class="absolute w-9 h-9 rounded-full bg-secondary/25 animate-ping"></span>
+                <div class="w-7 h-7 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-md">
+                  <span class="material-symbols-outlined text-[16px] material-symbols-fill">two_wheeler</span>
+                </div>
+              </div>
+              <span class="text-[11px] text-on-surface font-black">On the Way</span>
+            </div>
+            <!-- Step 4 -->
+            <div class="flex flex-col items-center text-center relative z-10 gap-space-xs">
+              <div class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center">
+                <span class="material-symbols-outlined text-[15px]">home_pin</span>
+              </div>
+              <span class="text-[11px] text-on-surface-variant font-bold">Delivered</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stylized Live Delivery Route Map -->
+        <section class="rounded-2xl bg-surface-container-lowest overflow-hidden shadow-sm border border-surface-container-high/60 flex flex-col">
+          <div class="p-space-sm bg-surface-container-low flex items-center justify-between border-b border-surface-container">
+            <div class="flex items-center gap-space-xs">
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+              <span class="text-[11px] text-secondary font-black uppercase">Live GPS Route</span>
+            </div>
+            <span class="text-[12px] text-on-surface-variant font-semibold">Speed: 24 km/h</span>
+          </div>
+
+          <div class="relative w-full h-64 bg-surface-container overflow-hidden">
+            <svg class="absolute inset-0 w-full h-full opacity-60 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern height="40" id="grid-pattern" patternunits="userSpaceOnUse" width="40">
+                  <rect fill="none" height="40" opacity="0.35" stroke="#d0c6ab" stroke-width="0.7" width="40"></rect>
+                  <circle cx="20" cy="20" fill="#7f775f" opacity="0.25" r="1.5"></circle>
+                </pattern>
+              </defs>
+              <rect fill="url(#grid-pattern)" height="100%" width="100%"></rect>
+              <path d="M-10,30 Q120,40 220,10 T400,20" fill="none" stroke="#e8e8ec" stroke-width="12"></path>
+              <path d="M40,240 L160,110 L340,150" fill="none" stroke="#e8e8ec" stroke-width="16"></path>
+              <path d="M-20,180 Q100,160 200,220 T420,190" fill="none" stroke="#e2e2e6" stroke-width="8"></path>
+              <path d="M 50,45 C 90,80 130,55 170,115 S 220,190 280,175 S 330,210 330,225" fill="none" id="delivery-route" opacity="0.5" stroke="#80f89d" stroke-linecap="round" stroke-width="8"></path>
+              <path class="animate-[pulse_1.5s_infinite]" d="M 50,45 C 90,80 130,55 170,115 S 220,190 280,175 S 330,210 330,225" fill="none" stroke="#006d32" stroke-dasharray="6 4" stroke-linecap="round" stroke-width="4"></path>
+            </svg>
+
+            <!-- Dark Store Marker (Origin) -->
+            <div class="absolute left-6 top-6 z-10 flex flex-col items-center -translate-x-1/2 -translate-y-1/2">
+              <div class="w-9 h-9 rounded-full bg-surface-container-lowest shadow-md flex items-center justify-center text-on-surface border border-surface-container">
+                <span class="material-symbols-outlined text-[18px] text-tertiary material-symbols-fill">warehouse</span>
+              </div>
+              <span class="mt-1 px-1.5 py-0.5 bg-surface-container-lowest/90 backdrop-blur text-[10px] font-black rounded shadow-sm text-on-surface whitespace-nowrap">
+                CIDCO Hub #04
+              </span>
+            </div>
+
+            <!-- Animated Moving Delivery Rider -->
+            <div class="absolute z-20 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-out" id="live-scooter" style="left: 200px; top: 145px;">
+              <div class="relative flex items-center justify-center">
+                <span class="absolute w-8 h-8 rounded-full bg-secondary-container animate-ping opacity-75"></span>
+                <div class="w-8 h-8 rounded-full bg-secondary text-on-secondary shadow-md flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">two_wheeler</span>
+                </div>
+              </div>
+              <div class="mt-1 px-1.5 py-0.5 bg-secondary text-on-secondary rounded text-[9px] font-black shadow-sm flex items-center gap-1">
+                <span>Sanjay</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+              </div>
+            </div>
+
+            <!-- Destination Marker -->
+            <div class="absolute right-7 bottom-6 z-10 flex flex-col items-center translate-x-1/2 -translate-y-1/2">
+              <div class="relative flex items-center justify-center">
+                <span class="absolute w-10 h-10 rounded-full bg-error-container/60 animate-ping"></span>
+                <div class="w-9 h-9 rounded-full bg-error text-on-error shadow-md flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px] material-symbols-fill">location_on</span>
+                </div>
+              </div>
+              <span id="map-dest-label" class="mt-1 px-1.5 py-0.5 bg-surface-container-lowest/90 backdrop-blur text-[10px] font-black rounded shadow-sm text-on-surface whitespace-nowrap">
+                You (CIDCO N-4)
+              </span>
+            </div>
+
+            <div class="absolute right-space-sm top-space-sm flex flex-col gap-space-xs z-10">
+              <button aria-label="Center map" class="w-8 h-8 rounded-lg bg-surface-container-lowest text-on-surface shadow-md flex items-center justify-center hover:bg-surface-container transition-colors" id="recenter-btn">
+                <span class="material-symbols-outlined text-[18px]">my_location</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-space-sm bg-surface-container-low flex items-center justify-between text-on-surface-variant text-[12px]">
+            <span class="flex items-center gap-space-2xs font-semibold">
+              <span class="material-symbols-outlined text-secondary text-[16px]">navigation</span>
+              Via Jalna Road Express Link
+            </span>
+            <span class="font-black text-on-surface">1.8 km left</span>
+          </div>
+        </section>
+
+        <!-- Live ETA & Delivery Rider Card Drawer -->
+        <section class="rounded-2xl bg-surface-container-lowest p-space-md shadow-md border border-surface-container-high/60 flex flex-col gap-space-md">
+          <div class="flex items-center justify-between bg-primary-fixed/20 p-space-md rounded-2xl border border-primary-container/30">
+            <div class="flex flex-col">
+              <span class="text-[11px] text-on-surface-variant uppercase tracking-wide font-black">Estimated Arrival</span>
+              <div class="flex items-baseline gap-space-2xs mt-space-2xs">
+                <span class="font-headline-lg text-[32px] text-on-surface font-black tracking-tight">8</span>
+                <span class="font-headline-sm text-[18px] text-on-surface font-black">MINS</span>
+                <span class="material-symbols-outlined text-secondary text-[22px] ml-space-xs animate-bounce material-symbols-fill">electric_bolt</span>
+              </div>
+              <span class="text-[12px] text-secondary font-black">On time • Clear Traffic</span>
+            </div>
+            <!-- Circular Progress Ring -->
+            <div class="relative w-16 h-16 flex items-center justify-center">
+              <svg class="w-16 h-16 transform -rotate-90" viewbox="0 0 36 36">
+                <path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+                <path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" id="eta-progress-ring" stroke="currentColor" stroke-dasharray="100, 100" stroke-dashoffset="25" stroke-linecap="round" stroke-width="3.5"></path>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-[12px] text-on-surface font-black">75%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Rider Profile -->
+          <div class="flex items-center gap-space-md pt-space-xs">
+            <div class="relative shrink-0">
+              <img class="w-14 h-14 rounded-full object-cover shadow-sm bg-surface-container" alt="Rider Sanjay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9e0nB9Av2Jl1KeObszai5hxp2rsuPpSUkeknFOAwoDyx9pdV78byMws9KNOds6fmvSBHrLtNxdhuzblz_3P-ltHo_sO8EF3-KykTX8yEplpLtbOC3mfINUtmZZRtcKMaxIzqjTdJwW11-4hDEVwAxJBKlo5uR3SzTpNaUCpKfkRHdREYYjhZKH_RTgzTpMinNXkCZNWP_amJ-L87vJWz7y7B9AFHxIhOUwFfJ3r58LWOclzNVEkfFyg"/>
+              <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[10px] shadow-sm">
+                <span class="material-symbols-outlined text-[12px] material-symbols-fill">verified</span>
+              </span>
+            </div>
+            <div class="flex flex-col min-w-0 flex-1">
+              <div class="flex items-center justify-between">
+                <h3 class="text-[16px] text-on-surface font-black truncate">Sanjay M.</h3>
+                <span class="inline-flex items-center gap-space-2xs bg-surface-container px-2 py-0.5 rounded-full text-[11px] font-bold text-on-surface">
+                  <span class="material-symbols-outlined text-primary text-[13px] material-symbols-fill">star</span>
+                  4.9 (1,420+)
+                </span>
+              </div>
+              <p class="text-[12px] text-on-surface-variant truncate mt-space-2xs">
+                EV Scooter • <span class="font-bold text-on-surface">MH-20-CZ-4412</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+            <a class="h-11 rounded-full bg-secondary text-on-secondary text-[13px] font-black flex items-center justify-center gap-space-xs shadow-md active:scale-95 transition-all" href="tel:+919876543210">
+              <span class="material-symbols-outlined text-[18px]">call</span>
+              Call Sanjay
+            </a>
+            <button class="h-11 rounded-full bg-surface-container-high text-on-surface text-[13px] font-bold flex items-center justify-center gap-space-xs hover:bg-surface-variant active:scale-95 transition-all" id="chat-rider-btn">
+              <span class="material-symbols-outlined text-[18px]">chat</span>
+              Message
+            </button>
+          </div>
+
+          <!-- Trust & Hygiene Pill -->
+          <div class="flex items-center gap-space-xs bg-surface-container-low p-space-sm rounded-xl text-on-surface-variant border border-surface-container">
+            <span class="material-symbols-outlined text-secondary text-[18px] material-symbols-fill">health_and_safety</span>
+            <span class="text-[12px] font-semibold">Daily temperature verified (98.2°F) &amp; double vaccinated</span>
+          </div>
+        </section>
+
+        <!-- Order Items Brief & Delivery Details Summary -->
+        <section class="rounded-2xl bg-surface-container-lowest p-space-md shadow-sm border border-surface-container-high/60 flex flex-col gap-space-sm">
+          <div class="flex items-center justify-between">
+            <h4 class="text-[15px] text-on-surface font-black">Delivery Address</h4>
+            <button onclick="promptAddressChange()" class="text-[11px] text-secondary font-black hover:underline">INSTRUCTIONS</button>
+          </div>
+          <div class="flex items-start gap-space-sm text-on-surface">
+            <span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">home</span>
+            <div class="flex flex-col text-[12px]">
+              <span id="tracking-address-title" class="font-black text-on-surface text-[13px]">Flat 302, Green Acre Heights</span>
+              <span id="tracking-address-detail" class="text-on-surface-variant">Town Centre, CIDCO N-4, Chhatrapati Sambhajinagar (Aurangabad)</span>
+              <span class="text-on-surface-variant mt-space-2xs italic">Note: "Leave at security desk if doorbell unanswered"</span>
+            </div>
+          </div>
+          <div class="pt-space-sm border-t border-surface-container flex items-center justify-between">
+            <div class="flex items-center gap-space-xs">
+              <span class="w-2 h-2 rounded-full bg-secondary"></span>
+              <span class="text-[12px] text-on-surface font-bold">Pack items on the way</span>
+            </div>
+            <button onclick="switchScreen('cart')" class="text-[11px] text-tertiary font-black hover:underline">VIEW RECEIPT</button>
+          </div>
+        </section>
+
+        <!-- Quick Help & Emergency Support Link -->
+        <div class="flex items-center justify-between px-space-xs pb-space-lg text-on-surface-variant text-[12px]">
+          <button onclick="alert('Support connected: Dark Store Manager Aurangabad (+91-240-2345678)')" class="flex items-center gap-space-2xs hover:text-on-surface transition-colors font-semibold">
+            <span class="material-symbols-outlined text-[16px]">help</span>
+            Need help with this order?
+          </button>
+          <button onclick="alert('Order is currently in dispatch transit. Contact rider directly for immediate delivery redirection.')" class="font-black text-error flex items-center gap-space-2xs hover:opacity-80">
+            <span class="material-symbols-outlined text-[16px]">cancel</span>
+            Cancel Order
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SCREEN 4: USER ACCOUNT & PROFILE (LOGIN / REGISTERED)   -->
+    <!-- ======================================================== -->
+    <div id="screen-profile" class="screen-view flex-col w-full pb-32">
+      <div class="px-margin pt-space-md space-y-space-md">
+
+        <!-- User VIP Identity Card -->
+        <div class="bg-gradient-to-br from-tertiary via-tertiary/90 to-primary-container text-on-tertiary rounded-3xl p-space-lg shadow-lg relative overflow-hidden">
+          <div class="relative z-10 flex items-center gap-space-md">
+            <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/80 shadow-md bg-surface-container-low shrink-0 flex items-center justify-center">
+              <img id="profile-avatar-img" class="w-full h-full object-cover hidden" alt="Profile Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzOYSwOBkOmr3p_HRbvK884A7KqlSlakvRRfslQ9LTVXKVlv3ctuJyEsyw5ZKz_olpSmzrXudlLIzPRdXZTtNBdz8bVySfNdfx8y8kqmlbBFcIMKXZuZfCx8CEiiNgmTm1bwxNU2_xOyEJczAznkYA5q2e5Tc55f-8Iojrgir-BD5m9KrUdJo9QxokSLl1kQfUqg8EsY-DGJf6nfjZyrC7x89i9igNVz1ovlr-eP_jiN7aLkC90J067A"/>
+              <span id="profile-avatar-fallback" class="material-symbols-outlined text-[36px] text-tertiary">person</span>
+            </div>
+            <div class="flex flex-col min-w-0">
+              <div class="flex items-center gap-1.5">
+                <h2 id="profile-user-name" class="font-headline-sm text-[20px] font-black text-white truncate">Guest Shopper</h2>
+                <span id="profile-vip-badge" class="bg-primary-container text-on-primary-fixed text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">VIP GOLD</span>
+              </div>
+              <p id="profile-user-phone" class="text-[13px] text-tertiary-fixed font-semibold mt-0.5">+91 98765 43210</p>
+              <p id="profile-user-email" class="text-[11px] text-white/80">neel@quickzap.in</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-[12px] font-bold text-white/95">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-primary-container material-symbols-fill">bolt</span>
+              Sub-12m Priority Dispatch
+            </span>
+            <span class="bg-white/20 backdrop-blur px-2 py-0.5 rounded-full text-[11px]">Free Delivery Forever</span>
+          </div>
+          <div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-primary-container/20 blur-xl pointer-events-none"></div>
+        </div>
+
+        <!-- Wallet & Quick Stats -->
+        <div class="grid grid-cols-2 gap-space-sm">
+          <div class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container-high/60 shadow-sm flex flex-col">
+            <span class="text-[11px] text-on-surface-variant font-bold uppercase">QuickZap Wallet</span>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span class="text-[22px] font-black text-secondary">₹150</span>
+              <span class="text-[11px] text-secondary font-bold">Cashback</span>
+            </div>
+            <button onclick="alert('Wallet balance automatically applied at checkout!')" class="mt-2 text-[11px] text-secondary font-black hover:underline self-start">Use in next order →</button>
+          </div>
+          <div class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container-high/60 shadow-sm flex flex-col">
+            <span class="text-[11px] text-on-surface-variant font-bold uppercase">Total Orders</span>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span class="text-[22px] font-black text-on-surface">14</span>
+              <span class="text-[11px] text-on-surface-variant">Aurangabad</span>
+            </div>
+            <button onclick="switchScreen('tracking')" class="mt-2 text-[11px] text-primary font-black hover:underline self-start">Track active →</button>
+          </div>
+        </div>
+
+        <!-- Saved Addresses in Aurangabad -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container-high/60 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-[15px] font-black text-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[20px] text-secondary">location_on</span>
+              Saved Delivery Addresses
+            </h3>
+            <button onclick="promptNewAddress()" class="text-[12px] font-bold text-secondary hover:underline">+ Add New</button>
+          </div>
+          
+          <div class="space-y-2" id="saved-addresses-list">
+            <!-- Address 1 -->
+            <div class="p-3 rounded-xl bg-surface-container-low border-2 border-secondary/40 flex items-start justify-between cursor-pointer" onclick="selectAddress('CIDCO N-4, Aurangabad')">
+              <div class="flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-[18px] text-secondary mt-0.5 material-symbols-fill">home</span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[13px] font-black text-on-surface">Home</span>
+                    <span class="bg-secondary text-on-secondary text-[9px] font-black px-1.5 rounded">DEFAULT</span>
+                  </div>
+                  <p class="text-[12px] text-on-surface-variant mt-0.5">Flat 302, Green Acre Heights, Town Centre, CIDCO N-4, Aurangabad</p>
+                </div>
+              </div>
+              <span class="material-symbols-outlined text-[18px] text-secondary material-symbols-fill">check_circle</span>
+            </div>
+
+            <!-- Address 2 -->
+            <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high flex items-start justify-between cursor-pointer hover:border-secondary/40" onclick="selectAddress('Kranti Chowk, Aurangabad')">
+              <div class="flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">work</span>
+                <div>
+                  <span class="text-[13px] font-black text-on-surface">Office</span>
+                  <p class="text-[12px] text-on-surface-variant mt-0.5">Tech Park Suite 4B, Jalna Road, Kranti Chowk, Aurangabad</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Address 3 -->
+            <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high flex items-start justify-between cursor-pointer hover:border-secondary/40" onclick="selectAddress('Nirala Bazar, Aurangabad')">
+              <div class="flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5">favorite</span>
+                <div>
+                  <span class="text-[13px] font-black text-on-surface">Family / Parents</span>
+                  <p class="text-[12px] text-on-surface-variant mt-0.5">Plot 12, Gulmandi Lane, Nirala Bazar, Aurangabad</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Settings & Logout Card -->
+        <div class="bg-surface-container-lowest rounded-2xl p-space-md border border-surface-container-high/60 shadow-sm space-y-2">
+          <h3 class="text-[15px] font-black text-on-surface mb-2">Account Actions</h3>
+          <button onclick="openAuthModal('login')" class="w-full py-3 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between text-[13px] font-bold text-on-surface transition-colors">
+            <span class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px] text-tertiary">swap_horiz</span>
+              Switch or Change Account
+            </span>
+            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+          </button>
+          <button onclick="handleLogout()" class="w-full py-3 px-4 rounded-xl bg-error-container/30 hover:bg-error-container/50 flex items-center justify-between text-[13px] font-bold text-error transition-colors">
+            <span class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px] text-error">logout</span>
+              Log Out of QuickZap
+            </span>
+            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= AUTHENTICATION MODAL (LOGIN & SIGN UP) ================= -->
+  <div id="auth-modal" class="fixed inset-0 z-50 bg-on-surface/65 backdrop-blur-md hidden items-end sm:items-center justify-center p-0 sm:p-margin">
+    <div class="bg-surface-container-lowest w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-space-lg shadow-2xl border border-surface-container flex flex-col max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Top Close & Brand -->
+      <div class="flex items-center justify-between pb-space-sm border-b border-surface-container">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center">
+            <span class="material-symbols-outlined text-[18px] text-on-primary-fixed material-symbols-fill">bolt</span>
+          </div>
+          <div>
+            <h3 class="text-[17px] font-black text-on-surface">QuickZap Account</h3>
+            <p class="text-[11px] text-on-surface-variant font-medium">10-minute grocery delivery in Aurangabad</p>
+          </div>
+        </div>
+        <button onclick="closeAuthModal()" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-on-surface transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Segmented Tab: Log In vs Sign Up -->
+      <div class="grid grid-cols-2 bg-surface-container-low p-1 rounded-2xl my-space-md">
+        <button id="auth-tab-login" onclick="setAuthTab('login')" class="py-2.5 rounded-xl text-[13px] font-black transition-all bg-surface-container-lowest text-on-surface shadow-sm">
+          Log In
+        </button>
+        <button id="auth-tab-signup" onclick="setAuthTab('signup')" class="py-2.5 rounded-xl text-[13px] font-bold transition-all text-on-surface-variant hover:text-on-surface">
+          Sign Up
+        </button>
+      </div>
+
+      <!-- STEP 1: Phone / Form View -->
+      <div id="auth-step-form" class="space-y-space-md">
+        
+        <!-- Sign Up Extra Fields (Hidden on Login) -->
+        <div id="signup-extra-fields" class="hidden space-y-space-sm">
+          <div>
+            <label class="block text-[12px] font-bold text-on-surface mb-1">Full Name</label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3 text-[18px] text-on-surface-variant">person</span>
+              <input id="auth-input-name" type="text" placeholder="e.g. Neel Belsare" class="w-full pl-10 pr-3 py-2.5 bg-surface-container-low border border-surface-container-high rounded-xl text-[14px] text-on-surface focus:outline-none focus:border-secondary font-medium"/>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[12px] font-bold text-on-surface mb-1">Email Address</label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3 text-[18px] text-on-surface-variant">mail</span>
+              <input id="auth-input-email" type="email" placeholder="e.g. neel@quickzap.in" class="w-full pl-10 pr-3 py-2.5 bg-surface-container-low border border-surface-container-high rounded-xl text-[14px] text-on-surface focus:outline-none focus:border-secondary font-medium"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Number Input (Universal) -->
+        <div>
+          <label class="block text-[12px] font-bold text-on-surface mb-1">Mobile Phone Number</label>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1 px-3 py-2.5 bg-surface-container-low border border-surface-container-high rounded-xl text-[14px] font-bold text-on-surface">
+              <span>🇮🇳</span>
+              <span>+91</span>
+            </div>
+            <input id="auth-input-phone" type="tel" maxlength="10" placeholder="98765 43210" class="flex-1 px-3 py-2.5 bg-surface-container-low border border-surface-container-high rounded-xl text-[15px] font-bold text-on-surface focus:outline-none focus:border-secondary tracking-wider"/>
+          </div>
+          <p class="text-[11px] text-on-surface-variant mt-1">We'll send a 4-digit one-time password (OTP) via SMS.</p>
+        </div>
+
+        <!-- Quick 1-Click Demo Fill Assistant Button -->
+        <div class="p-2.5 bg-primary-container/25 border border-primary-container/40 rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[16px]">🧪</span>
+            <div class="text-[11px]">
+              <span class="font-black text-on-surface">Test User Demo Fill</span>
+              <p class="text-on-surface-variant">Auto-fills Neel (+91 98765 43210)</p>
+            </div>
+          </div>
+          <button onclick="fillDemoCredentials()" class="px-3 py-1 bg-primary-container text-on-primary-fixed text-[11px] font-black rounded-lg shadow-sm hover:opacity-90 active:scale-95">
+            Auto-fill
+          </button>
+        </div>
+
+        <!-- Submit Button -->
+        <button id="auth-submit-btn" onclick="requestOTP()" class="w-full py-3.5 rounded-full bg-secondary text-on-secondary text-[14px] font-black shadow-md hover:opacity-95 active:scale-95 transition-all flex items-center justify-center gap-1.5">
+          <span>Continue with OTP</span>
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-3 my-2 text-on-surface-variant/60">
+          <div class="flex-1 h-px bg-surface-container"></div>
+          <span class="text-[11px] font-bold uppercase">or continue with</span>
+          <div class="flex-1 h-px bg-surface-container"></div>
+        </div>
+
+        <!-- Social Sign-ins -->
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="socialLogin('Google')" class="py-2.5 px-3 rounded-xl bg-surface-container-low border border-surface-container-high hover:bg-surface-container text-[12px] font-bold text-on-surface flex items-center justify-center gap-2 active:scale-95 transition-all">
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3h3.86c2.26-2.09 3.68-5.17 3.68-9.09z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.26v3.09C3.25 21.3 7.31 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.26C.46 8.23 0 10.06 0 12s.46 3.77 1.26 5.38l4.01-3.09z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.26 6.62l4.01 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+            </svg>
+            <span>Google</span>
+          </button>
+          <button onclick="guestLogin()" class="py-2.5 px-3 rounded-xl bg-surface-container-low border border-surface-container-high hover:bg-surface-container text-[12px] font-bold text-on-surface flex items-center justify-center gap-1.5 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">shopping_cart</span>
+            <span>Guest Checkout</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: OTP Verification Screen -->
+      <div id="auth-step-otp" class="hidden space-y-space-md py-2">
+        <div class="text-center">
+          <div class="w-12 h-12 rounded-full bg-secondary-container text-secondary flex items-center justify-center mx-auto mb-2">
+            <span class="material-symbols-outlined text-[24px]">sms</span>
+          </div>
+          <h4 class="text-[17px] font-black text-on-surface">Enter Verification Code</h4>
+          <p class="text-[12px] text-on-surface-variant mt-0.5">
+            Sent to <span id="otp-phone-display" class="font-black text-on-surface">+91 98765 43210</span>
+            <button onclick="backToPhoneStep()" class="text-secondary font-bold ml-1 hover:underline">Edit</button>
+          </p>
+        </div>
+
+        <!-- 4-Digit OTP Boxes -->
+        <div class="flex justify-center gap-2.5 my-3">
+          <input type="text" maxlength="1" class="otp-box w-12 h-13 text-center text-[22px] font-black rounded-xl bg-surface-container-low border-2 border-secondary focus:border-secondary focus:outline-none" value="8"/>
+          <input type="text" maxlength="1" class="otp-box w-12 h-13 text-center text-[22px] font-black rounded-xl bg-surface-container-low border-2 border-secondary focus:border-secondary focus:outline-none" value="8"/>
+          <input type="text" maxlength="1" class="otp-box w-12 h-13 text-center text-[22px] font-black rounded-xl bg-surface-container-low border-2 border-secondary focus:border-secondary focus:outline-none" value="4"/>
+          <input type="text" maxlength="1" class="otp-box w-12 h-13 text-center text-[22px] font-black rounded-xl bg-surface-container-low border-2 border-secondary focus:border-secondary focus:outline-none" value="2"/>
+        </div>
+
+        <button onclick="verifyOTPAndLogin()" class="w-full py-3.5 rounded-full bg-secondary text-on-secondary text-[14px] font-black shadow-md hover:opacity-95 active:scale-95 transition-all">
+          Verify &amp; Enter QuickZap ⚡
+        </button>
+
+        <div class="text-center text-[12px] text-on-surface-variant">
+          Didn't receive code? <span id="resend-countdown" class="font-bold text-secondary">Resend in 25s</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= BOTTOM NAVIGATION BAR ================= -->
+  <nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.06)] border-t border-surface-container">
+    <div class="h-16 px-gutter flex items-center justify-around max-w-md mx-auto">
+      <button onclick="switchScreen('home')" class="nav-item flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors text-secondary font-black" data-target="home">
+        <span class="material-symbols-outlined text-[24px]">bolt</span>
+        <span class="text-[11px] leading-none">Home</span>
+      </button>
+      <button onclick="switchScreen('home')" class="nav-item flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" data-target="categories">
+        <span class="material-symbols-outlined text-[24px]">grid_view</span>
+        <span class="text-[11px] leading-none">Categories</span>
+      </button>
+      <button onclick="switchScreen('tracking')" class="nav-item flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" data-target="tracking">
+        <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+        <span class="text-[11px] leading-none">Orders</span>
+      </button>
+      <button onclick="switchScreen('cart')" class="nav-item relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" data-target="cart">
+        <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+        <span class="text-[11px] leading-none">Cart</span>
+        <span id="nav-cart-badge" class="absolute top-1 right-2 w-4 h-4 rounded-full bg-secondary text-on-secondary text-[9px] font-black flex items-center justify-center shadow-sm">5</span>
+      </button>
+      <button onclick="switchScreen('profile')" class="nav-item flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" data-target="profile">
+        <span class="material-symbols-outlined text-[24px]">person</span>
+        <span class="text-[11px] leading-none">Account</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= JAVASCRIPT STATE & INTERACTIONS ================= -->
+  <script>
+    // Master Product Catalog & Shared State
+    const catalog = {
+      item1: { id: 'item1', name: 'Amul Taaza Toned Milk', pack: '500 ml pouch', price: 27, mrp: 30, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0R3kiFFFoGxSZSrEBev5t9ffTU1B4Qj6Nretwu4gERXXNZ4sVhZ-9BFGcoWg1wNg_wdehE-6W6Y48Y_v1JI2h7wQHAIyR3Lv302XFznjbdHjhVmGeLc6TkYcyEK_nGkhXzRhz3DeNaMaDM7HppoGuUozLsa063eyt7eORrVh6Uoh3v0jwOm2BRbfRnultvhOvtHEN4Sp6p3PfCxeYlfDCO1dFYZMXiQRqhi7SN28w5_mtJoX3ljm1FA' },
+      item2: { id: 'item2', name: 'Lay\'s Magic Masala Chips', pack: '50 g bag', price: 20, mrp: 25, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB9moe2W40nd3-5TGESYCtADXW_iFituJXGxgqJrqOv5B4TG_iEQJ3OHf9s9dh7nsJgjRCErLE_PHx4JpUl5DND6ydbIZTyWDf2Guo0yfXuexdKRPpb30Nayorq9EjGhMVaR8WJPBqWCIuBM2i2ta1VfqG1qVdBkLnL32BEQTwSqKkRxDVKcDLV1_odLiJpJl2-okx6dtcaYrnv2LKJAX7H7SRmAPtcIF0nPzGZAXf7T0rWLmpIhD4TfA' },
+      item3: { id: 'item3', name: 'Coca-Cola Zero Sugar Can', pack: '300 ml can', price: 40, mrp: 45, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxKe6GAsvjXVn80GBCKF49bntdvRso6lzNJ8vcuzZRxB_lXDPZuR0rLjhwzwCka1JHc8WM0WZZl4Q1QGlv9FjNRqD5uPyiDGQEMBAk5LQV4zA-2z1kL-nmsmXaiKZewEUKuSh2JmGNCHui-Yoz9DuWhey78kLwre0GdnsWS9VAhlzeukcuHqaB13L-JZekfCZrl91HZAJZxEG_AW3sLe6KMpi786S8DB6X_3nkdgf7JOONq_cix52Mlg' },
+      item4: { id: 'item4', name: 'Fresh Organic Bananas / Mangoes', pack: '1 Dozen / 1 kg', price: 60, mrp: 80, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBK4L7iS_wI8I50zIvJYTe3MzoRNwQT3Ohhc0XcAsrtdHt0iWOoI_ltyfj20VJMYwcYxyabfvv61ZgNOManLKuy8O1qogrWWxiatwztrKhUYE8zivj_r1OQtBeaZbHJdF7_nrHuaZcLHlkmTv4cBm22JZjJdyzRyI40PTtvWVc9UNNs5UGDDfSv1ks_EH3Q4B6m2M_p3YC-j5704m-_IROCtvJKz5gwZdgm64HZzzJgc5M2mi-uF0ZtrQ' },
+      item5: { id: 'item5', name: 'Cadbury Dairy Milk Silk / Maggi', pack: '150 g bar', price: 175, mrp: 200, image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCIX5-NDB3Is_fhaYF1eEsrLDtcQueahfKypxgtV-4HN5X187dzH1VBbhpJCCfjBIeeh-fjc1hL7jb0yeHVLOJG4qsPmzSB8ye09STsIUYK2MkO28IdzzuBDgkt4pBv8LagacHrpK1kEqR_qzJsETZOs0N6Nf6rq5RggLrARX3iPuJzaShO7b3iI5akJOLM919f76I_gIQiXZoKX2CTJX9ovdBDz8nO6YnmG4i_Wn-o8chzUEDEs06rlg' }
+    };
+
+    const state = {
+      cart: {
+        item1: 2,
+        item2: 2,
+        item3: 2,
+        item4: 1,
+        item5: 1
+      },
+      tip: 20,
+      donation: 1,
+      handlingFee: 5,
+      deliveryFee: 0,
+      taxes: 12,
+      freeDeliveryThreshold: 458,
+      activeScreen: 'home',
+      authTab: 'login',
+      user: {
+        isLoggedIn: false,
+        name: 'Neel Belsare',
+        phone: '9876543210',
+        email: 'neel@quickzap.in',
+        address: 'CIDCO N-4, Aurangabad',
+        tier: 'VIP Gold'
+      }
+    };
+
+    // Screen Switching Controller
+    function switchScreen(screenName) {
+      state.activeScreen = screenName;
+      document.querySelectorAll('.screen-view').forEach(el => el.classList.remove('active'));
+      
+      const targetScreen = document.getElementById('screen-' + screenName);
+      if (targetScreen) targetScreen.classList.add('active');
+
+      // Update Nav Highlights
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        if (btn.getAttribute('data-target') === screenName) {
+          btn.className = 'nav-item flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors text-secondary font-black';
+        } else {
+          btn.className = 'nav-item flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors';
+        }
+      });
+
+      // Update Subtitle & Back Button
+      const subtitle = document.getElementById('screen-subtitle');
+      const backBtn = document.getElementById('nav-back-btn');
+      if (screenName === 'home') {
+        subtitle.textContent = state.user.address;
+        backBtn.classList.add('hidden');
+        backBtn.classList.remove('flex');
+      } else if (screenName === 'cart') {
+        subtitle.textContent = 'Review & Checkout';
+        backBtn.classList.remove('hidden');
+        backBtn.classList.add('flex');
+      } else if (screenName === 'tracking') {
+        subtitle.textContent = 'Order #QZ-89421 • Tracking';
+        backBtn.classList.remove('hidden');
+        backBtn.classList.add('flex');
+        setTimeout(triggerConfettiAnimation, 150);
+      } else if (screenName === 'profile') {
+        subtitle.textContent = state.user.isLoggedIn ? state.user.name : 'Account Profile';
+        backBtn.classList.remove('hidden');
+        backBtn.classList.add('flex');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('nav-back-btn').addEventListener('click', () => {
+      switchScreen('home');
+    });
+
+    // Authentication & Modal Logic
+    function handleAuthButtonClick() {
+      if (state.user.isLoggedIn) {
+        switchScreen('profile');
+      } else {
+        openAuthModal('login');
+      }
+    }
+
+    function openAuthModal(mode = 'login') {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setAuthTab(mode);
+      backToPhoneStep();
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function setAuthTab(mode) {
+      state.authTab = mode;
+      const loginTab = document.getElementById('auth-tab-login');
+      const signupTab = document.getElementById('auth-tab-signup');
+      const signupFields = document.getElementById('signup-extra-fields');
+      const submitBtn = document.getElementById('auth-submit-btn');
+
+      if (mode === 'login') {
+        loginTab.className = 'py-2.5 rounded-xl text-[13px] font-black transition-all bg-surface-container-lowest text-on-surface shadow-sm';
+        signupTab.className = 'py-2.5 rounded-xl text-[13px] font-bold transition-all text-on-surface-variant hover:text-on-surface';
+        signupFields.classList.add('hidden');
+        submitBtn.innerHTML = '<span>Continue with OTP</span><span class="material-symbols-outlined text-[18px]">arrow_forward</span>';
+      } else {
+        signupTab.className = 'py-2.5 rounded-xl text-[13px] font-black transition-all bg-surface-container-lowest text-on-surface shadow-sm';
+        loginTab.className = 'py-2.5 rounded-xl text-[13px] font-bold transition-all text-on-surface-variant hover:text-on-surface';
+        signupFields.classList.remove('hidden');
+        submitBtn.innerHTML = '<span>Create Account &amp; Verify</span><span class="material-symbols-outlined text-[18px]">arrow_forward</span>';
+      }
+    }
+
+    function fillDemoCredentials() {
+      document.getElementById('auth-input-phone').value = '9876543210';
+      document.getElementById('auth-input-name').value = 'Neel Belsare';
+      document.getElementById('auth-input-email').value = 'neel@quickzap.in';
+    }
+
+    function requestOTP() {
+      const phone = document.getElementById('auth-input-phone').value.trim();
+      if (!phone || phone.length < 10) {
+        alert('Please enter a valid 10-digit mobile phone number.');
+        return;
+      }
+
+      if (state.authTab === 'signup') {
+        const name = document.getElementById('auth-input-name').value.trim();
+        if (name) state.user.name = name;
+        const email = document.getElementById('auth-input-email').value.trim();
+        if (email) state.user.email = email;
+      }
+
+      state.user.phone = phone;
+      document.getElementById('otp-phone-display').textContent = `+91 ${phone}`;
+
+      // Switch to step 2 OTP
+      document.getElementById('auth-step-form').classList.add('hidden');
+      document.getElementById('auth-step-otp').classList.remove('hidden');
+    }
+
+    function backToPhoneStep() {
+      document.getElementById('auth-step-form').classList.remove('hidden');
+      document.getElementById('auth-step-otp').classList.add('hidden');
+    }
+
+    function verifyOTPAndLogin() {
+      state.user.isLoggedIn = true;
+      closeAuthModal();
+      renderUserProfileUI();
+      alert(`🎉 Welcome to QuickZap, ${state.user.name}! You are logged in with VIP Gold delivery benefits.`);
+    }
+
+    function socialLogin(provider) {
+      state.user.isLoggedIn = true;
+      state.user.name = 'Neel Belsare';
+      state.user.email = 'neel@gmail.com';
+      closeAuthModal();
+      renderUserProfileUI();
+      alert(`Signed in successfully with ${provider}!`);
+    }
+
+    function guestLogin() {
+      state.user.isLoggedIn = false;
+      closeAuthModal();
+      switchScreen('cart');
+    }
+
+    function handleLogout() {
+      state.user.isLoggedIn = false;
+      state.user.name = 'Guest Shopper';
+      renderUserProfileUI();
+      switchScreen('home');
+      alert('You have logged out of QuickZap.');
+    }
+
+    function renderUserProfileUI() {
+      const headerLabel = document.getElementById('header-auth-label');
+      const headerIcon = document.getElementById('header-user-icon');
+      const headerAvatar = document.getElementById('header-user-avatar');
+      const greetingRibbon = document.getElementById('user-greeting-ribbon');
+      const greetingName = document.getElementById('greeting-name');
+      const profileName = document.getElementById('profile-user-name');
+      const profilePhone = document.getElementById('profile-user-phone');
+      const profileEmail = document.getElementById('profile-user-email');
+      const profileAvatarImg = document.getElementById('profile-avatar-img');
+      const profileAvatarFallback = document.getElementById('profile-avatar-fallback');
+
+      if (state.user.isLoggedIn) {
+        headerLabel.textContent = state.user.name.split(' ')[0];
+        headerIcon.classList.add('hidden');
+        headerAvatar.classList.remove('hidden');
+        greetingRibbon.classList.remove('hidden');
+        greetingName.textContent = state.user.name.split(' ')[0];
+        profileName.textContent = state.user.name;
+        profilePhone.textContent = `+91 ${state.user.phone}`;
+        profileEmail.textContent = state.user.email;
+        profileAvatarImg.classList.remove('hidden');
+        profileAvatarFallback.classList.add('hidden');
+      } else {
+        headerLabel.textContent = 'Login';
+        headerIcon.classList.remove('hidden');
+        headerAvatar.classList.add('hidden');
+        greetingRibbon.classList.add('hidden');
+        profileName.textContent = 'Guest Shopper';
+        profilePhone.textContent = 'Not signed in';
+        profileEmail.textContent = 'Tap login to access saved addresses';
+        profileAvatarImg.classList.add('hidden');
+        profileAvatarFallback.classList.remove('hidden');
+      }
+    }
+
+    function selectAddress(addressStr) {
+      state.user.address = addressStr;
+      document.getElementById('home-delivery-address').textContent = addressStr;
+      document.getElementById('screen-subtitle').textContent = addressStr;
+      document.getElementById('sticky-delivery-label').textContent = addressStr.split(',')[0];
+      document.getElementById('map-dest-label').textContent = `You (${addressStr.split(',')[0]})`;
+      document.getElementById('tracking-address-detail').textContent = `${addressStr}, Chhatrapati Sambhajinagar`;
+      alert(`Delivery address set to: ${addressStr}`);
+    }
+
+    function promptAddressChange() {
+      const newAddr = prompt('Enter delivery neighborhood in Aurangabad (e.g. CIDCO N-4, Kranti Chowk, Nirala Bazar, Beed Bypass):', state.user.address);
+      if (newAddr) selectAddress(newAddr);
+    }
+
+    function promptNewAddress() {
+      const newAddr = prompt('Add new delivery address in Aurangabad:');
+      if (newAddr) selectAddress(newAddr);
+    }
+
+    // Cart Modification Functions
+    function setItemQty(itemId, newQty) {
+      if (newQty <= 0) {
+        delete state.cart[itemId];
+      } else {
+        state.cart[itemId] = newQty;
+      }
+      renderAll();
+    }
+
+    function clearCart() {
+      state.cart = {};
+      renderAll();
+    }
+
+    function renderHomeSteppers() {
+      document.querySelectorAll('.product-stepper-slot').forEach(slot => {
+        const id = slot.getAttribute('data-id');
+        const qty = state.cart[id] || 0;
+
+        if (qty > 0) {
+          slot.innerHTML = `
+            <div class="bg-secondary text-on-secondary px-2.5 py-1 rounded-full flex items-center gap-2 shadow-sm">
+              <button onclick="setItemQty('${id}', ${qty - 1})" class="w-5 h-5 flex items-center justify-center hover:opacity-80 active:scale-90 cursor-pointer">
+                <span class="material-symbols-outlined text-[14px]">remove</span>
+              </button>
+              <span class="text-[12px] font-black">${qty}</span>
+              <button onclick="setItemQty('${id}', ${qty + 1})" class="w-5 h-5 flex items-center justify-center hover:opacity-80 active:scale-90 cursor-pointer">
+                <span class="material-symbols-outlined text-[14px]">add</span>
+              </button>
+            </div>
+          `;
+        } else {
+          slot.innerHTML = `
+            <button onclick="setItemQty('${id}', 1)" class="bg-surface-container-low text-secondary text-[12px] font-black px-3.5 py-1.5 rounded-full shadow-sm hover:bg-secondary hover:text-on-secondary active:scale-95 transition-all flex items-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">add</span>
+              <span>ADD</span>
+            </button>
+          `;
+        }
+      });
+    }
+
+    function renderCartScreen() {
+      const container = document.getElementById('cart-items-container');
+      const itemIds = Object.keys(state.cart);
+
+      if (itemIds.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center flex flex-col items-center">
+            <span class="material-symbols-outlined text-[48px] text-on-surface-variant/40">shopping_basket</span>
+            <p class="font-bold text-on-surface mt-2 text-[15px]">Your basket is empty</p>
+            <p class="text-[12px] text-on-surface-variant">Add snacks, groceries, and drinks to start your 10-minute order!</p>
+            <button onclick="switchScreen('home')" class="mt-4 px-6 py-2 rounded-full bg-secondary text-on-secondary text-[13px] font-black shadow-sm">Explore Catalog</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = itemIds.map(id => {
+        const item = catalog[id];
+        const qty = state.cart[id];
+        const total = item.price * qty;
+        const mrpTotal = item.mrp * qty;
+
+        return `
+          <div class="item-row flex items-center justify-between py-space-sm border-b border-surface-container-low last:border-0" data-id="${id}">
+            <div class="flex items-center gap-space-md min-w-0 pr-2">
+              <div class="w-14 h-14 rounded-xl bg-surface-container-low p-1 shrink-0 flex items-center justify-center overflow-hidden border border-surface-container">
+                <img class="w-full h-full object-contain" alt="${item.name}" src="${item.image}"/>
+              </div>
+              <div class="min-w-0">
+                <h3 class="text-[14px] font-bold text-on-surface truncate">${item.name}</h3>
+                <p class="text-[11px] text-on-surface-variant">${item.pack}</p>
+                <div class="flex items-baseline gap-1.5 mt-0.5">
+                  <span class="text-[15px] text-on-surface font-black">₹${total}</span>
+                  <span class="text-[11px] text-on-surface-variant line-through">₹${mrpTotal}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center bg-secondary-container/40 rounded-full p-1 gap-2 shrink-0 shadow-sm">
+              <button onclick="setItemQty('${id}', ${qty - 1})" class="w-7 h-7 rounded-full bg-surface-container-lowest text-secondary flex items-center justify-center hover:bg-secondary hover:text-on-secondary transition-colors cursor-pointer active:scale-90">
+                <span class="material-symbols-outlined text-[15px] font-bold">remove</span>
+              </button>
+              <span class="text-[13px] font-black text-secondary w-3 text-center">${qty}</span>
+              <button onclick="setItemQty('${id}', ${qty + 1})" class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer active:scale-90">
+                <span class="material-symbols-outlined text-[15px] font-bold">add</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateCalculations() {
+      let itemsTotal = 0;
+      let totalMrp = 0;
+      let totalCount = 0;
+
+      Object.entries(state.cart).forEach(([id, qty]) => {
+        const item = catalog[id];
+        if (item) {
+          itemsTotal += item.price * qty;
+          totalMrp += item.mrp * qty;
+          totalCount += qty;
+        }
+      });
+
+      const grandTotal = itemsTotal + state.handlingFee + state.deliveryFee + state.tip + state.taxes + state.donation;
+      const savings = Math.max(0, (totalMrp - itemsTotal) + 25);
+
+      const pill = document.getElementById('floating-cart-pill');
+      const pillCount = document.getElementById('pill-item-count');
+      const pillTotal = document.getElementById('pill-total-amount');
+      const navCartBadge = document.getElementById('nav-cart-badge');
+
+      if (totalCount > 0) {
+        if (pill) pill.classList.remove('hidden');
+        if (pillCount) pillCount.textContent = `${totalCount} ITEM${totalCount > 1 ? 'S' : ''} IN CART`;
+        if (pillTotal) pillTotal.textContent = `₹${itemsTotal} Total`;
+        if (navCartBadge) {
+          navCartBadge.textContent = totalCount;
+          navCartBadge.classList.remove('hidden');
+        }
+      } else {
+        if (pill) pill.classList.add('hidden');
+        if (navCartBadge) navCartBadge.classList.add('hidden');
+      }
+
+      const billMrpEl = document.getElementById('bill-mrp');
+      const billItemsTotalEl = document.getElementById('bill-items-total');
+      const billGrandTotalEl = document.getElementById('bill-grand-total');
+      const stickySummaryEl = document.getElementById('sticky-order-summary');
+      const headerItemCountEl = document.getElementById('header-item-count');
+      const billTipEl = document.getElementById('bill-tip-amount');
+      const savingsTagEl = document.getElementById('savings-tag');
+      const cartValueLabel = document.getElementById('cart-value-label');
+
+      if (billMrpEl) billMrpEl.textContent = '₹' + totalMrp;
+      if (billItemsTotalEl) billItemsTotalEl.textContent = '₹' + itemsTotal;
+      if (billGrandTotalEl) billGrandTotalEl.textContent = '₹' + grandTotal;
+      if (billTipEl) billTipEl.textContent = state.tip > 0 ? '+₹' + state.tip : '₹0';
+      if (stickySummaryEl) stickySummaryEl.textContent = `₹${grandTotal} | ${totalCount} Items`;
+      if (headerItemCountEl) headerItemCountEl.textContent = `${totalCount} Items`;
+      if (savingsTagEl) savingsTagEl.textContent = `🎉 You saved ₹${savings} on this order!`;
+      if (cartValueLabel) cartValueLabel.textContent = '₹' + itemsTotal;
+
+      const diff = state.freeDeliveryThreshold - itemsTotal;
+      const progressPercent = Math.min(100, Math.round((itemsTotal / state.freeDeliveryThreshold) * 100));
+      const progressBar = document.getElementById('free-delivery-bar');
+      const progressText = document.getElementById('free-delivery-text');
+      const progressBadge = document.getElementById('free-delivery-badge');
+
+      if (progressBar) progressBar.style.width = progressPercent + '%';
+      if (progressBadge) progressBadge.textContent = progressPercent + '% reached';
+      if (progressText) {
+        if (diff <= 0) {
+          progressText.textContent = '🎉 FREE Delivery unlocked!';
+        } else {
+          progressText.textContent = `Add ₹${diff} more for FREE Delivery!`;
+        }
+      }
+    }
+
+    function renderAll() {
+      renderHomeSteppers();
+      renderCartScreen();
+      updateCalculations();
+      renderUserProfileUI();
+    }
+
+    function openLiveTrackingFromModal() {
+      const modal = document.getElementById('order-success-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      switchScreen('tracking');
+    }
+
+    (function initSliderAndInteractions() {
+      const tipButtons = document.querySelectorAll('.tip-btn');
+      tipButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tipButtons.forEach(b => {
+            b.className = 'tip-btn py-2 px-1 rounded-xl text-[13px] font-bold flex flex-col items-center justify-center transition-all bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-95';
+          });
+          btn.className = 'tip-btn py-2 px-1 rounded-xl text-[13px] font-bold flex flex-col items-center justify-center transition-all bg-secondary text-on-secondary shadow-md active:scale-95 ring-offset-1';
+          
+          const tipAttr = btn.getAttribute('data-tip');
+          if (tipAttr === 'custom') {
+            const customVal = prompt('Enter custom tip amount in ₹:', '50');
+            const parsed = parseInt(customVal, 10);
+            state.tip = !isNaN(parsed) && parsed >= 0 ? parsed : 0;
+          } else {
+            state.tip = parseInt(tipAttr, 10) || 0;
+          }
+          updateCalculations();
+        });
+      });
+
+      document.querySelectorAll('.instruction-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const isSelected = chip.getAttribute('data-selected') === 'true';
+          const checkIcon = chip.querySelector('.material-symbols-outlined');
+          
+          if (isSelected) {
+            chip.setAttribute('data-selected', 'false');
+            chip.className = 'instruction-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all bg-surface-container text-on-surface active:scale-95 hover:bg-surface-container-high';
+            if (checkIcon) checkIcon.classList.add('hidden');
+          } else {
+            chip.setAttribute('data-selected', 'true');
+            chip.className = 'instruction-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold transition-all bg-secondary text-on-secondary shadow-sm active:scale-95';
+            if (checkIcon) checkIcon.classList.remove('hidden');
+          }
+        });
+      });
+
+      const donationToggle = document.getElementById('donation-toggle');
+      if (donationToggle) {
+        donationToggle.addEventListener('change', (e) => {
+          state.donation = e.target.checked ? 1 : 0;
+          updateCalculations();
+        });
+      }
+
+      const track = document.getElementById('slider-track');
+      const thumb = document.getElementById('slider-thumb');
+      const fill = document.getElementById('slider-fill');
+      const label = document.getElementById('slider-label');
+      const modal = document.getElementById('order-success-modal');
+
+      if (track && thumb && fill && label) {
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+        let maxDistance = 0;
+
+        function updateMaxDistance() {
+          maxDistance = track.clientWidth - thumb.clientWidth - 8;
+        }
+        updateMaxDistance();
+        window.addEventListener('resize', updateMaxDistance);
+
+        function setPosition(x) {
+          const clampedX = Math.max(0, Math.min(x, maxDistance));
+          thumb.style.transform = `translateX(${clampedX}px)`;
+          fill.style.width = `${clampedX + 48}px`;
+          const progress = clampedX / maxDistance;
+          label.style.opacity = `${1 - progress * 1.5}`;
+
+          if (clampedX >= maxDistance - 6) {
+            triggerOrderSuccess();
+          }
+        }
+
+        function onStart(e) {
+          isDragging = true;
+          startX = (e.touches ? e.touches[0].clientX : e.clientX) - currentX;
+          thumb.style.transition = 'none';
+          fill.style.transition = 'none';
+        }
+
+        function onMove(e) {
+          if (!isDragging) return;
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          currentX = clientX - startX;
+          setPosition(currentX);
+        }
+
+        function onEnd() {
+          if (!isDragging) return;
+          isDragging = false;
+          if (currentX < maxDistance - 10) {
+            thumb.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            fill.style.transition = 'width 0.3s ease';
+            currentX = 0;
+            setPosition(0);
+            label.style.opacity = '1';
+          }
+        }
+
+        function triggerOrderSuccess() {
+          isDragging = false;
+          thumb.style.transform = `translateX(${maxDistance}px)`;
+          fill.style.width = '100%';
+          thumb.innerHTML = '<span class="material-symbols-outlined text-[24px]">check</span>';
+
+          if (navigator.vibrate) {
+            navigator.vibrate([40, 60, 40]);
+          }
+
+          setTimeout(() => {
+            if (modal) {
+              modal.classList.remove('hidden');
+              modal.classList.add('flex');
+            }
+          }, 300);
+        }
+
+        thumb.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+        thumb.addEventListener('touchstart', onStart, { passive: true });
+        window.addEventListener('touchmove', onMove, { passive: true });
+        window.addEventListener('touchend', onEnd);
+      }
+    })();
+
+    (function initSearchPlaceholderTicker() {
+      const track = document.getElementById('search-placeholder-track');
+      if (!track) return;
+      let index = 0;
+      const total = 4;
+      setInterval(() => {
+        index = (index + 1) % total;
+        track.style.transform = `translateY(-${index * 20}px)`;
+      }, 2600);
+    })();
+
+    (function initUrgencyTimers() {
+      let seconds1 = 14 * 60 + 32;
+      let seconds2 = 28 * 60 + 45;
+      const timer1El = document.getElementById('flash-timer-1');
+      const timer2El = document.getElementById('flash-timer-2');
+
+      setInterval(() => {
+        if (seconds1 > 0) seconds1--;
+        if (seconds2 > 0) seconds2--;
+
+        const format = (sec) => {
+          const m = Math.floor(sec / 60).toString().padStart(2, '0');
+          const s = (sec % 60).toString().padStart(2, '0');
+          return `${m}:${s}`;
+        };
+
+        if (timer1El) timer1El.textContent = format(seconds1);
+        if (timer2El) timer2El.textContent = format(seconds2);
+      }, 1000);
+    })();
+
+    (function simulateLiveRiderTracking() {
+      const scooter = document.getElementById('live-scooter');
+      if (!scooter) return;
+      
+      let step = 0;
+      const baseCoords = [
+        { x: 170, y: 115 },
+        { x: 195, y: 135 },
+        { x: 215, y: 155 },
+        { x: 240, y: 170 },
+        { x: 220, y: 160 }
+      ];
+
+      setInterval(() => {
+        step = (step + 1) % baseCoords.length;
+        const target = baseCoords[step];
+        scooter.style.transform = `translate(${target.x - 200}px, ${target.y - 145}px)`;
+      }, 2800);
+
+      const recenterBtn = document.getElementById('recenter-btn');
+      if (recenterBtn) {
+        recenterBtn.addEventListener('click', () => {
+          scooter.classList.add('scale-125');
+          setTimeout(() => scooter.classList.remove('scale-125'), 300);
+        });
+      }
+
+      const chatBtn = document.getElementById('chat-rider-btn');
+      if (chatBtn) {
+        chatBtn.addEventListener('click', () => {
+          const msg = prompt('Send note to Sanjay (e.g. "Security code is 4421"):');
+          if (msg) {
+            chatBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span> Sent!';
+            setTimeout(() => {
+              chatBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">chat</span> Message';
+            }, 2000);
+          }
+        });
+      }
+    })();
+
+    function triggerConfettiAnimation() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = canvas.parentElement.clientWidth || 380;
+      let height = canvas.height = 320;
+
+      const colors = ['#F7CE00', '#006D32', '#6549BE', '#80F89D', '#FFE174', '#BA1A1A'];
+      const particles = [];
+      const count = 55;
+
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: width * 0.5 + (Math.random() - 0.5) * 60,
+          y: 70,
+          r: Math.random() * 5 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 9,
+          vy: (Math.random() * -8) - 2,
+          tilt: Math.random() * 10,
+          tiltAngleInc: (Math.random() * 0.08) + 0.04,
+          tiltAngle: 0,
+          gravity: 0.19,
+          opacity: 1
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+        let alive = false;
+
+        particles.forEach(p => {
+          p.tiltAngle += p.tiltAngleInc;
+          p.vy += p.gravity;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.tilt = Math.sin(p.tiltAngle) * 8;
+
+          if (p.y < height && p.opacity > 0) {
+            alive = true;
+            ctx.beginPath();
+            ctx.lineWidth = p.r / 2;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+            ctx.stroke();
+          }
+        });
+
+        if (alive) {
+          requestAnimationFrame(render);
+        } else {
+          canvas.style.display = 'none';
+        }
+      }
+      render();
+    }
+
+    // Initialize application state
+    renderAll();
+  </script>
+</body>
+</html>

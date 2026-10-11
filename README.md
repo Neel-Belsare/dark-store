@@ -1,7 +1,7 @@
-# 🛒 Aurangabad (Chhatrapati Sambhajinagar) Quick-Commerce Ecosystem (v4.0 Production) 📊
-**An AI-Powered Dark Store Command Center & Real-Time Blinkit Clone Mobile App**
+# ⚡ QuickZap — Aurangabad (Chhatrapati Sambhajinagar) Quick-Commerce Ecosystem (v4.5 Production) 📊
+**An AI-Powered 10-Minute Dark Store Command Center & Real-Time QuickZap Mobile App with Full Auth & Live Tracking**
 
-[![Release](https://img.shields.io/badge/Release-v4.0.0-0C831F?logo=github)](https://github.com/NeelBelsare/my-dark-store-app/releases/tag/v4.0.0)
+[![Release](https://img.shields.io/badge/Release-v4.5.0-0C831F?logo=github)](https://github.com/Neel-Belsare/dark-store/releases/tag/v4.5.0)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-ff4b4b?logo=streamlit)](https://streamlit.io/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -13,15 +13,15 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Neel%20Belsare-0A66C2?logo=linkedin)](https://www.linkedin.com/in/neel-belsare-719b9a314/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Mansi%20Gaike-0A66C2?logo=linkedin)](https://www.linkedin.com/in/mansi-gaike-821260316)
-[![GitHub](https://img.shields.io/badge/GitHub-NeelBelsare-181717?logo=github)](https://github.com/NeelBelsare)
+[![GitHub](https://img.shields.io/badge/GitHub-Neel--Belsare-181717?logo=github)](https://github.com/Neel-Belsare)
 [![GitHub](https://img.shields.io/badge/GitHub-gaikemansi03--sketch-181717?logo=github)](https://github.com/gaikemansi03-sketch)
 
 ---
 
 ## 🌐 Live Deployments & Links
-- 📱 **Blinkit Consumer Client (Live Web App)**: [**blinkit-aurangabad.netlify.app**](https://blinkit-aurangabad.netlify.app)
-- 🚀 **Streamlit Command Center (Live Dashboard)**: [**my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
-- 🔗 **GitHub Repository**: [**NeelBelsare/my-dark-store-app**](https://github.com/NeelBelsare/my-dark-store-app)
+- 📱 **QuickZap Consumer Mobile Client**: [**blinkit-aurangabad.netlify.app**](https://blinkit-aurangabad.netlify.app)
+- 🚀 **QuickZap Command Center (Streamlit Dashboard)**: [**my-dark-store-app.streamlit.app**](https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app)
+- 🔗 **GitHub Repository**: [**Neel-Belsare/dark-store**](https://github.com/Neel-Belsare/dark-store)
 - 👨‍💻 **Developers**: [**Neel Belsare**](https://www.linkedin.com/in/neel-belsare-719b9a314/) & [**Mansi Gaike**](https://www.linkedin.com/in/mansi-gaike-821260316) 
 
 ---

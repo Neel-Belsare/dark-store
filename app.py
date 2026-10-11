@@ -31,8 +31,8 @@ except ImportError:
 # 1. Page Configuration
 # ------------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Aurangabad Dark Store Command Center v4.0",
-    page_icon="🛒",
+    page_title="QuickZap Dark Store Command Center v4.5",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -434,23 +434,24 @@ LOGIN_BG_MESH_HTML = """<div class="live-bg-container">
 LOGIN_HERO_HTML = """<div class="left-side-hero" style="height: 100%; min-height: 580px; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; z-index: 2; color: #FFFFFF; background: linear-gradient(155deg, #2E0854 0%, #4E2298 50%, #1E40AF 100%); border-radius: 24px 0 0 24px;">
 <div>
 <div style="display: flex; align-items: center; gap: 10px;">
-<div style="width: 38px; height: 38px; background-color: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-<svg style="width: 22px; height: 22px; color: #ffffff;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-</svg>
+<div style="width: 40px; height: 40px; background-color: #f7ce00; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(247, 206, 0, 0.45);">
+<span style="font-size: 22px; line-height: 1;">⚡</span>
 </div>
-<span style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: #ffffff;">
-InventoryPro
+<span style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #ffffff;">
+QuickZap
+</span>
+<span style="background: rgba(247, 206, 0, 0.2); color: #f7ce00; border: 1px solid rgba(247, 206, 0, 0.5); font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 9999px; margin-left: 4px;">
+COMMAND CENTER
 </span>
 </div>
 
-<div style="margin-top: 56px;">
-<h1 style="font-size: 32px; font-weight: 800; line-height: 1.2; margin: 0 0 16px 0; color: #ffffff;">
-Smart Quick-Commerce <br>Delivery <br>
-<span style="color: #56B4E9;">Made Fast</span>
+<div style="margin-top: 48px;">
+<h1 style="font-size: 30px; font-weight: 800; line-height: 1.25; margin: 0 0 16px 0; color: #ffffff;">
+Autonomous Dark Store <br>Command Center & <br>
+<span style="color: #f7ce00;">10-Min Dispatch Hub</span>
 </h1>
-<p style="color: rgba(255, 255, 255, 0.85); font-size: 14px; line-height: 1.6; margin: 0; max-width: 320px;">
-Access local dark stores, browse catalogue items, and process orders in real time.
+<p style="color: rgba(255, 255, 255, 0.85); font-size: 13.5px; line-height: 1.6; margin: 0; max-width: 320px;">
+Fleet spatial dispatch, serpentine picking routes, weather surge buffers & real-time inventory synchronization across Chhatrapati Sambhajinagar (Aurangabad).
 </p>
 </div>
 </div>
@@ -458,32 +459,32 @@ Access local dark stores, browse catalogue items, and process orders in real tim
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.15);">
 <div>
 <div style="font-size: 20px; font-weight: 700; color: #ffffff;">10 Min</div>
-<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Delivery Goal</div>
+<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Avg SLA</div>
+</div>
+<div>
+<div style="font-size: 20px; font-weight: 700; color: #ffffff;">12 Hubs</div>
+<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Dark Stores</div>
 </div>
 <div>
 <div style="font-size: 20px; font-weight: 700; color: #ffffff;">100%</div>
-<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Live Tracking</div>
-</div>
-<div>
-<div style="font-size: 20px; font-weight: 700; color: #ffffff;">99.9%</div>
-<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Uptime</div>
+<div style="font-size: 11px; color: rgba(255, 255, 255, 0.75); margin-top: 2px;">Telemetry</div>
 </div>
 </div>
 </div>"""
 
-LOGIN_FORM_HEADER_HTML = """<div style="margin-bottom: 24px; text-align: center; width: 100%;">
-<h2 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0 0 8px 0;">
-Welcome Back
+LOGIN_FORM_HEADER_HTML = """<div style="margin-bottom: 18px; text-align: center; width: 100%;">
+<h2 style="font-size: 24px; font-weight: 800; color: #111827; margin: 0 0 6px 0; letter-spacing: -0.02em;">
+QuickZap Portal Access
 </h2>
-<p style="color: #6B7280; font-size: 14px; margin: 0;">
-Sign in to access your store dashboard
+<p style="color: #6B7280; font-size: 13px; margin: 0;">
+Dark Store Fleet & Micro-Market Dispatch Console
 </p>
 </div>"""
 
-LOGIN_SOCIAL_DIVIDER_HTML = """<div style="margin-top: 20px; width: 100%;">
-<div style="position: relative; text-align: center; margin-bottom: 16px;">
+LOGIN_SOCIAL_DIVIDER_HTML = """<div style="margin-top: 16px; width: 100%;">
+<div style="position: relative; text-align: center; margin-bottom: 14px;">
 <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background-color: #E5E7EB;"></div>
-<span style="position: relative; background-color: #ffffff; padding: 0 12px; font-size: 13px; color: #9CA3AF;">
+<span style="position: relative; background-color: #ffffff; padding: 0 12px; font-size: 12px; color: #9CA3AF;">
 Or continue with
 </span>
 </div>
@@ -496,112 +497,204 @@ Or continue with
 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
 </svg>
-<span>Google</span>
+<span>Google Workspace</span>
 </div>
 <div class="social-auth-card">
 <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="currentColor">
 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
 </svg>
-<span>Apple</span>
+<span>Apple ID</span>
 </div>
 </div>
-
-<p style="margin-top: 20px; text-align: center; font-size: 13px; color: #6B7280;">
-Don't have an account? <a href="#" style="color: #4E2298; font-weight: 600; text-decoration: none;">Sign Up</a>
-</p>
 
 <div style="text-align: center; padding: 8px 12px; background: rgba(78, 34, 152, 0.05); border: 1px dashed rgba(78, 34, 152, 0.25); border-radius: 8px; font-size: 11px; color: #4E2298; margin-top: 10px;">
-⚡ <b>Demo Credentials:</b> <code style="background: rgba(78, 34, 152, 0.1); color: #4E2298; padding: 2px 6px; border-radius: 4px; font-weight: 700;">sample_username</code> / <code style="background: rgba(78, 34, 152, 0.1); color: #4E2298; padding: 2px 6px; border-radius: 4px; font-weight: 700;">password@123</code>
+⚡ <b>Admin Demo Credentials:</b> <code style="background: rgba(78, 34, 152, 0.1); color: #4E2298; padding: 2px 6px; border-radius: 4px; font-weight: 700;">sample_username</code> / <code style="background: rgba(78, 34, 152, 0.1); color: #4E2298; padding: 2px 6px; border-radius: 4px; font-weight: 700;">password@123</code>
 </div>
 </div>"""
 
 def render_login_screen():
     """
-    Renders the modern InventoryPro split-card login interface matching the
-    exact UI/UX specification: Animated glowing mesh orbs on #0f0c20 canvas,
-    frosted glass container, deep violet hero panel, and minimalist auth form.
+    Renders the modern QuickZap split-card login and sign-up interface.
+    Features:
+    - Tab switcher for Sign In vs Create Account (Sign Up)
+    - Full authentication pipeline for registered admins & operators
+    - Instant 1-Click Demo Login button for reviewers
+    - Animated glowing mesh background on dark canvas
     """
     st.markdown(LOGIN_CSS, unsafe_allow_html=True)
     st.markdown(LOGIN_BG_MESH_HTML, unsafe_allow_html=True)
 
+    if "auth_mode" not in st.session_state:
+        st.session_state["auth_mode"] = "signin"
+    if "registered_users" not in st.session_state:
+        st.session_state["registered_users"] = {}
+
     with st.container(key="inventory_login_auth_box"):
         col_left, col_right = st.columns([1, 1.22], gap=0)
 
-        # ----------------------------------------------------------------------
-        # Left Hero Panel: InventoryPro Branding & Statistics
-        # ----------------------------------------------------------------------
+        # Left Hero Panel: QuickZap Branding & Statistics
         with col_left:
             st.markdown(LOGIN_HERO_HTML, unsafe_allow_html=True)
 
-        # ----------------------------------------------------------------------
-        # Right Form Panel: Welcome Back & Sign In
-        # ----------------------------------------------------------------------
+        # Right Form Panel: Welcome Back & Sign In / Sign Up
         with col_right:
             st.markdown(LOGIN_FORM_HEADER_HTML, unsafe_allow_html=True)
 
-            with st.form("inventory_login_form", clear_on_submit=False):
-                username_input = st.text_input(
-                    "Email Address",
-                    value="",
-                    placeholder="you@example.com or sample_username",
-                    key="login_email_input"
-                )
-                password_input = st.text_input(
-                    "Password",
-                    value="",
-                    type="password",
-                    placeholder="Enter your password",
-                    key="login_password_input"
-                )
+            # Segmented Switcher for Sign In vs Sign Up
+            tab_cols = st.columns(2)
+            with tab_cols[0]:
+                btn_type_in = "primary" if st.session_state["auth_mode"] == "signin" else "secondary"
+                if st.button("🔐 Sign In", use_container_width=True, type=btn_type_in, key="tab_btn_signin"):
+                    st.session_state["auth_mode"] = "signin"
+                    st.rerun()
+            with tab_cols[1]:
+                btn_type_up = "primary" if st.session_state["auth_mode"] == "signup" else "secondary"
+                if st.button("✨ Create Account", use_container_width=True, type=btn_type_up, key="tab_btn_signup"):
+                    st.session_state["auth_mode"] = "signup"
+                    st.rerun()
 
-                # Inline Remember Me & Forgot Password
-                st.markdown("""<div style="display: flex; align-items: center; justify-content: space-between; margin: 6px 0 16px 0;">
-<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4B5563; cursor: pointer; user-select: none;">
-<input type="checkbox" checked style="accent-color: #4E2298; width: 16px; height: 16px; cursor: pointer;">
+            st.write("")
+
+            # ------------------------------------------------------------------
+            # TAB 1: SIGN IN MODE
+            # ------------------------------------------------------------------
+            if st.session_state["auth_mode"] == "signin":
+                with st.form("quickzap_login_form", clear_on_submit=False):
+                    username_input = st.text_input(
+                        "Email Address or Username",
+                        value="sample_username",
+                        placeholder="you@quickzap.in or sample_username",
+                        key="login_email_input"
+                    )
+                    password_input = st.text_input(
+                        "Password",
+                        value="password@123",
+                        type="password",
+                        placeholder="Enter your password",
+                        key="login_password_input"
+                    )
+
+                    st.markdown("""<div style="display: flex; align-items: center; justify-content: space-between; margin: 4px 0 14px 0;">
+<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4B5563; cursor: pointer;">
+<input type="checkbox" checked style="accent-color: #4E2298; width: 16px; height: 16px;">
 <span>Remember me</span>
 </label>
-<a href="mailto:admin@inventorypro.com?subject=Password%20Reset" style="font-size: 13px; font-weight: 500; color: #4E2298; text-decoration: none;">Forgot password?</a>
+<a href="mailto:support@quickzap.in?subject=Password%20Reset" style="font-size: 13px; font-weight: 500; color: #4E2298; text-decoration: none;">Forgot password?</a>
 </div>""", unsafe_allow_html=True)
 
-                submit_btn = st.form_submit_button("Sign In", use_container_width=True)
+                    submit_btn = st.form_submit_button("Sign In to Command Center", use_container_width=True)
 
-            # Social Sign-In, Footer, and Demo Credentials Note
-            st.markdown(LOGIN_SOCIAL_DIVIDER_HTML, unsafe_allow_html=True)
+                # 1-Click Demo Login Button for instant access
+                if st.button("⚡ Quick 1-Click Demo Sign In", use_container_width=True, key="quick_demo_login_btn"):
+                    auth_res = {
+                        "authenticated": True,
+                        "username": "sample_username",
+                        "full_name": "Operations Admin (Neel Belsare)",
+                        "role": "Lead Administrator",
+                        "source": "1-Click Demo Verification",
+                        "error": None
+                    }
+                    st.success("✓ Instant Demo Access Granted! Welcome Neel Belsare.")
+                    st.session_state["authenticated"] = True
+                    st.session_state["user_info"] = auth_res
+                    time.sleep(0.3)
+                    st.rerun()
 
-            # Submission Processing
-            if submit_btn:
-                if not username_input or not password_input:
-                    st.error("⚠️ Please enter your email/username and password.")
-                else:
-                    with st.spinner("Authenticating with Supabase Cloud..."):
-                        if supabase_client:
-                            auth_res = supabase_client.authenticate_user(username_input, password_input)
-                        else:
-                            # Production guard: Demo fallback only allowed when explicitly enabled
-                            allow_demo = os.environ.get("ALLOW_DEMO_LOGIN", "true").lower() in ["1", "true", "yes"]
-                            if allow_demo and (username_input.strip() in ["sample_username", "you@example.com", "sample_username@inventorypro.com"]) and (password_input.strip() == "password@123"):
+                st.markdown(LOGIN_SOCIAL_DIVIDER_HTML, unsafe_allow_html=True)
+
+                if submit_btn:
+                    if not username_input or not password_input:
+                        st.error("⚠️ Please enter your email/username and password.")
+                    else:
+                        with st.spinner("Authenticating with QuickZap Security Gateway..."):
+                            user_clean = username_input.strip()
+                            pw_clean = password_input.strip()
+
+                            # Check session-registered users first
+                            reg_user = st.session_state["registered_users"].get(user_clean)
+                            if reg_user and reg_user.get("password") == pw_clean:
                                 auth_res = {
                                     "authenticated": True,
-                                    "username": username_input.strip(),
-                                    "full_name": "Operations Admin (Neel Belsare)",
-                                    "role": "Lead Administrator",
-                                    "source": "Demo Fallback Mode",
+                                    "username": user_clean,
+                                    "full_name": reg_user.get("full_name", user_clean),
+                                    "role": reg_user.get("role", "Hub Operator"),
+                                    "source": "Local Registered Account",
                                     "error": None
                                 }
+                            elif supabase_client:
+                                auth_res = supabase_client.authenticate_user(user_clean, pw_clean)
                             else:
-                                auth_res = {
-                                    "authenticated": False,
-                                    "error": "Supabase client unconfigured. For production, configure SUPABASE_URL and SUPABASE_KEY in environment or Streamlit secrets."
-                                }
+                                allow_demo = os.environ.get("ALLOW_DEMO_LOGIN", "true").lower() in ["1", "true", "yes"]
+                                valid_demos = ["sample_username", "you@example.com", "admin", "admin@quickzap.in", "sample_username@quickzap.in"]
+                                if allow_demo and (user_clean in valid_demos) and (pw_clean == "password@123"):
+                                    auth_res = {
+                                        "authenticated": True,
+                                        "username": user_clean,
+                                        "full_name": "Operations Admin (Neel Belsare)",
+                                        "role": "Lead Administrator",
+                                        "source": "Demo Fallback Mode",
+                                        "error": None
+                                    }
+                                else:
+                                    auth_res = {
+                                        "authenticated": False,
+                                        "error": "Invalid email or password. Please verify credentials."
+                                    }
 
-                        if auth_res.get("authenticated"):
-                            st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')}.")
-                            st.session_state["authenticated"] = True
-                            st.session_state["user_info"] = auth_res
-                            time.sleep(0.35)
-                            st.rerun()
-                        else:
-                            st.error(f"❌ {auth_res.get('error', 'Invalid email or password. Access denied.')}")
+                            if auth_res.get("authenticated"):
+                                st.success(f"✓ Access Granted! Welcome back, {auth_res.get('full_name')}.")
+                                st.session_state["authenticated"] = True
+                                st.session_state["user_info"] = auth_res
+                                time.sleep(0.35)
+                                st.rerun()
+                            else:
+                                st.error(f"❌ {auth_res.get('error', 'Invalid email or password. Access denied.')}")
+
+            # ------------------------------------------------------------------
+            # TAB 2: SIGN UP / CREATE ACCOUNT MODE
+            # ------------------------------------------------------------------
+            else:
+                with st.form("quickzap_signup_form", clear_on_submit=False):
+                    reg_name = st.text_input("Full Name", placeholder="e.g. Neel Belsare or Mansi Gaike", key="signup_name_input")
+                    reg_email = st.text_input("Work Email", placeholder="you@quickzap.in", key="signup_email_input")
+                    reg_username = st.text_input("Choose Username", placeholder="e.g. neel_admin", key="signup_user_input")
+                    reg_role = st.selectbox(
+                        "Operational Role",
+                        ["Hub Operations Lead", "Fleet Dispatch Controller", "Inventory Analyst", "Regional Operations Director"],
+                        key="signup_role_input"
+                    )
+                    reg_hub = st.selectbox(
+                        "Assigned Dark Store Hub",
+                        ["CIDCO N-4 Dark Store Hub", "Harsul Fast-Fulfillment Hub", "Usmanpura Central Hub", "Kranti Chowk Micro-Store", "All City Hubs"],
+                        key="signup_hub_input"
+                    )
+                    reg_password = st.text_input("Password", type="password", placeholder="Minimum 6 characters", key="signup_pw_input")
+                    reg_confirm = st.text_input("Confirm Password", type="password", placeholder="Repeat your password", key="signup_pw_confirm")
+
+                    create_account_btn = st.form_submit_button("Create Command Center Account", use_container_width=True)
+
+                if create_account_btn:
+                    if not reg_name.strip() or not reg_email.strip() or not reg_username.strip() or not reg_password:
+                        st.error("⚠️ All fields are required to create a Command Center account.")
+                    elif len(reg_password) < 6:
+                        st.error("⚠️ Password must be at least 6 characters long.")
+                    elif reg_password != reg_confirm:
+                        st.error("⚠️ Passwords do not match. Please re-enter.")
+                    else:
+                        clean_u = reg_username.strip()
+                        st.session_state["registered_users"][clean_u] = {
+                            "full_name": reg_name.strip(),
+                            "email": reg_email.strip(),
+                            "role": f"{reg_role} ({reg_hub.split(' ')[0]})",
+                            "password": reg_password.strip()
+                        }
+                        # Also register with email as key
+                        st.session_state["registered_users"][reg_email.strip()] = st.session_state["registered_users"][clean_u]
+
+                        st.success(f"🎉 Account successfully created for {reg_name.strip()}! You can now sign in.")
+                        st.session_state["auth_mode"] = "signin"
+                        time.sleep(0.6)
+                        st.rerun()
 
 
 # ------------------------------------------------------------------------------
@@ -2545,11 +2638,14 @@ st.session_state["prev_filter_state"] = current_state_key
 # ------------------------------------------------------------------------------
 # 6. Main Dashboard Header & KPI Metrics Cards (Modern Lavender & Slate Design)
 # ------------------------------------------------------------------------------
-st.markdown("""
+user_display_name = st.session_state.get("user_info", {}).get("full_name", "Admin Hub") if st.session_state.get("user_info") else "Admin Hub"
+user_initials = "".join([w[0] for w in user_display_name.split() if w])[:2].upper() or "QZ"
+
+st.markdown(f"""
 <div class="top-header-bar">
   <div class="title-block">
-    <h1>Overview</h1>
-    <p>Detailed information about your store & dark store network across Chhatrapati Sambhajinagar</p>
+    <h1>⚡ QuickZap Command Center</h1>
+    <p>Hyperlocal Dark Store Logistics & Micro-Market Dispatch Hub · Chhatrapati Sambhajinagar (Aurangabad)</p>
   </div>
   <div class="header-actions">
     <div class="action-pill-search">
@@ -2561,8 +2657,8 @@ st.markdown("""
       <div class="notif-badge"></div>
     </div>
     <div class="action-pill-user">
-      <div class="avatar-dot">CS</div>
-      <span>Admin Hub</span>
+      <div class="avatar-dot">{user_initials}</div>
+      <span>{user_display_name}</span>
     </div>
     <div class="live-badge-pill">
       <i></i>Live Network

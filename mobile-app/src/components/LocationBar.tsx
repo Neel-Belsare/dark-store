@@ -51,7 +51,7 @@ export const LocationBar: React.FC<LocationBarProps> = ({
 
           <View style={styles.textContainer}>
             <View style={styles.titleRow}>
-              <Text style={styles.deliveryTitle}>Blinkit in 10 minutes</Text>
+              <Text style={styles.deliveryTitle}>QuickZap in 10 minutes</Text>
               <Text style={styles.dropdownChevron}>▼</Text>
             </View>
 

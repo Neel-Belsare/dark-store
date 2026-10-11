@@ -157,20 +157,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToCart }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Purple Hero Banner */}
+        {/* QuickZap Hero Banner */}
         <View style={styles.heroBanner}>
           <View style={styles.heroLeft}>
             <View style={styles.heroBadge}>
               <Text style={styles.heroBadgeIcon}>⚡</Text>
               <Text style={styles.heroBadgeText}>10 MINUTES DISPATCH</Text>
             </View>
-            <Text style={styles.heroTitle}>Smart Quick Delivery</Text>
+            <Text style={styles.heroTitle}>QuickZap Micro-Market</Text>
             <Text style={styles.heroSubtitle}>
-              Fresh groceries & dark store inventory delivered in minutes
+              Fresh groceries & dark store inventory delivered in 10 minutes
             </Text>
           </View>
           <View style={styles.heroRight}>
-            <Text style={styles.heroEmoji}>📦</Text>
+            <Text style={styles.heroEmoji}>⚡</Text>
           </View>
         </View>
 

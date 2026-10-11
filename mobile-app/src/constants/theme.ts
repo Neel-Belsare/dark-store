@@ -1,49 +1,49 @@
 export const COLORS = {
-  // Login Page Signature Royal Purple & Indigo Gradient Palette
-  brandYellow: '#4E2298',            // Replaced old mustard with Signature InventoryPro Purple
-  brandYellowDark: '#2E0854',        // Deep Midnight Violet
-  brandYellowLight: '#EDE9FE',       // Soft Lavender Tint
-  brandYellowSubtle: '#F5F3FF',      // Ultra-light Violet
+  // QuickZap Signature Gold & Royal Violet Palette
+  brandYellow: '#f7ce00',            // QuickZap Signature Amber / Yellow
+  brandYellowDark: '#6b5800',        // Deep Gold Ochre
+  brandYellowLight: '#ffe174',       // Soft Warm Gold
+  brandYellowSubtle: '#fffdf0',      // Ultra-light Warm Tint
 
-  brandGreen: '#4E2298',             // Primary Accent (Purple)
-  brandGreenDark: '#2E0854',
-  brandGreenLight: '#EDE9FE',
-  brandGreenSubtle: '#F8F6FE',
-  brandGreenBorder: '#DDD6FE',
+  brandGreen: '#006d32',             // QuickZap Emerald Green Accent
+  brandGreenDark: '#005224',
+  brandGreenLight: '#80f89d',
+  brandGreenSubtle: '#d8fedf',
+  brandGreenBorder: '#a3f7ba',
 
   // Surfaces & Backgrounds
-  background: '#F1F3F9',             // Sleek Cool Gray matching login background
-  backgroundAlt: '#E2E8F0',
+  background: '#f9f9fd',             // Sleek Cool QuickZap background
+  backgroundAlt: '#eeedf2',
   surface: '#FFFFFF',
-  surfaceSecondary: '#F8FAFC',
-  surfaceMuted: '#F1F5F9',
-  surfaceDark: '#1E1035',            // Deep Dark Aubergine for Header/Rider
+  surfaceSecondary: '#f3f3f7',
+  surfaceMuted: '#e8e8ec',
+  surfaceDark: '#1a1c1f',            // Deep Dark for Header/Rider
 
   // Typography & Text Hierarchies
-  textPrimary: '#0F172A',
-  textSecondary: '#475569',
-  textTertiary: '#64748B',
+  textPrimary: '#1a1c1f',
+  textSecondary: '#4d4632',
+  textTertiary: '#7f775f',
   textMuted: '#94A3B8',
   textInverse: '#FFFFFF',
 
   // Borders & Dividers
-  border: '#E2E8F0',
-  borderSubtle: '#F1F5F9',
+  border: '#e8e8ec',
+  borderSubtle: '#f3f3f7',
   borderStrong: '#CBD5E1',
-  borderFocus: '#4E2298',
+  borderFocus: '#6549be',
 
   // Status & Telemetry Accents
-  accentIndigo: '#4E2298',
+  accentIndigo: '#6549be',
   accentLavender: '#8B5CF6',
-  accentChampagne: '#EDE9FE',
-  accentDark: '#1E1035',
+  accentChampagne: '#e7deff',
+  accentDark: '#1a1c1f',
   accentCyan: '#38BDF8',
   dangerRed: '#EF4444',
   dangerRedLight: '#FEE2E2',
   warningAmber: '#F59E0B',
   warningAmberLight: '#FEF3C7',
   ratingGold: '#F59E0B',
-  successEmerald: '#10B981',
+  successEmerald: '#006d32',
 };
 
 export const SPACING = {

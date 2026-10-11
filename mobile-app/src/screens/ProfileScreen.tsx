@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,63 +13,134 @@ import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import { getApiBaseUrl } from '../config/apiConfig';
 import { supabase } from '../supabaseClient';
 
-export const ProfileScreen: React.FC = () => {
+interface ProfileScreenProps {
+  userSession?: any;
+  onLogout?: () => void;
+}
+
+const SAVED_ADDRESSES = [
+  { id: '1', tag: 'HOME', address: 'Plot 42, CIDCO N-4, Near Shivaji Park, Aurangabad', isDefault: true },
+  { id: '2', tag: 'WORK', address: 'Office 304, Nirala Bazar Commercial Hub, Aurangabad', isDefault: false },
+  { id: '3', tag: 'OTHER', address: 'B-12, Kranti Chowk Road, Aurangabad', isDefault: false },
+];
+
+export const ProfileScreen: React.FC<ProfileScreenProps> = ({
+  userSession,
+  onLogout,
+}) => {
   const { address, location } = useCurrentLocation();
   const apiBase = getApiBaseUrl();
-  const [userEmail, setUserEmail] = useState<string>('User');
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) {
-        setUserEmail(user.email);
-      }
-    });
-  }, []);
+  const [selectedAddrId, setSelectedAddrId] = useState<string>('1');
+
+  const userName =
+    userSession?.full_name ||
+    userSession?.user_metadata?.full_name ||
+    (userSession?.email ? userSession.email.split('@')[0] : 'Mansi Gaike');
+
+  const userEmail =
+    userSession?.email || 'mansi.gaike@quickzap.in';
+
+  const userPhone =
+    userSession?.phone ||
+    userSession?.user_metadata?.phone ||
+    '+91 98765 43210';
+
+  const userInitials = userName
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase() || 'QZ';
 
   const handleOpenStreamlit = () => {
     Linking.openURL('https://my-dark-store-app-nahqcxrxdlguw9uczkkpj3.streamlit.app');
   };
 
   const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        Alert.alert('Logout Failed', error.message);
-      }
-    } catch (err: any) {
-      console.error('Logout error:', err.message);
-    }
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out of QuickZap?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              if (supabase && typeof supabase.auth?.signOut === 'function') {
+                await supabase.auth.signOut();
+              }
+            } catch (e) {
+              console.warn('Supabase sign out error:', e);
+            }
+            if (onLogout) onLogout();
+          },
+        },
+      ]
+    );
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* User Header Card */}
+      {/* QuickZap Profile Header Card */}
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {userEmail.substring(0, 2).toUpperCase()}
-          </Text>
+          <Text style={styles.avatarText}>{userInitials}</Text>
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.userName} numberOfLines={1}>{userEmail}</Text>
-          <Text style={styles.userPhone}>InventoryPro Registered Customer</Text>
+          <Text style={styles.userName} numberOfLines={1}>{userName}</Text>
+          <Text style={styles.userPhone}>{userPhone}</Text>
+          <Text style={styles.userEmail} numberOfLines={1}>{userEmail}</Text>
           <View style={styles.membershipPill}>
-            <Text style={styles.membershipText}>⚡ VIP CUSTOMER • FREE PRIORITY DISPATCH</Text>
+            <Text style={styles.membershipText}>⚡ QUICKZAP VIP GOLD • 10-MIN SLA</Text>
           </View>
         </View>
       </View>
 
-      {/* Primary Saved Address Card */}
+      {/* Saved Delivery Addresses */}
       <View style={styles.sectionCard}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Default Delivery Address</Text>
-          <Text style={styles.tagHome}>HOME</Text>
+          <Text style={styles.sectionTitle}>Saved Delivery Addresses</Text>
+          <Text style={styles.activeTag}>AURANGABAD</Text>
         </View>
-        <Text style={styles.addressLine}>{address}</Text>
+
+        {SAVED_ADDRESSES.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={[
+              styles.addressRow,
+              selectedAddrId === item.id && styles.addressRowSelected,
+            ]}
+            onPress={() => setSelectedAddrId(item.id)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.addressLeft}>
+              <View style={styles.tagBadge}>
+                <Text style={styles.tagBadgeText}>{item.tag}</Text>
+              </View>
+              <Text style={styles.addressLine} numberOfLines={2}>
+                {item.address}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.radioOuter,
+                selectedAddrId === item.id && styles.radioOuterSelected,
+              ]}
+            >
+              {selectedAddrId === item.id && <View style={styles.radioInner} />}
+            </View>
+          </TouchableOpacity>
+        ))}
+
         {location && (
-          <Text style={styles.coordsLine}>
-            GPS Lat: {location.latitude.toFixed(4)}, Lon: {location.longitude.toFixed(4)}
-          </Text>
+          <View style={styles.gpsBanner}>
+            <Text style={styles.gpsIcon}>🛰️</Text>
+            <Text style={styles.coordsLine}>
+              Live Device GPS: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)} ({address})
+            </Text>
+          </View>
         )}
       </View>
 
@@ -95,7 +166,7 @@ export const ProfileScreen: React.FC = () => {
       {/* Quick-Commerce Telemetry & Command Center Links */}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Quick-Commerce Infrastructure</Text>
-        
+
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>FastAPI Bridge URL:</Text>
           <Text style={styles.infoValue} numberOfLines={1}>{apiBase}</Text>
@@ -109,8 +180,12 @@ export const ProfileScreen: React.FC = () => {
           <Text style={styles.infoValue}>Deck.gl 3D (PyDeck)</Text>
         </View>
 
-        <TouchableOpacity style={styles.webAppBtn} onPress={handleOpenStreamlit} activeOpacity={0.85}>
-          <Text style={styles.webAppBtnText}>🖥️ Open 3D Command Center</Text>
+        <TouchableOpacity
+          style={styles.webAppBtn}
+          onPress={handleOpenStreamlit}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.webAppBtnText}>🖥️ Open QuickZap 3D Command Center</Text>
         </TouchableOpacity>
       </View>
 
@@ -124,8 +199,8 @@ export const ProfileScreen: React.FC = () => {
 
       {/* App Version Info */}
       <View style={styles.footerNote}>
-        <Text style={styles.footerText}>Blinkit Dark Store Mobile • v4.0 Production</Text>
-        <Text style={styles.footerSub}>Architected for Chhatrapati Sambhajinagar</Text>
+        <Text style={styles.footerText}>QuickZap Mobile • v4.5 Production</Text>
+        <Text style={styles.footerSub}>Architected for Chhatrapati Sambhajinagar (Aurangabad)</Text>
       </View>
     </ScrollView>
   );
@@ -134,7 +209,7 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#f9f9fd',
   },
   content: {
     padding: SPACING.lg,
@@ -143,101 +218,166 @@ const styles = StyleSheet.create({
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#ffffff',
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.card,
+    borderColor: '#e8e8ec',
+    ...SHADOWS.small,
   },
   avatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#4E2298',
-    justifyContent: 'center',
+    backgroundColor: '#f7ce00',
     alignItems: 'center',
+    justifyContent: 'center',
     marginRight: SPACING.md,
-    shadowColor: '#4E2298',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#eac300',
   },
   avatarText: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: '900',
+    color: '#221b00',
+    fontSize: 22,
+    fontWeight: '800',
   },
   profileInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1a1c1f',
   },
   userPhone: {
-    fontSize: 12.5,
-    color: COLORS.textSecondary,
+    fontSize: 13,
+    color: '#4d4632',
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  userEmail: {
+    fontSize: 12,
+    color: '#7f775f',
     marginTop: 1,
   },
   membershipPill: {
-    backgroundColor: '#EDE9FE',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    borderRadius: 6,
+    backgroundColor: '#fef3c7',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    marginTop: 6,
+    borderRadius: BORDER_RADIUS.full,
     alignSelf: 'flex-start',
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#fde68a',
   },
   membershipText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '800',
-    color: '#4E2298',
-    letterSpacing: 0.4,
+    color: '#92400e',
   },
   sectionCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#ffffff',
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#e8e8ec',
     ...SHADOWS.small,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.xs,
+    marginBottom: SPACING.md,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: '#1a1c1f',
+    letterSpacing: 0.2,
   },
-  tagHome: {
+  activeTag: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#4E2298',
-    backgroundColor: '#EDE9FE',
+    color: '#6549be',
+    backgroundColor: '#e7deff',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: '#eeedf2',
+    marginBottom: 8,
+    backgroundColor: '#fdfdfd',
+  },
+  addressRowSelected: {
+    borderColor: '#f7ce00',
+    backgroundColor: '#fffdf0',
+  },
+  addressLeft: {
+    flex: 1,
+    marginRight: 10,
+  },
+  tagBadge: {
+    backgroundColor: '#eeedf2',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: BORDER_RADIUS.sm,
+    alignSelf: 'flex-start',
+    marginBottom: 4,
+  },
+  tagBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#4d4632',
   },
   addressLine: {
-    fontSize: 13,
-    color: COLORS.textPrimary,
-    fontWeight: '600',
-    lineHeight: 18,
+    fontSize: 12,
+    color: '#1a1c1f',
+    lineHeight: 16,
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#d0c6ab',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioOuterSelected: {
+    borderColor: '#705d00',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#705d00',
+  },
+  gpsBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3f3f7',
+    padding: 8,
+    borderRadius: BORDER_RADIUS.sm,
+    marginTop: 6,
+  },
+  gpsIcon: {
+    fontSize: 14,
+    marginRight: 6,
   },
   coordsLine: {
     fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 3,
+    color: '#64748b',
+    flex: 1,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -245,85 +385,80 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   statBox: {
-    width: '31%',
-    backgroundColor: COLORS.surfaceSecondary,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
+    flex: 1,
     alignItems: 'center',
+    paddingVertical: 12,
+    backgroundColor: '#f9f9fd',
+    borderRadius: BORDER_RADIUS.md,
+    marginHorizontal: 4,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#eeedf2',
   },
   statNum: {
     fontSize: 18,
-    fontWeight: '900',
-    color: '#4E2298',
+    fontWeight: '800',
+    color: '#6549be',
   },
   statLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
+    color: '#7f775f',
     marginTop: 2,
+    fontWeight: '600',
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderSubtle,
+    borderBottomColor: '#f3f3f7',
   },
   infoLabel: {
     fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
+    color: '#7f775f',
   },
   infoValue: {
     fontSize: 12,
-    color: COLORS.textPrimary,
     fontWeight: '700',
-    maxWidth: '55%',
-    textAlign: 'right',
+    color: '#1a1c1f',
   },
   webAppBtn: {
-    backgroundColor: '#EDE9FE',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
-    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: '#6549be',
     paddingVertical: 12,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     marginTop: SPACING.md,
+    ...SHADOWS.small,
   },
   webAppBtnText: {
+    color: '#ffffff',
     fontSize: 13,
     fontWeight: '800',
-    color: '#4E2298',
   },
   logoutBtn: {
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
-    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: '#fee2e2',
     paddingVertical: 12,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
-    marginTop: SPACING.sm,
+    borderWidth: 1,
+    borderColor: '#fecaca',
   },
   logoutBtnText: {
+    color: '#ef4444',
     fontSize: 13,
     fontWeight: '800',
-    color: '#DC2626',
   },
   footerNote: {
     alignItems: 'center',
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    color: COLORS.textSecondary,
+    color: '#94a3b8',
   },
   footerSub: {
-    fontSize: 10.5,
-    color: COLORS.textMuted,
+    fontSize: 10,
+    color: '#cbd5e1',
     marginTop: 2,
   },
 });
